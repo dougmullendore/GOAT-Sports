@@ -1,0 +1,157 @@
+{
+ "started_utc": "2026-10-24T11:05:47+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "poll": {
+   "ok": true,
+   "result": {
+    "checked": false,
+    "newest": "2026-10-18"
+   }
+  },
+  "scoreboard": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "days": 132,
+    "days_failed": 0,
+    "matches": 4820,
+    "from_backup": 0
+   }
+  },
+  "watch": {
+   "ok": true,
+   "result": {
+    "matches_soon": 699,
+    "with_channel": 580,
+    "with_live_score": 685,
+    "listings": 866,
+    "failed": []
+   }
+  },
+  "boxes": {
+   "ok": true,
+   "result": {
+    "fetched": 168,
+    "failed": 0,
+    "finished": 3489,
+    "with_box": 3489
+   }
+  },
+  "photos": {
+   "ok": true,
+   "result": {
+    "pages_read": 0,
+    "players": 5594,
+    "with_photo": 5510,
+    "found_page_for": [],
+    "no_page": [],
+    "no_page_count": 0,
+    "waiting": 0,
+    "failed": []
+   }
+  },
+  "careers": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "seasons_done": [
+     "2022",
+     "2023",
+     "2024",
+     "2025"
+    ],
+    "seasons_wanted": 4
+   }
+  },
+  "pro data": {
+   "ok": true,
+   "result": {
+    "downloaded": 8,
+    "failed": []
+   }
+  },
+  "pro schedules": {
+   "ok": true,
+   "result": {
+    "lovb": {
+     "season": 2027,
+     "games": 1,
+     "live": 0
+    },
+    "mlv": {
+     "season": 2026,
+     "games": 116,
+     "live": 0
+    }
+   }
+  },
+  "pro box scores now": {
+   "ok": true,
+   "result": {
+    "lovb": {
+     "matches": 0
+    },
+    "mlv": {
+     "matches": 0
+    }
+   }
+  },
+  "pro photos": {
+   "ok": true,
+   "result": {
+    "lovb": "up to date",
+    "mlv": "up to date"
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "poll_through": "2026-10-18",
+    "matches_listed": 560,
+    "teams_matched": 25,
+    "unmatched": [],
+    "with_channel": 74,
+    "players": 398,
+    "regulars": 257,
+    "d1_teams": 348,
+    "d1_matches": 4820,
+    "d1_players": 5594,
+    "d1_regulars": 3830,
+    "with_odds": 182,
+    "teams_rated": 369,
+    "match_pages": 3490
+   }
+  },
+  "pro leagues": {
+   "ok": true,
+   "result": {
+    "lovb": {
+     "season": 2026,
+     "matches": 66,
+     "played": 66,
+     "teams": 6,
+     "players": 98,
+     "box_scores": 66
+    },
+    "mlv": {
+     "season": 2026,
+     "matches": 115,
+     "played": 115,
+     "teams": 8,
+     "players": 144,
+     "box_scores": 115
+    }
+   }
+  },
+  "every ranked team found": {
+   "ok": true,
+   "result": {
+    "teams_matched": 25
+   }
+  }
+ },
+ "finished_utc": "2026-10-24T11:06:28+00:00",
+ "ok": true
+}

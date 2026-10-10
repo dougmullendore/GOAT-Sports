@@ -1,0 +1,165 @@
+{
+ "started_utc": "2026-10-24T11:06:34+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "College schedule": {
+   "ok": true,
+   "result": {
+    "season": 2027,
+    "days": 0,
+    "days_failed": 0,
+    "games": 6002,
+    "from_backup": 0,
+    "showing_last_season": false
+   }
+  },
+  "College rankings": {
+   "ok": true,
+   "result": {
+    "found": {
+     "ap": "2026-10-19",
+     "usa": "2026-10-19"
+    },
+    "new": []
+   }
+  },
+  "College standings": {
+   "ok": true,
+   "result": {
+    "teams": 365,
+    "from_last_season": false
+   }
+  },
+  "College box scores": {
+   "ok": true,
+   "result": {
+    "fetched": 0,
+    "failed": 0,
+    "finished": 0,
+    "with_box": 0,
+    "to_read": 0
+   }
+  },
+  "College rosters": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "teams": 365
+   }
+  },
+  "College careers": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "kept": 0,
+    "wanted": 0,
+    "to_read": 0
+   }
+  },
+  "College social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 0
+   }
+  },
+  "College site": {
+   "ok": true,
+   "result": {
+    "poll_date": "2026-10-19",
+    "games_listed": 668,
+    "teams": 365,
+    "games": 6002,
+    "played": 0,
+    "game_pages": 0,
+    "players": 0,
+    "regulars": 0,
+    "with_odds": 6002,
+    "with_channel": 1048,
+    "teams_rated": 745
+   }
+  },
+  "NBA schedule": {
+   "ok": true,
+   "result": {
+    "season": 2027,
+    "days": 10,
+    "days_failed": 0,
+    "games": 1267,
+    "from_backup": 0,
+    "showing_last_season": false
+   }
+  },
+  "NBA standings": {
+   "ok": true,
+   "result": {
+    "teams": 30,
+    "from_last_season": false
+   }
+  },
+  "NBA box scores": {
+   "ok": true,
+   "result": {
+    "fetched": 14,
+    "failed": 0,
+    "finished": 28,
+    "with_box": 28,
+    "to_read": 0
+   }
+  },
+  "NBA rosters": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "teams": 30
+   }
+  },
+  "NBA careers": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "kept": 376,
+    "wanted": 376,
+    "to_read": 0
+   }
+  },
+  "NBA social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 1235,
+    "age_days": 6
+   }
+  },
+  "NBA power ranking": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "newest": "NBA Power Rankings: Where all 30 teams stack up in 2026 offseason",
+    "published": "2026-07-27T15:41:14.000+00:00"
+   }
+  },
+  "NBA site": {
+   "ok": true,
+   "result": {
+    "poll_date": null,
+    "games_listed": 1200,
+    "teams": 30,
+    "games": 1200,
+    "played": 28,
+    "game_pages": 94,
+    "players": 376,
+    "regulars": 253,
+    "with_odds": 1172,
+    "with_channel": 401,
+    "teams_rated": 30
+   }
+  }
+ },
+ "finished_utc": "2026-10-24T11:06:36+00:00",
+ "ok": true
+}

@@ -1,0 +1,106 @@
+{
+ "started_utc": "2026-10-24T11:05:42+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "schedule": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 42,
+    "weeks_failed": 0,
+    "games": 1344,
+    "from_backup": 0,
+    "final": 167
+   }
+  },
+  "standings": {
+   "ok": true,
+   "result": {
+    "teams": 32,
+    "first": "CAR"
+   }
+  },
+  "box scores": {
+   "ok": true,
+   "result": {
+    "asked": 14,
+    "read": 14,
+    "failed": [],
+    "failed_count": 0,
+    "stored": 167
+   }
+  },
+  "people": {
+   "ok": true,
+   "result": {
+    "rosters_read": 0,
+    "looked_up": 0,
+    "players": 842,
+    "played": 785,
+    "without_details": 0
+   }
+  },
+  "careers": {
+   "ok": true,
+   "result": {
+    "asked": 0,
+    "failed": 0,
+    "have": 785,
+    "played": 785
+   }
+  },
+  "social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 1068,
+    "age_days": 6
+   }
+  },
+  "power ranking": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "newest": "NHL Power Rankings: Each team's biggest shock of 2026-27",
+    "published": "2026-10-16T10:09:31.000+00:00"
+   }
+  },
+  "lines": {
+   "ok": true,
+   "result": {
+    "asked": 0,
+    "read": 0,
+    "empty": 0,
+    "failed": 0,
+    "stored": 167
+   }
+  },
+  "betting lines": {
+   "ok": true,
+   "result": {
+    "days_read": 7,
+    "lines": 12,
+    "goalies": 49
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "games": 1344,
+    "played": 167,
+    "game_pages": 167,
+    "teams": 32,
+    "players": 785,
+    "regulars": 612,
+    "with_odds": 1177,
+    "xg_scale": 0.9872,
+    "with_play_by_play": 167,
+    "with_channel": 1177,
+    "teams_with_lines": 32,
+    "missing_box": []
+   }
+  }
+ },
+ "finished_utc": "2026-10-24T11:05:46+00:00",
+ "ok": true
+}
