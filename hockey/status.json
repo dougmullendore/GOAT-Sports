@@ -1,0 +1,106 @@
+{
+ "started_utc": "2026-11-07T16:37:34+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "schedule": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 42,
+    "weeks_failed": 0,
+    "games": 1344,
+    "from_backup": 0,
+    "final": 264
+   }
+  },
+  "standings": {
+   "ok": true,
+   "result": {
+    "teams": 32,
+    "first": "CAR"
+   }
+  },
+  "box scores": {
+   "ok": true,
+   "result": {
+    "asked": 14,
+    "read": 14,
+    "failed": [],
+    "failed_count": 0,
+    "stored": 264
+   }
+  },
+  "people": {
+   "ok": true,
+   "result": {
+    "rosters_read": 0,
+    "looked_up": 0,
+    "players": 884,
+    "played": 826,
+    "without_details": 0
+   }
+  },
+  "careers": {
+   "ok": true,
+   "result": {
+    "asked": 0,
+    "failed": 0,
+    "have": 826,
+    "played": 826
+   }
+  },
+  "social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 1068,
+    "age_days": 6
+   }
+  },
+  "power ranking": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "newest": "NHL Power Rankings: Updated poll, plus all 32 teams as horror movies",
+    "published": "2026-10-30T11:29:09.000+00:00"
+   }
+  },
+  "lines": {
+   "ok": true,
+   "result": {
+    "asked": 0,
+    "read": 0,
+    "empty": 0,
+    "failed": 0,
+    "stored": 264
+   }
+  },
+  "betting lines": {
+   "ok": true,
+   "result": {
+    "days_read": 7,
+    "lines": 18,
+    "goalies": 47
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "games": 1344,
+    "played": 264,
+    "game_pages": 264,
+    "teams": 32,
+    "players": 826,
+    "regulars": 617,
+    "with_odds": 1080,
+    "xg_scale": 0.9946,
+    "with_play_by_play": 264,
+    "with_channel": 1080,
+    "teams_with_lines": 32,
+    "missing_box": []
+   }
+  }
+ },
+ "finished_utc": "2026-11-07T16:37:39+00:00",
+ "ok": true
+}

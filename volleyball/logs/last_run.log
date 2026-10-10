@@ -1,0 +1,21 @@
+[16:37:40] STAGE poll FAILED: RuntimeError('the poll page did not read cleanly: 23 rows, dated 2026-11-01')
+Traceback (most recent call last):
+  File "/home/runner/work/GOAT-Sports/GOAT-Sports/volleyball/pipeline/run.py", line 650, in stage
+    status["stages"][name] = {"ok": True, "result": fn()}
+                                                    ~~^^
+  File "/home/runner/work/GOAT-Sports/GOAT-Sports/volleyball/pipeline/run.py", line 680, in <lambda>
+    stage("poll", lambda: update_poll(state, now, os.environ.get("CHECK_POLL") == "1"))
+                          ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/GOAT-Sports/GOAT-Sports/volleyball/pipeline/run.py", line 154, in update_poll
+    raise RuntimeError(f"the poll page did not read cleanly: {len(found['rows'])} rows, dated {found['through']}")
+RuntimeError: the poll page did not read cleanly: 23 rows, dated 2026-11-01
+[16:37:45] scoreboard: 132 of 132 days read, 4,819 matches in season 2026
+[16:37:49] watch: 794 listings read; a channel for 478 of 548 matches in the next 14 days
+[16:38:02] box scores: 178 fetched (0 failed); 4193 of 4193 finished matches have one
+[16:38:06] photos: 0 roster pages read; 5553 of 5633 players have a photo
+[16:38:09] pro leagues: 8 data files downloaded
+[16:38:11] pro schedules: {'lovb': {'season': 2027, 'games': 110, 'live': 0}, 'mlv': {'season': 2027, 'games': 156, 'live': 0}}
+[16:38:18] site: poll through 2026-10-25, 558 matches of 25 ranked teams and 4819 in all of Division I (348 teams); 257 top-25 regulars rated, 3849 in Division I
+[16:38:18] LOVB: 2026 season, 66 matches (66 played), 6 teams, 98 players, 66 box scores
+[16:38:19] MLV: 2026 season, 115 matches (115 played), 8 teams, 144 players, 115 box scores
+[16:38:19] run finished: WITH ERRORS
