@@ -1,0 +1,85 @@
+{
+ "started_utc": "2026-10-17T17:06:35+00:00",
+ "commit": "ee63b442c31e",
+ "stages": {
+  "MLB schedule": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "days": 10,
+    "days_failed": 0,
+    "games": 2496,
+    "from_backup": 0
+   }
+  },
+  "MLB standings": {
+   "ok": true,
+   "result": {
+    "teams": 30,
+    "from_last_season": false
+   }
+  },
+  "MLB box scores": {
+   "ok": true,
+   "result": {
+    "fetched": 2,
+    "failed": 0,
+    "finished": 2461,
+    "with_box": 2461,
+    "to_read": 0
+   }
+  },
+  "MLB rosters": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "teams": 30
+   }
+  },
+  "MLB careers": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "kept": 1472,
+    "wanted": 1472,
+    "to_read": 0
+   }
+  },
+  "MLB social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 2571,
+    "age_days": 6
+   }
+  },
+  "MLB power ranking": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "newest": "MLB Power Rankings Week 26: Where teams stand entering playoffs",
+    "published": "2026-09-24T11:38:30.000+00:00"
+   }
+  },
+  "MLB site": {
+   "ok": true,
+   "result": {
+    "poll_date": null,
+    "games_listed": 2495,
+    "teams": 30,
+    "games": 2495,
+    "played": 2461,
+    "game_pages": 2462,
+    "players": 1472,
+    "regulars": 710,
+    "with_odds": 4,
+    "with_channel": 2495,
+    "teams_rated": 30
+   }
+  }
+ },
+ "finished_utc": "2026-10-17T17:06:38+00:00",
+ "ok": true
+}

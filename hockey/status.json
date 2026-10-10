@@ -1,0 +1,52 @@
+{
+ "started_utc": "2026-10-17T20:09:02+00:00",
+ "commit": "ee63b442c31e",
+ "stages": {
+  "scores now": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 1,
+    "weeks_failed": 0,
+    "games": 1344,
+    "from_backup": 0,
+    "final": 121
+   }
+  },
+  "box scores now": {
+   "ok": true,
+   "result": {
+    "asked": 2,
+    "read": 1,
+    "failed": [],
+    "failed_count": 0
+   }
+  },
+  "standings": {
+   "ok": true,
+   "result": {
+    "teams": 32,
+    "first": "VGK"
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "games": 1344,
+    "played": 121,
+    "game_pages": 122,
+    "teams": 32,
+    "players": 750,
+    "regulars": 607,
+    "with_odds": 1223,
+    "xg_scale": 0.9925,
+    "with_play_by_play": 122,
+    "with_channel": 1223,
+    "teams_with_lines": 32,
+    "missing_box": []
+   }
+  }
+ },
+ "finished_utc": "2026-10-17T20:09:06+00:00",
+ "ok": true
+}
