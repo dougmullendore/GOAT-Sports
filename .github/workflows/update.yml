@@ -1,0 +1,162 @@
+name: Update the site
+
+# One job keeps all three sports up to date. Each sport has its own folder with its own code
+# (hockey/, volleyball/, football/), its own folder of stored data on the `state` branch and its
+# own folder of pages on the `gh-pages` branch. A sport that fails does not stop the others.
+
+on:
+  schedule:
+    - cron: '47 10 * * *'   # every morning, about 5:47am Central: every sport, in full
+    - cron: '47 16 * * *'   # every day about 11:47am Central: every sport again
+    - cron: '47 4 * * *'    # every night about 11:47pm Central: volleyball and football, so the night's results are in by morning
+    - cron: '17 8 * * *'    # every night about 3:17am Central: hockey and football, once the late games out west are over
+    - cron: '13 21 * * 1'   # Monday about 4pm Central: volleyball, to look for the new AVCA top 25
+    - cron: '13 2 * * 2'    # Monday about 9pm Central: volleyball again, in case the poll came out late
+    - cron: '23 19 * * 0'   # Sunday about 2:23pm Central: football, to look for the new AP top 25
+    - cron: '23 23 * * 0'   # Sunday about 6:23pm Central: football again, in case the poll came out late
+    # game days: every 5 minutes from about 11am to 2am Central, for live scores and box scores.
+    # Each sport looks whether one of its games is on and stops within seconds when none is.
+    - cron: '*/5 16-23 * 1-6,8-12 *'
+    - cron: '*/5 0-7 * 1-6,8-12 *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['hockey/**', 'volleyball/**', 'football/**', 'home/**', 'tools/**', '.github/workflows/update.yml']
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write      # to keep the schedule switched on (last step)
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    env:
+      REPO_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+      # A run started by hand or by a code change checks the code first and looks for new polls straight away.
+      BY_HAND: ${{ github.event_name != 'schedule' && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Which sports this run updates, and how: "full" (everything), "live" (only games under
+      # way; the 5-minute runs) or "skip".
+      - name: Decide what to update
+        id: plan
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          H=full; V=full; F=full
+          case "$SCHEDULE" in
+            '*/5 '*) H=live; V=live; F=live ;;
+            '47 4 * * *') H=skip ;;
+            '17 8 * * *') V=skip ;;
+            '13 21 * * 1'|'13 2 * * 2') H=skip; F=skip ;;
+            '23 19 * * 0'|'23 23 * * 0') H=skip; V=skip ;;
+          esac
+          [ -d football/pipeline ] || F=skip
+          echo "hockey=$H" >> "$GITHUB_OUTPUT"
+          echo "volleyball=$V" >> "$GITHUB_OUTPUT"
+          echo "football=$F" >> "$GITHUB_OUTPUT"
+          echo "hockey: $H, volleyball: $V, football: $F"
+
+      - name: Get what was stored last time
+        id: state
+        run: |
+          set +e
+          git ls-remote --exit-code --heads "$REPO_URL" state >/dev/null 2>&1
+          found=$?
+          set -e
+          if [ "$found" -eq 0 ]; then
+            git clone --quiet --depth 1 --branch state "$REPO_URL" state
+          elif [ "$found" -eq 2 ]; then          # the branch does not exist yet: the very first run
+            mkdir state && git -C state init -q -b state
+          else
+            echo "The repository could not be reached, so nothing was updated."; exit 1
+          fi
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Hockey
+        id: hockey
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && steps.plan.outputs.hockey != 'skip' }}
+        working-directory: hockey
+        env:
+          RUN_MODE: ${{ steps.plan.outputs.hockey }}
+        run: ../tools/run_sport.sh hockey
+
+      - name: Volleyball
+        id: volleyball
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && steps.plan.outputs.volleyball != 'skip' }}
+        working-directory: volleyball
+        env:
+          RUN_MODE: ${{ steps.plan.outputs.volleyball }}
+          CHECK_POLL: ${{ github.event_name != 'schedule' && '1' || '0' }}
+        run: ../tools/run_sport.sh volleyball
+
+      - name: Football
+        id: football
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && steps.plan.outputs.football != 'skip' }}
+        working-directory: football
+        env:
+          RUN_MODE: ${{ steps.plan.outputs.football }}
+          CHECK_POLL: ${{ github.event_name != 'schedule' && '1' || '0' }}
+        run: ../tools/run_sport.sh football
+
+      - name: Save what was stored
+        if: ${{ always() && steps.state.outcome == 'success' }}
+        run: |
+          cd state
+          if [ -z "$(git status --porcelain)" ]; then echo "nothing new to store"; exit 0; fi
+          git config user.name "goat-sports-bot"
+          git config user.email "goat-sports-bot@users.noreply.github.com"
+          git add -A
+          if git rev-parse -q --verify HEAD >/dev/null; then
+            git commit -q --amend -m "State as of $(date -u +%FT%TZ)" || true
+          else
+            git commit -q -m "State as of $(date -u +%FT%TZ)"
+          fi
+          git push -q -f "$REPO_URL" HEAD:state
+
+      # The pages of a sport that was rebuilt replace the ones published; the other sports' pages
+      # stay as they are. The front page and the bar across the top are redone every time.
+      - name: Publish the site
+        if: ${{ always() && steps.state.outcome == 'success' }}
+        run: |
+          if [ "$BY_HAND" = 0 ] && ! ls dist/*/index.html >/dev/null 2>&1; then
+            echo "no sport was rebuilt, so the published site stays as it is"; exit 0
+          fi
+          set +e
+          git ls-remote --exit-code --heads "$REPO_URL" gh-pages >/dev/null 2>&1
+          found=$?
+          set -e
+          if [ "$found" -eq 0 ]; then
+            git clone --quiet --depth 1 --branch gh-pages "$REPO_URL" pub
+          elif [ "$found" -eq 2 ]; then
+            mkdir pub && git -C pub init -q -b gh-pages
+          else
+            echo "The repository could not be reached, so the site was not published."; exit 1
+          fi
+          mkdir -p dist
+          python -m tools.assemble dist pub
+          cd pub
+          git config user.name "goat-sports-bot"
+          git config user.email "goat-sports-bot@users.noreply.github.com"
+          git add -A
+          # One commit with no history, so the branch does not grow over the season. Files that
+          # have not changed are already on GitHub and are not uploaded again.
+          commit=$(git commit-tree "$(git write-tree)" -m "Site build $(date -u +%FT%TZ)")
+          git push -q -f "$REPO_URL" "$commit:refs/heads/gh-pages"
+
+      # GitHub turns off scheduled jobs after 60 days without activity in the
+      # repository (the off-season, say). Switching it on again each run resets that.
+      - name: Keep the schedule switched on
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/update.yml/enable" || echo "could not switch the schedule on; it may stop after 60 quiet days"

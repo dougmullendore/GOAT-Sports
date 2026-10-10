@@ -1,0 +1,15 @@
+/* The strip across the top of every page on GOAT Sports: the site's name and a tab for each sport.
+   tools/assemble.py writes the strip into each sport's pages. */
+.sports { background: #0f1d33; color: #c9d3e3; font: 600 .8125rem/1 Barlow, "Segoe UI", system-ui, sans-serif; }
+.sports-row { display: flex; align-items: stretch; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.sports-row::-webkit-scrollbar { display: none; }
+.sports a { color: inherit; text-decoration: none; white-space: nowrap; padding: 10px 12px; border-bottom: 3px solid transparent; }
+.sports a:hover { color: #fff; }
+.sports a:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.sports .sports-home { font: 700 .9375rem/1 "Barlow Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding-left: 0; margin-right: 10px; align-self: center; border-bottom-color: transparent; }
+.sports a[aria-current="page"] { color: #fff; border-bottom-color: var(--ball, #f5b83d); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sports { background: #060b16; } }
+:root[data-theme="dark"] .sports { background: #060b16; }
+/* the volleyball leagues' tabs sit right under the strip, so they need less room above */
+.sports + .leagues { padding-top: 14px; }
+@media print { .sports { display: none; } }

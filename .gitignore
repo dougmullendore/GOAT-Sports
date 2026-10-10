@@ -1,5 +1,8 @@
 __pycache__/
 *.pyc
 /out/
+/dist/
+/state/
 /data/
 .venv/
+/pub/
