@@ -1,0 +1,165 @@
+{
+ "started_utc": "2026-11-14T20:57:52+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "schedule": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 17,
+    "weeks_failed": 0,
+    "games": 888,
+    "from_backup": 0
+   }
+  },
+  "rankings": {
+   "ok": true,
+   "result": {
+    "found": {
+     "cfp": "2026-11-10",
+     "ap": "2026-11-08",
+     "usa": "2026-11-08"
+    },
+    "new": []
+   }
+  },
+  "conferences": {
+   "ok": true,
+   "result": {
+    "teams": 138
+   }
+  },
+  "box scores": {
+   "ok": true,
+   "result": {
+    "fetched": 36,
+    "failed": 0,
+    "finished": 705,
+    "with_box": 705
+   }
+  },
+  "rosters": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "teams": 138
+   }
+  },
+  "careers": {
+   "ok": true,
+   "result": {
+    "read": 1124,
+    "failed": 18,
+    "kept": 8337,
+    "wanted": 8337,
+    "to_read": 1142
+   }
+  },
+  "social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 69,
+    "age_days": 6
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "poll_date": "2026-11-08",
+    "games_listed": 262,
+    "fbs_teams": 138,
+    "games": 888,
+    "played": 705,
+    "game_pages": 724,
+    "players": 1530,
+    "regulars": 608,
+    "fbs_players": 8337,
+    "fbs_regulars": 3434,
+    "with_odds": 183,
+    "with_channel": 824,
+    "teams_rated": 238
+   }
+  },
+  "NFL schedule": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 22,
+    "weeks_failed": 0,
+    "games": 272,
+    "from_backup": 0
+   }
+  },
+  "NFL standings": {
+   "ok": true,
+   "result": {
+    "teams": 32
+   }
+  },
+  "NFL box scores": {
+   "ok": true,
+   "result": {
+    "fetched": 1,
+    "failed": 0,
+    "finished": 137,
+    "with_box": 137
+   }
+  },
+  "NFL rosters": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "teams": 32
+   }
+  },
+  "NFL careers": {
+   "ok": true,
+   "result": {
+    "read": 0,
+    "failed": 0,
+    "kept": 1603,
+    "wanted": 1603,
+    "to_read": 0
+   }
+  },
+  "NFL social links": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "players": 1195,
+    "age_days": 6
+   }
+  },
+  "NFL power ranking": {
+   "ok": true,
+   "result": {
+    "read": false,
+    "newest": "NFL Power Rankings: Stacking all 32 teams for Week 10, plus important games left",
+    "published": "2026-11-10T11:21:42.000+00:00"
+   }
+  },
+  "NFL site": {
+   "ok": true,
+   "result": {
+    "poll_date": null,
+    "games_listed": 272,
+    "fbs_teams": 32,
+    "games": 272,
+    "played": 137,
+    "game_pages": 137,
+    "players": 1603,
+    "regulars": 769,
+    "fbs_players": 1603,
+    "fbs_regulars": 769,
+    "with_odds": 135,
+    "with_channel": 248,
+    "teams_rated": 32
+   }
+  }
+ },
+ "finished_utc": "2026-11-14T20:58:00+00:00",
+ "ok": true
+}
