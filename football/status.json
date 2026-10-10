@@ -1,0 +1,63 @@
+{
+ "started_utc": "2026-10-31T18:57:07+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "scores now": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 1,
+    "weeks_failed": 0,
+    "games": 888,
+    "from_backup": 0
+   }
+  },
+  "box scores now": {
+   "ok": true,
+   "result": {
+    "fetched": 14,
+    "failed": 0,
+    "finished": 575,
+    "with_box": 575
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "poll_date": "2026-10-25",
+    "games_listed": 259,
+    "fbs_teams": 138,
+    "games": 888,
+    "played": 575,
+    "game_pages": 589,
+    "players": 1470,
+    "regulars": 622,
+    "fbs_players": 8083,
+    "fbs_regulars": 3465,
+    "with_odds": 313,
+    "with_channel": 727,
+    "teams_rated": 238
+   }
+  },
+  "NFL site": {
+   "ok": true,
+   "result": {
+    "poll_date": null,
+    "games_listed": 272,
+    "fbs_teams": 32,
+    "games": 272,
+    "played": 108,
+    "game_pages": 108,
+    "players": 1520,
+    "regulars": 772,
+    "fbs_players": 1520,
+    "fbs_regulars": 772,
+    "with_odds": 164,
+    "with_channel": 248,
+    "teams_rated": 32
+   }
+  }
+ },
+ "finished_utc": "2026-10-31T18:57:10+00:00",
+ "ok": true
+}

@@ -1,0 +1,68 @@
+{
+ "started_utc": "2026-10-31T18:57:11+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "College site": {
+   "ok": true,
+   "result": {
+    "poll_date": "2026-10-19",
+    "games_listed": 668,
+    "teams": 365,
+    "games": 6005,
+    "played": 0,
+    "game_pages": 0,
+    "players": 0,
+    "regulars": 0,
+    "with_odds": 6005,
+    "with_channel": 1633,
+    "teams_rated": 747
+   }
+  },
+  "NBA scores now": {
+   "ok": true,
+   "result": {
+    "season": 2027,
+    "days": 1,
+    "days_failed": 0,
+    "games": 1267,
+    "from_backup": 0,
+    "showing_last_season": false
+   }
+  },
+  "NBA standings": {
+   "ok": true,
+   "result": {
+    "teams": 30,
+    "from_last_season": false
+   }
+  },
+  "NBA box scores now": {
+   "ok": true,
+   "result": {
+    "fetched": 0,
+    "failed": 0,
+    "finished": 81,
+    "with_box": 81,
+    "to_read": 0
+   }
+  },
+  "NBA site": {
+   "ok": true,
+   "result": {
+    "poll_date": null,
+    "games_listed": 1200,
+    "teams": 30,
+    "games": 1200,
+    "played": 81,
+    "game_pages": 147,
+    "players": 432,
+    "regulars": 271,
+    "with_odds": 1119,
+    "with_channel": 1031,
+    "teams_rated": 30
+   }
+  }
+ },
+ "finished_utc": "2026-10-31T18:57:11+00:00",
+ "ok": true
+}

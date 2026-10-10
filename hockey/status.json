@@ -1,0 +1,52 @@
+{
+ "started_utc": "2026-10-31T18:56:54+00:00",
+ "commit": "7f6658427a97",
+ "stages": {
+  "scores now": {
+   "ok": true,
+   "result": {
+    "season": 2026,
+    "weeks": 1,
+    "weeks_failed": 0,
+    "games": 1344,
+    "from_backup": 0,
+    "final": 216
+   }
+  },
+  "box scores now": {
+   "ok": true,
+   "result": {
+    "asked": 4,
+    "read": 4,
+    "failed": [],
+    "failed_count": 0
+   }
+  },
+  "standings": {
+   "ok": true,
+   "result": {
+    "teams": 32,
+    "first": "CAR"
+   }
+  },
+  "site": {
+   "ok": true,
+   "result": {
+    "games": 1344,
+    "played": 216,
+    "game_pages": 220,
+    "teams": 32,
+    "players": 804,
+    "regulars": 612,
+    "with_odds": 1128,
+    "xg_scale": 0.9911,
+    "with_play_by_play": 220,
+    "with_channel": 1128,
+    "teams_with_lines": 32,
+    "missing_box": []
+   }
+  }
+ },
+ "finished_utc": "2026-10-31T18:56:55+00:00",
+ "ok": true
+}
