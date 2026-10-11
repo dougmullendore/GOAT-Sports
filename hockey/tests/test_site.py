@@ -306,19 +306,23 @@ def test_goat_ranking():
                                                standing("CCC", "Gamma Cats", 3, 0, 4, 0)]})
     games = [played(1, "2026-10-01", "CCC", "AAA", 1, 5), played(2, "2026-10-02", "CCC", "BBB", 0, 3), played(3, "2026-10-03", "BBB", "AAA", 2, 3, "SO"),
              played(4, "2026-10-04", "CCC", "BBB", 1, 2), played(5, "2026-10-05", "CCC", "AAA", 0, 1)]
-    assert goat.win_streaks(games) == {"AAA": 3, "BBB": 1, "CCC": 0}
-    assert goat.hot_boost(2) == 0 and goat.hot_boost(3) == 3 * config.GOAT_HOT_STEP and goat.hot_boost(40) == config.GOAT_HOT_MAX
     chances = {"AAA": [9.0, 5.0], "BBB": [8.0, 6.0], "CCC": [5.0, 11.0]}
-    r = goat.rank(games, {"AAA": 0.2, "BBB": 0.0, "CCC": -0.2}, table, chances)
-    assert r["order"] == ["AAA", "BBB", "CCC"] and r["streak"]["AAA"] == 3 and r["boost"]["AAA"] > 0 == r["boost"]["BBB"]
+    rating = {"AAA": 0.2, "BBB": 0.0, "CCC": -0.2}
+    r = goat.rank(games, rating, table, chances)
+    assert r["order"] == ["AAA", "BBB", "CCC"]
     assert abs(r["xg_pct"]["AAA"] - 9 / 14) < 1e-9 and abs(r["goal_pct"]["AAA"] - 8 / 11) < 1e-9      # the shootout win is not a goal
     assert r["sos"]["CCC"] > r["sos"]["AAA"]                             # the bottom team has played only the top two
-    assert abs(sum(config.GOAT_WEIGHTS.values()) - 1) < 1e-9 and set(config.GOAT_WEIGHTS) == {"record", "sos", "xg", "goals"}
-    # better chances lift a team: swap the expected goals of the top two and the gap between them narrows
-    swapped = goat.rank(games, {"AAA": 0.2, "BBB": 0.0, "CCC": -0.2}, table, {**chances, "AAA": chances["BBB"], "BBB": chances["AAA"]})
-    assert swapped["score"]["AAA"] - swapped["score"]["BBB"] < r["score"]["AAA"] - r["score"]["BBB"]
-    # with no play-by-play yet every team is level on chances and the rest decides
-    assert goat.rank(games, {}, table, {})["order"] == ["AAA", "BBB", "CCC"]
+    assert abs(sum(config.GOAT_WEIGHTS) - 1) < 1e-9 and len(config.GOAT_WEIGHTS) == 3
+    # who it beat, the standings, record: the unbeaten team leads on all three; expected goals no longer decide anything
+    assert r["factors"]["AAA"] == [1.0, 1.0, 1.0] and r["factors"]["CCC"][0] == 0.0 and r["factors"]["CCC"][2] == 0.0
+    swapped = goat.rank(games, rating, table, {**chances, "AAA": chances["BBB"], "BBB": chances["AAA"]})
+    assert swapped["order"] == r["order"] and swapped["score"] == r["score"]
+    # a win over a better team is worth more: beating the top team lifts the middle team's "who it beat" above a win over the bottom one
+    upset = goat.rank(games + [played(6, "2026-10-06", "AAA", "BBB", 1, 2)], rating, table, chances)
+    easy = goat.rank(games + [played(6, "2026-10-06", "CCC", "BBB", 1, 2)], rating, table, chances)
+    assert upset["score"]["BBB"] - upset["score"]["AAA"] > easy["score"]["BBB"] - easy["score"]["AAA"]
+    # before the first game the ratings carried over from last season decide
+    assert goat.rank([], {"AAA": -1.0, "BBB": 0.5, "CCC": 0.0}, table, {})["order"] == ["BBB", "CCC", "AAA"]
 
 
 # -------------------------------------------------------- expected goals --
@@ -554,7 +558,7 @@ def test_game_night_runs_only_work_when_a_game_is_on():
 
 def test_the_wording_file_is_complete():
     words = run.read_words()
-    assert words["nav.games"] == "Games" and "{from}" in words["standings.note_goat_how"]
+    assert words["nav.games"] == "Games" and "head to head" in words["standings.note_goat_how"]
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp)
         for name in ("app.js", "index.html", "words.txt"):
@@ -591,7 +595,7 @@ def test_the_site_is_built_from_what_is_stored():
         assert data["site"] == config.SITE_NAME and data["season"] == 2026 and [t["id"] for t in data["teams"]] == ["BOS", "UTA"]
         bos = data["teams"][0]
         assert bos["goat"] == 1 and data["teams"][1]["goat"] == 2 and bos["sos_rank"] in (1, 2) and "beat" not in bos
-        assert bos["xg_pct"] == 66.7 and bos["g_pct"] == 66.7 and bos["hot"] == 0 and 0 < data["xg"]["scale"] < 1.01
+        assert bos["xg_pct"] == 66.7 and bos["g_pct"] == 66.7 and bos["beat_score"] == 100 and 0 < data["xg"]["scale"] < 1.01
         assert abs(data["xg"]["scale"] - (6 + config.XG_STEADY_GOALS) / (9 + config.XG_STEADY_GOALS)) < 1e-4
         log = json.loads((out / "player" / "21.json").read_text())
         assert len(log["games"]) == 2 and log["games"][0][0] == 2026020090 and doc_xg(out) == [1.5, 3.0]

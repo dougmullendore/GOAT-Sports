@@ -432,13 +432,15 @@ def test_goat_ranking_puts_a_winner_above_a_close_rival():
     rating, teams = {"a": 1.0, "b": 1.0, "c": 1.0, "d": 1.0}, {"a", "b", "c", "d"}
     poll = {"a": 1, "b": 2, "c": 3, "d": 4}
     assert goat.rank([], rating, teams, poll)["order"] == ["a", "b", "c", "d"]                  # no results: the poll decides
-    assert goat.rank([_won(1, "b", "a")], rating, teams, poll)["order"][:2] == ["b", "a"]       # close, and b beat a
+    order = goat.rank([_won(1, "b", "a")], rating, teams, poll)["order"]
+    assert order[0] == "b" and order.index("b") < order.index("a")                               # b beat a, and a's loss costs it
     split = [_won(1, "b", "a"), _won(2, "a", "b")]
-    assert goat.rank(split, rating, teams, poll)["order"][:2] == ["a", "b"]                      # 1-1: nothing to enforce
+    order = goat.rank(split, rating, teams, poll)["order"]
+    assert order.index("a") < order.index("b")                                                   # 1-1: nothing to enforce, so the poll decides
 
 
-def test_goat_ranking_weighs_schedule_before_record():
-    # x and y both 1-1; x played the stronger teams, so it ranks higher
+def test_goat_ranking_weighs_who_was_beaten_before_record():
+    # x and y both 1-1; x beat a strong team and lost to a strong one, y beat a weak team and lost to a weak one
     rating = {"x": 0.0, "y": 0.0, "s1": 3.0, "s2": 3.0, "w1": -3.0, "w2": -3.0}
     games = [_won(1, "x", "s1"), _won(2, "s2", "x"), _won(3, "y", "w1"), _won(4, "w2", "y")]
     order = goat.rank(games, rating, {"x", "y"}, {})["order"]
@@ -452,7 +454,7 @@ def test_goat_ranking_does_not_jump_teams_it_has_not_beaten():
     # results in a circle cannot all be honored: it keeps as many as it can (two of three here)
     circle = [_won(1, "b", "a"), _won(2, "c", "b"), _won(3, "a", "c")]
     got = goat.rank(circle, rating, set(rating), poll)["order"]
-    assert goat.contradictions(got, circle, set(rating)) == 1 and got[-1] == "d"
+    assert goat.contradictions(got, circle, set(rating)) == 1
 
 
 def test_goat_ranking_counts_what_an_order_gets_wrong():

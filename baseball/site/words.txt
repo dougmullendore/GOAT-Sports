@@ -39,13 +39,13 @@ games.home = Home
 # ---- Standings page ----
 rankings.title = MLB Standings
 rankings.lede = The MLB standings, through games of {date}.
-rankings.lede_goat = This site's own ranking of the 30 teams: head to head first, then strength of schedule, place in the standings and record.
+rankings.lede_goat = This site's own ranking of the 30 teams: head to head first, then who each team has beaten and lost to, its record and its place in the standings.
 rankings.lede_before = The season has not started yet.
 rankings.button_conf = League
 rankings.button_goat = GOAT Ranking
 rankings.note = Teams are placed by share of games won, then wins, then runs scored less runs allowed; the league's own tie-breakers are not worked through, so teams level on record can sit in a different order here. Records and runs are the league's, from ESPN, and count the regular season only. Choose a team to see its page.
 rankings.note_conf = Seeds are ESPN's, as things stand: the three division winners, then the three best of the rest. The six teams above the line in each league make the playoffs.
-rankings.note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten more often than not, unless the rest say the gap is wide), strength of schedule, its place in the standings, and its record. Redone on every update.
+rankings.note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten more often than not, unless the rest say the gap is wide), who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), its record, and its place in the standings. Redone on every update.
 # not shown on the baseball site
 rankings.lede_other = The {poll} of {date}.
 rankings.lede_nopoll = The season has not started yet.

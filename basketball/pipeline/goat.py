@@ -3,14 +3,21 @@
 Four things decide it, in this order of importance:
   1. head to head: a team that has beaten another is ranked above it where
      that can be done without contradicting more results than it honors;
-  2. strength of schedule: the average rating of the teams it has played
-     (the ratings behind the odds);
-  3. the AP poll: a ranked team gets credit for its place in it (for the NBA,
-     which has no poll, its place in the standings);
-  4. record: its share of games won.
-Factors 2 to 4 make a score: each team's place among all of them on
-schedule and on record (0 at the bottom, 1 at the top) and its poll credit
-((26 - rank) / 25 for a ranked team, 0 otherwise), weighted by GOAT_WEIGHTS.
+  2. who it beat: every win adds the quality of the team beaten, raised to
+     GOAT_CURVE, and every loss takes away GOAT_LOSS plus the rest of 1 times
+     how weak the team lost to was, raised to GOAT_CURVE. A team's quality is
+     its place among all the teams by the ratings behind the odds, 0 for the
+     weakest and 1 for the strongest; a team from outside the division counts
+     as the weakest. So a win over a top team is worth far more than a win over
+     a weak one, a loss to a weak team costs far more than a loss to a top
+     one, and no loss is free. The totals are stretched to run from 0 (the
+     lowest) to 1 (the highest);
+  3. record: its share of games won;
+  4. the AP poll: a ranked team gets credit for its place in it (for the NBA,
+     which has no poll, its place in the standings).
+Parts 2 to 4 make a score, weighted by GOAT_WEIGHTS (who it beat, the poll,
+record). The poll credit is (26 - rank) / 25 for a ranked team and 0 otherwise.
+The same formula is used on every GOAT site.
 
 The order starts from that score. Then every pair of teams has a price for
 being ranked the "wrong" way round: ranking a team above one that has beaten
@@ -54,25 +61,32 @@ def _percentile(values: dict) -> dict:
 def rank(games: list[dict], rating: dict, teams: set, in_poll: dict) -> dict:
     """Rank `teams` (ids). `in_poll` is {id: poll rank} for the ranked teams.
     Returns {"order": [ids, best first], "base": {id: place by score alone},
-    "score": {id: score}, "factors": {id: [schedule, poll, record]}}."""
+    "score": {id: score}, "factors": {id: [who it beat, poll, record]}}."""
     finals = [g for g in games if g["state"] == "final" and g["home"].get("score") is not None
               and g["away"].get("score") is not None and g["home"]["score"] != g["away"]["score"]]
     floor = min(rating.values()) if rating else 0.0
-    won, played, opp = {}, {}, {}
+    # how good each team is, from 0 (the weakest) to 1 (the strongest), by the ratings behind the odds;
+    # a school from outside the division counts as the weakest
+    quality = _percentile({t: rating.get(t, floor) for t in teams})
+    won, played, earned = {}, {}, {}
     for g in finals:
         for side, other in (("home", "away"), ("away", "home")):
             t = g[side]["id"]
             if t not in teams:
                 continue
+            q = quality.get(g[other]["id"], 0.0)
+            win = g[side]["score"] > g[other]["score"]
             played[t] = played.get(t, 0) + 1
-            won[t] = won.get(t, 0) + (g[side]["score"] > g[other]["score"])
-            opp.setdefault(t, []).append(rating.get(g[other]["id"], floor))
-    sos = _percentile({t: (sum(opp[t]) / len(opp[t])) if opp.get(t) else floor for t in teams})
-    rec = _percentile({t: won.get(t, 0) / played[t] if played.get(t) else 0.0 for t in teams})
-    size = max(in_poll.values(), default=25)
+            won[t] = won.get(t, 0) + win
+            # who it beat: a win is worth more the better the team beaten, a loss costs more the worse the team lost to
+            earned[t] = earned.get(t, 0.0) + (q ** config.GOAT_CURVE if win else -(config.GOAT_LOSS + (1 - config.GOAT_LOSS) * (1 - q) ** config.GOAT_CURVE))
+    lo, hi = min((earned.get(t, 0.0) for t in teams), default=0.0), max((earned.get(t, 0.0) for t in teams), default=0.0)
+    beat = {t: (earned.get(t, 0.0) - lo) / (hi - lo) if hi > lo else 0.0 for t in teams}
+    rec = {t: won.get(t, 0) / played[t] if played.get(t) else 0.0 for t in teams}
+    size = max(in_poll.values(), default=25)        # 25 for a poll; the number of teams in a league numbered by its standings
     poll = {t: (size + 1 - in_poll[t]) / size if t in in_poll else 0.0 for t in teams}
-    ws, wp, wr = config.GOAT_WEIGHTS
-    score = {t: ws * sos[t] + wp * poll[t] + wr * rec[t] for t in teams}
+    wb, wp, wr = config.GOAT_WEIGHTS
+    score = {t: wb * beat[t] + wp * poll[t] + wr * rec[t] for t in teams}
     # before anyone has played, every score is level: the ratings carried over from last season decide
     order = sorted(teams, key=lambda t: (-score[t], -rating.get(t, floor), t))
     base = {t: i + 1 for i, t in enumerate(order)}
@@ -108,7 +122,7 @@ def rank(games: list[dict], rating: dict, teams: set, in_poll: dict) -> dict:
     # themselves; every other team follows from 26, in its order here.
     order = [t for t in order if t in in_poll] + [t for t in order if t not in in_poll]
     return {"order": order, "base": base, "score": score,
-            "factors": {t: [round(sos[t], 3), round(poll[t], 3), round(rec[t], 3)] for t in teams}}
+            "factors": {t: [round(beat[t], 3), round(poll[t], 3), round(rec[t], 3)] for t in teams}}
 
 
 def contradictions(order: list, games: list[dict], among: set) -> int:

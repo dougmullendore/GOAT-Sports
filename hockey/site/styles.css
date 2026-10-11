@@ -407,7 +407,6 @@ a.tlink:hover { color: var(--teal); text-decoration: underline; }
 .stm .abbr { display: none; font-weight: 600; }
 @media (max-width: 640px) { .stm .full { display: none; } .stm .abbr { display: inline; } }
 .pc-id .pc-team { flex-wrap: wrap; }
-.stand td.hot { color: var(--win); font-weight: 700; }
 .logtable .res { font-weight: 600; text-decoration: none; }
 .logtable .res.w { color: var(--win); } .logtable .res.l { color: var(--loss); }
 .logtable .res:hover { text-decoration: underline; }

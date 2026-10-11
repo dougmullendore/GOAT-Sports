@@ -164,14 +164,13 @@
     if (standView === "goat") {       // the same table as the standings, in GOAT order
       holder.appendChild(standTable(teams.sort(by("goat")), "Team", function (t) { return t.goat; }, null, [
         ["League", "Place in the league standings", function (t) { return t.rank; }],
+        ["Beat", "Who it beat: every win counts for more the better the team beaten, every loss costs more the weaker the team lost to. 100 is the best in the league", function (t) { return t.beat_score == null ? "–" : t.beat_score; }],
         ["SOS", "Strength of schedule: 1 is the hardest, by the average rating of the teams played", function (t) { return t.sos_rank; }],
         ["xG%", "Expected-goal share: of the expected goals in its games, the share that were its own", function (t) { return t.xg_pct == null ? "–" : t.xg_pct.toFixed(1); }],
         ["G%", "Goal share: of the goals in its games, the share it scored (shootouts aside)", function (t) { return t.g_pct == null ? "–" : t.g_pct.toFixed(1); }]],
         ["RW", "Home", "Away"]));
-      // a team on a hot streak (it gets a boost) has its streak in green
-      Array.prototype.forEach.call(holder.querySelectorAll("tbody tr"), function (tr, i) { if (teams[i].hot) { tr.lastChild.className = "hot"; tr.lastChild.title = "On a hot streak: boosted in the ranking"; } });
       $("rank-note").textContent = W("standings.note_goat");
-      $("goat-note").textContent = W("standings.note_goat_how", { from: G.hot_from });
+      $("goat-note").textContent = W("standings.note_goat_how");
       return;
     }
     if (standView === "league") holder.appendChild(standTable(teams.sort(by("rank")), "League"));

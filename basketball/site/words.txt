@@ -39,7 +39,7 @@ games.home = Home
 # ---- Rankings page ----
 rankings.title = Top 25 Rankings
 rankings.lede = The {poll} of {date}.
-rankings.lede_goat = This site's own ranking of every Division I team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then strength of schedule, the poll and record; every other team follows from 26 the same way.
+rankings.lede_goat = This site's own ranking of every Division I team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then who each team has beaten and lost to, its record and the poll; every other team follows from 26 the same way.
 rankings.lede_other = The {poll} of {date}.
 # shown before the season's first AP poll comes out
 rankings.lede_nopoll = This season's first AP poll is not out yet. Until it is, this is the site's own ranking of every Division I team, and every page shows the whole division.
@@ -104,10 +104,10 @@ nba.games_lede = Every NBA game, day by day: each team's chance of winning, wher
 nba.games_all_teams = All 30 teams
 nba.rankings_title = NBA Standings
 nba.rankings_lede = The NBA standings, through games of {date}.
-nba.rankings_lede_goat = This site's own ranking of the 30 teams: head to head first, then strength of schedule, place in the standings and record.
+nba.rankings_lede_goat = This site's own ranking of the 30 teams: head to head first, then who each team has beaten and lost to, its record and its place in the standings.
 nba.rankings_note = Teams are placed by share of games won, then wins, then points scored less points allowed; the league's own tie-breakers are not worked through, so teams level on record can sit in a different order here. Records and points are the league's, from ESPN. Choose a team to see its page.
 nba.rankings_note_conf = Seeds are ESPN's, as things stand. The six teams above the first line in each conference make the playoffs; the next four, down to the second line, play in for the last two places.
-nba.rankings_note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten unless the rest say the gap is wide), strength of schedule, its place in the standings, and its record. Redone on every update.
+nba.rankings_note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten unless the rest say the gap is wide), who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), its record, and its place in the standings. Redone on every update.
 nba.teams_title = NBA Team Stats
 nba.teams_lede = How every NBA team scores, shoots and defends, per game and per 100 possessions. From the box scores.
 nba.teams_all_conferences = All divisions

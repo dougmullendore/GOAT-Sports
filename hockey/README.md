@@ -175,25 +175,29 @@ code (DAL, COL) is shown in its place. To remove them, set `LOGO_URL = ""` in
 ## GOAT ranking
 
 The Standings page's GOAT Ranking button shows the site's own ranking of the
-32 teams (`pipeline/goat.py`), redone on every run. Five things decide it:
+32 teams (`pipeline/goat.py`), redone on every run. Four things decide it, most
+important first:
 
-1. **Record:** the share of the possible points a team has won (weight 30%).
-2. **Expected-goal share:** of the expected goals in its games, the share
-   that were its own (30%). This says who has had the better chances,
-   whatever the bounces.
-3. **Goal share:** of the goals in its games, the share it scored (25%). A
-   shootout win is not a goal.
-4. **Strength of schedule:** the average rating of the teams it has played so
-   far, each game counted once (15%). The ratings are the ones behind the odds.
-5. **A hot streak:** a team that has won three or more in a row gets 0.02
-   added for each win in the streak, up to 0.10.
+1. **Head to head.** A team is ranked above one it has beaten, unless the
+   rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
+   form a circle cannot all be honored; the ranking keeps as many as it can.
+2. **Who it beat (60%).** Every win adds the quality of the team beaten,
+   squared; every loss takes away a quarter, plus three quarters of how weak
+   the team lost to was, squared. Quality is a team's place among all the
+   teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
+   So a win over a top team is worth far more than a win over a weak one, a
+   loss to a weak team costs far more than a loss to a top one, and no loss
+   is free. The totals are stretched to run from 0 to 1.
+3. **Record (25%):** its share of games (an overtime or shootout loss is a loss) won.
+4. **The standings (15%):** credit for its place in them.
 
-For each of the first four a team gets its place among the 32, from 0 at the
-bottom to 1 at the top, and those are combined with the weights above
-(`GOAT_WEIGHTS` in `pipeline/config.py`; the streak settings are the
-`GOAT_HOT_` lines beside it). The ranking is shown as a table like the
-standings, with each team's place in the league, its strength of schedule,
-its expected-goal and goal shares, and its streak in green when it is hot.
+The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
+`pipeline/config.py`. Every GOAT site uses this formula.
+
+The ranking is shown as a table like the standings, with each team's place in
+the league, its "who it beat" score out of 100, its strength of schedule and
+its expected-goal and goal shares. Those last three are for reading; they no
+longer decide the order.
 
 ## Expected goals
 

@@ -183,22 +183,28 @@ belong to the schools. To remove them, set `LOGO_URL = ""` in
 ## GOAT ranking
 
 The Rankings page's GOAT tab is the site's own ranking of every Division I
-team (`pipeline/goat.py`), redone every night. Four things decide it, most
+team (`pipeline/goat.py`), redone on every update. Four things decide it, most
 important first:
 
 1. **Head to head.** A team is ranked above one it has beaten, unless the
-   other three factors say the gap between them is wide
-   (`GOAT_HEAD_TO_HEAD`). Results that form a circle cannot all be honored;
-   the ranking keeps as many as it can.
-2. **Strength of schedule:** the average rating of the teams it has played
-   (the ratings behind the odds).
-3. **The AVCA poll:** a ranked team gets credit for its place in it.
-4. **Record:** its share of matches won.
+   rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
+   form a circle cannot all be honored; the ranking keeps as many as it can.
+2. **Who it beat (60%).** Every win adds the quality of the team beaten,
+   squared; every loss takes away a quarter, plus three quarters of how weak
+   the team lost to was, squared. Quality is a team's place among all the
+   teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
+   So a win over a top team is worth far more than a win over a weak one, a
+   loss to a weak team costs far more than a loss to a top one, and no loss
+   is free. The totals are stretched to run from 0 to 1.
+3. **Record (25%):** its share of matches won.
+4. **The AVCA poll (15%):** credit for its place in it.
 
-Factors 2 to 4 are combined with the weights in `GOAT_WEIGHTS` (0.5, 0.3,
-0.2). Everywhere else on the site a team's number is its AVCA rank, or, for a
-team outside the poll, its place from 26 onward in GOAT order, so no two teams
-share a number.
+The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
+`pipeline/config.py`. Every GOAT site uses this formula.
+
+The top 25 are always the poll's 25 teams, in GOAT order. Everywhere else on
+the site a team's number is its AVCA rank, or, for a team outside the poll,
+its place from 26 onward in GOAT order, so no two teams share a number.
 
 ## Odds
 

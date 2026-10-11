@@ -66,12 +66,13 @@ PLAYOFF_DAYS_KEPT = 300       # days of playoff chances kept, to show who has mo
 PLAYOFF_TESTED = {"seasons": "2022-23 to 2025-26", "checks": 896,       # 32 teams, at seven points in each of four seasons
                   "low": ["under 20%", 0.08], "mid": ["40 to 60%", 0.48], "high": ["60 to 80%", 0.68], "top": ["over 80%", 0.94]}
 
-# The GOAT ranking (pipeline/goat.py) of the 32 teams: each team's place among
-# the 32 on these four things, weighted like this, plus a boost for a hot streak.
-GOAT_WEIGHTS = {"record": 0.30, "sos": 0.15, "xg": 0.30, "goals": 0.25}
-GOAT_HOT_FROM = 3         # a winning streak counts as hot from this many wins in a row
-GOAT_HOT_STEP = 0.02      # added to a hot team's total for each win in the streak
-GOAT_HOT_MAX = 0.10       # and never more than this (the totals run from 0 to 1)
+# The GOAT ranking (pipeline/goat.py) of the 32 teams: head to head first, then a score
+# made of these three things, weighted like this. The same on every GOAT site.
+GOAT_WEIGHTS = (0.6, 0.15, 0.25)   # who it beat, standings, record (head to head comes first, see goat.py)
+GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
+GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
+GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head lead outweighs a score gap up to this size (scores run 0 to 1)
+GOAT_REACH = 80           # how far up or down the order one move can take a team
 
 # Expected goals (pipeline/xg.py). The model tends to run a few percent high or
 # low in any one season, so its numbers are scaled to make the league's

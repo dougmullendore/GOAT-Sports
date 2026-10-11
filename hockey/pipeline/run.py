@@ -505,8 +505,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     expected = sum(v[0] for v in chances.values())
     xg_scale = (goals + config.XG_STEADY_GOALS) / (expected + config.XG_STEADY_GOALS)
 
-    # The GOAT ranking: record, strength of schedule, expected-goal share, goal
-    # share and a boost for a hot streak (see pipeline/goat.py). Regular season only.
+    # The GOAT ranking: head to head, then who it beat, the standings and record
+    # (see pipeline/goat.py), as on every other GOAT site. Regular season only.
     ranking = goat.rank(counted, rating, table, chances)
     spot = {t: i + 1 for i, t in enumerate(ranking["order"])}
     by_schedule = sorted(ranking["sos"], key=lambda t: -ranking["sos"][t])
@@ -517,9 +517,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         t["sos_rank"] = by_schedule.index(tid) + 1
         t["xg_pct"] = round(100 * ranking["xg_pct"][tid], 1) if sum(chances[tid]) else None
         t["g_pct"] = round(100 * ranking["goal_pct"][tid], 1)
-        t["hot"] = ranking["streak"][tid] if ranking["boost"][tid] else 0
-    goat_info = {"weights": config.GOAT_WEIGHTS, "hot_from": config.GOAT_HOT_FROM, "hot_step": config.GOAT_HOT_STEP,
-                 "hot_max": config.GOAT_HOT_MAX}
+        t["beat_score"] = round(100 * ranking["factors"][tid][0])       # who it beat: 100 is the best set of results in the league
+    goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD}
 
     words = read_words()                       # checked before anything is written
     if out.exists():

@@ -463,8 +463,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     kept[str(season)] = {t: round(v, 3) for t, v in rating.items()}
     write_json(state / "ratings.json", kept)
 
-    # The GOAT ranking of every Division I team: head to head, then strength of
-    # schedule, the AVCA poll and record (see pipeline/goat.py).
+    # The GOAT ranking of every Division I team: head to head, then who it
+    # beat, record and the AVCA poll (see pipeline/goat.py).
     in_poll = {t["id"]: t["rank"] for t in ranked if t["id"]}
     division = {t["id"] for t in sel["d1_teams"]} | set(in_poll)
     ranking = goat.rank(sel["all_games"], rating, division, in_poll)
