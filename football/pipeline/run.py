@@ -92,7 +92,12 @@ def update_rankings(state: Path) -> dict:
     polls = read_json(state / "polls.json", {})
     found = espn.parse_rankings(web.get_json(config.RANKINGS))
     if config.POLL_TYPE not in found or len(found[config.POLL_TYPE]["rows"]) < config.POLL_SIZE:
-        raise RuntimeError(f"the rankings did not read cleanly: {({k: len(v['rows']) for k, v in found.items()})}")
+        # ESPN takes the AP poll out of its feed for a while on Sunday while the new one is put in.
+        # With one already stored that is not a failure: the stored poll stays until the new one shows.
+        if not polls.get(config.POLL_TYPE):
+            raise RuntimeError(f"the rankings did not read cleanly: {({k: len(v['rows']) for k, v in found.items()})}")
+        found.pop(config.POLL_TYPE, None)
+        log(f"rankings: the {config.POLL_NAME} is not in the feed just now; kept the one stored")
     new = []
     for kind, poll in found.items():
         seen = polls.setdefault(kind, {})
