@@ -18,10 +18,10 @@ Top 25 / All FBS switch narrows any page to the ranked teams.
   each team's chance of winning; finished ones show the score and link to the
   box score. A game between two ranked teams has a coloured edge. A menu
   narrows the list to one team's whole season.
-- **Rankings**: the AP Top 25 with each team's record and how far it moved,
-  and its results against the other 24 (Beat / Lost to). Buttons switch to the
-  GOAT ranking, the coaches poll, and the playoff committee's ranking once it
-  starts in November.
+- **Rankings**: the AP Top 25 with each team's record and how far it moved.
+  Buttons switch to the coaches poll, the playoff committee's ranking once it
+  starts in November, and the GOAT ranking, which also lists each team's
+  results against the rest of its top 25 (Beat / Lost to).
 - **Teams**: a sortable table (with a conference menu): record, points for and
   against, yards per play for and against, passing and rushing yards, third
   downs, turnover margin, points per drive, the site's rating and strength of

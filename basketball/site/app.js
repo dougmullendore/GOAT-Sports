@@ -376,12 +376,12 @@
     else if (rankView !== "poll" && rankView !== "goat" && !others[rankView]) rankView = "poll";
     var goatView = rankView === "goat" && G.top, other = others[rankView];
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = "";
-    (NOPOLL() ? [] : [["poll", W("rankings.button_poll")]]).concat([["goat", W("rankings.button_goat")]]).concat(Object.keys(others).map(function (k) { return [k, others[k].label]; })).forEach(function (o) {
+    (NOPOLL() ? [] : [["poll", W("rankings.button_poll")]]).concat(Object.keys(others).map(function (k) { return [k, others[k].label]; })).concat([["goat", W("rankings.button_goat")]]).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
     (goatView ? ["GOAT", "Team", "Record", "AP"] : [other ? "#" : "AP", "Team", "Record", "Change"]).forEach(function (h) { head.appendChild(el("span", { text: h })); });
-    // on a wide screen the Beat and Lost to boxes sit in the row, under these two headings
-    if (!other) {
+    // the Beat and Lost to boxes belong to the GOAT ranking only; on a wide screen they sit in the row, under these two headings
+    if (goatView) {
       head.appendChild(el("span", { "class": "wide beat", text: W("rankings.beat") }));
       head.appendChild(el("span", { "class": "wide lostto", text: W("rankings.lost_to") }));
     }
@@ -400,7 +400,7 @@
           versus(t)]));
       });
     } else if (other) other.teams.forEach(function (t) { ol.appendChild(pollRow(t, false)); });
-    else data.poll.teams.forEach(function (t) { ol.appendChild(pollRow(t, true)); });
+    else data.poll.teams.forEach(function (t) { ol.appendChild(pollRow(t, false)); });
     function nice(d) { return day(d).toLocaleDateString(undefined, { month: "long", day: "numeric" }); }
     $("rank-lede").textContent = NOPOLL() ? W("rankings.lede_nopoll") : goatView ? W("rankings.lede_goat") : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : other ? W("rankings.note_other") : W("rankings.note");

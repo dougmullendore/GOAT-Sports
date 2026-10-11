@@ -150,9 +150,11 @@
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
     (goatView ? ["GOAT", "Team", "Record", PRO() ? "Std" : "AVCA"] : [PRO() ? "#" : "AVCA", "Team", "Record", "Change"]).forEach(function (h) { head.appendChild(el("span", { text: h })); });
-    // on a wide screen the Beat and Lost to boxes sit in the row, under these two headings
-    head.appendChild(el("span", { "class": "wide beat", text: W("rankings.beat") }));
-    head.appendChild(el("span", { "class": "wide lostto", text: W("rankings.lost_to") }));
+    // the Beat and Lost to boxes belong to the GOAT ranking only; on a wide screen they sit in the row, under these two headings
+    if (goatView) {
+      head.appendChild(el("span", { "class": "wide beat", text: W("rankings.beat") }));
+      head.appendChild(el("span", { "class": "wide lostto", text: W("rankings.lost_to") }));
+    }
     function teamLink(id, name) { return teamA(id, name, "nm"); }
     var proBox = $("pro-standings");
     if (proBox) proBox.parentNode.removeChild(proBox);
@@ -191,7 +193,7 @@
         var move = t.prev == null ? ["new", "up", "not ranked last week"] : t.prev > t.rank ? ["▲" + (t.prev - t.rank), "up", "up " + (t.prev - t.rank) + " from last week"]
           : t.prev < t.rank ? ["▼" + (t.rank - t.prev), "", "down " + (t.rank - t.prev) + " from last week"] : ["", "", ""];
         ol.appendChild(el("li", {}, [rankTag(t.rank), el("span", { "class": "who" }, [logo(t.id), teamLink(t.id, t.name)]), el("span", { "class": "rec", text: t.record || "" }),
-          el("span", { "class": "mv " + move[1], text: move[0], "aria-label": move[2] || null }), versus(t)]));
+          el("span", { "class": "mv " + move[1], text: move[0], "aria-label": move[2] || null })]));
       });
     }
     var through = day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" });

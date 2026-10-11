@@ -33,11 +33,11 @@ You do not need to run anything. GitHub does it all on a schedule.
 
 ## Beat and Lost to
 
-On the Rankings page each team's Beat and Lost to boxes list its results
-against the other ranked teams. In the AVCA poll view they count only matches
-played through the poll's date, so they change with the poll each Monday,
-and so do the boxes on team pages. The GOAT view's boxes are redone every
-night.
+On the Rankings page the GOAT ranking shows each team's Beat and Lost to
+boxes: its results against the rest of the GOAT top 25, redone every night.
+The AVCA poll view is the plain list. A ranked team's own page has the boxes
+too, against the other teams in the poll, counting matches played through the
+poll's date.
 
 ## Team pages
 

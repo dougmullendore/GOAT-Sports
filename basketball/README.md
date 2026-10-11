@@ -17,9 +17,10 @@ college football site is, and the NBA as a second copy of the same pages.
   finished ones show the score and link to the box score. A game between two
   ranked teams has a coloured edge. A menu narrows the list to one team's
   whole season.
-- **Rankings**: the AP Top 25 with each team's record and how far it moved,
-  and its results against the other 24 (Beat / Lost to). Buttons switch to the
-  GOAT ranking of all of Division I and to the coaches poll.
+- **Rankings**: the AP Top 25 with each team's record and how far it moved.
+  Buttons switch to the coaches poll and to the GOAT ranking of all of
+  Division I, which also lists each team's results against the rest of its
+  top 25 (Beat / Lost to).
 - **Teams**: a sortable table (with a conference menu): record, points for and
   against, offense, defense and net per 100 possessions, pace, effective field
   goal percentage for and against, turnover and offensive rebound rates, free
