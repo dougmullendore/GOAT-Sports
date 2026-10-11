@@ -450,7 +450,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     for x in goat_top:
         if espn_power:
             x["power"] = (credit if frozen else espn_power["ranks"]).get(x["id"])     # once frozen, the ranking it was frozen with
-    results = goat.head_to_head(every)          # every result so far, not only the poll's
+    results = goat.head_to_head(regular)        # every regular-season result so far, not only the poll's
     for x in goat_top:
         won = sum(v[0] for (a, _), v in results.items() if a == x["id"])
         lost = sum(v[1] for (a, _), v in results.items() if a == x["id"])

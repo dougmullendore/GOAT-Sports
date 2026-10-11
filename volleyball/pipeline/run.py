@@ -515,7 +515,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                  "score_rank": ranking["base"][t], "factors": ranking["factors"][t]} for i, t in enumerate(ranking["order"])]
     # For the GOAT view: each team's record, and its results against the GOAT top 25.
     in_goat = {x["id"]: x["rank"] for x in goat_top[:config.POLL_SIZE]}
-    results = goat.head_to_head(sel["all_games"])          # every result so far, not only the poll's
+    results = goat.head_to_head(regular)        # every regular-season result so far, not only the poll's
     for x in goat_top:
         won = sum(v[0] for (a, _), v in results.items() if a == x["id"])
         lost = sum(v[1] for (a, _), v in results.items() if a == x["id"])
