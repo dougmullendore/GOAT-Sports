@@ -103,7 +103,7 @@ def assign(games: list[dict], listings: list[dict], names: dict) -> dict:
         if not found:
             continue
         best = min(found, key=lambda f: f[:2])
-        chans, espn, flip, neutral = [], None, False, False
+        chans, espn, flip, neutral, start = [], None, False, False, None
         for n, gap, item in sorted(found, key=lambda f: f[:2]):
             # the same match in both sources: both teams agree, or one does and so does the start time
             if n == best[0] and (n == -2 or abs(item["t"] - best[2]["t"]) <= 3600):
@@ -113,9 +113,11 @@ def assign(games: list[dict], listings: list[dict], names: dict) -> dict:
                         chans.append(c)
                 if item.get("espn") and not espn:
                     espn, neutral = item["espn"], bool(item.get("neutral"))
+                    if n == -2:
+                        start = int(item["t"])           # when ESPN says the match starts (see run.ranked_matches)
                     away_name = next((t for t in item["teams"] if t != item.get("home")), None)
                     flip = item.get("home_id") == g["away"]["id"] or (item.get("home_id") is None and seen.get(away_name) == g["home"]["id"])
-        out[g["id"]] = {"channels": chans, "espn": espn, "flip": bool(flip), "neutral": neutral}
+        out[g["id"]] = {"channels": chans, "espn": espn, "flip": bool(flip), "neutral": neutral, "t": start}
     return out
 
 

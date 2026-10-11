@@ -149,6 +149,14 @@ def ranked_matches(state: Path) -> dict:
         ranked.append({"rank": r["rank"], "id": tid, "name": names.get(tid, r["school"]), "record": r.get("record"),
                        "prev": r.get("prev"), "points": r.get("points"), "votes": r.get("votes") or 0})
     rank = {t["id"]: t["rank"] for t in ranked if t["id"]}
+    # The NCAA's start time for a match is sometimes hours out. Where ESPN lists the same match (both
+    # teams) at a different time, ESPN's is used until the match is over: it is the time on the TV schedule.
+    listed_at = read_json(state / "watch.json", {})
+    for g in games.values():
+        w = listed_at.get(str(g["id"]))
+        t = w.get("t") if isinstance(w, dict) else None
+        if t and g["state"] == "upcoming" and g.get("start") and abs(t - g["start"]) >= 30 * 60:
+            g["start"] = int(t)
     every = sorted(games.values(), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
     for g in every:
         for s in (g["away"], g["home"]):
@@ -201,7 +209,8 @@ def update_watch(state: Path, now: dt.datetime) -> dict:
         stored[str(g["id"])] = {"channels": new.get("channels") or old.get("channels") or [],
                                 "espn": new.get("espn") or old.get("espn"),
                                 "flip": new["flip"] if new.get("espn") else bool(old.get("flip")),
-                                "neutral": new["neutral"] if new.get("espn") else bool(old.get("neutral"))}
+                                "neutral": new["neutral"] if new.get("espn") else bool(old.get("neutral")),
+                                "t": new.get("t") or old.get("t")}
     write_json(state / "watch.json", stored, indent=0)
     have = sum(1 for g in soon if stored[str(g["id"])]["channels"])
     followable = sum(1 for g in soon if stored[str(g["id"])]["espn"])
