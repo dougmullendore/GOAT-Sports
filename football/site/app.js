@@ -19,8 +19,24 @@
     tag.style.background = "rgb(" + bg.join(",") + ")";       // the number itself is always dark with a white outline (styles)
   }
   function shadeAll(root) { if (!root || root.nodeType !== 1) return; shadeRank(root); Array.prototype.forEach.call(root.querySelectorAll(".rk"), shadeRank); }
+  // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
+  function liveFirst(ol) {
+    var kids = Array.prototype.slice.call(ol.children), ref = null, i;
+    function on(li) { return li.classList && li.classList.contains("game") && li.classList.contains("on"); }
+    for (i = 0; i < kids.length; i++) if (!on(kids[i])) { ref = kids[i]; break; }
+    if (!ref) return;
+    for (i = kids.indexOf(ref) + 1; i < kids.length; i++) if (on(kids[i])) ol.insertBefore(kids[i], ref);
+  }
+  function listsIn(node, found) {
+    if (!node || node.nodeType !== 1) return;
+    if (node.matches && node.matches("ol.games")) found.push(node);
+    else if (node.matches && node.matches("li.game") && node.parentNode) found.push(node.parentNode);
+    Array.prototype.forEach.call(node.querySelectorAll("ol.games"), function (ol) { found.push(ol); });
+  }
   if (window.MutationObserver) new MutationObserver(function (list) {
-    list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, shadeAll); });
+    var lists = [];
+    list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { shadeAll(n); listsIn(n, lists); }); });
+    lists.filter(function (ol, i) { return lists.indexOf(ol) === i; }).forEach(liveFirst);
   }).observe(document.documentElement, { childList: true, subtree: true });
   try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { shadeAll(document.body); }); } catch (e) {}
 
