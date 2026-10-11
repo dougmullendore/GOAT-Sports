@@ -19,4 +19,9 @@
   .sports .sports-home { margin-right: 0; font-size: 0; letter-spacing: 0; }
   .sports .sports-home::before { content: "GOAT"; font-size: .8125rem; letter-spacing: .04em; }
 }
+/* Saved to an iPhone's home screen, the page runs up to the clock and battery line, and iOS blurs
+   whatever sits just under it. Extra room at the top keeps the sports' names clear of that. */
+@media (display-mode: standalone) {
+  @supports (-webkit-touch-callout: none) { .sports { padding-top: 28px; } }
+}
 @media print { .sports { display: none; } }
