@@ -38,6 +38,8 @@ games.live_note = Live scores from ESPN, refreshed every {seconds} seconds.
 standings.title = NHL Standings
 standings.lede = The league's own standings, as of {date}.
 standings.lede_goat = This site's own ranking of the 32 teams: ESPN's newest power ranking (half the score), strength of schedule, strength of record and head to head.
+# added to the line above once a season's playoffs or tournament have begun
+standings.frozen = Final for the season: frozen at the end of the regular season.
 standings.button_division = Division
 standings.button_wildcard = Wild Card
 standings.button_conference = Conference

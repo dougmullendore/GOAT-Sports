@@ -150,6 +150,8 @@
   }
   function by(key) { return function (a, b) { return a[key] - b[key]; }; }
   function groups(key) { var seen = []; data.teams.forEach(function (t) { if (seen.indexOf(t[key]) < 0) seen.push(t[key]); }); return seen.sort(); }
+  // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
+  function goatLede() { return W("standings.lede_goat") + ((data.goat || {}).frozen ? " " + W("standings.frozen") : ""); }
   function drawStandings() {
     var holder = $("stand"), bar = $("rank-sort");
     holder.innerHTML = ""; bar.innerHTML = "";
@@ -159,7 +161,7 @@
     });
     var teams = data.teams.slice(), G = data.goat || {};
     var read = data.standings_read ? new Date(data.standings_read) : null;
-    $("rank-lede").textContent = standView === "goat" ? W("standings.lede_goat") : W("standings.lede", { date: read && !isNaN(read) ? read.toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "" });
+    $("rank-lede").textContent = standView === "goat" ? goatLede() : W("standings.lede", { date: read && !isNaN(read) ? read.toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "" });
     $("goat-note").textContent = "";
     if (standView === "goat") {       // the same table as the standings, in GOAT order
       holder.appendChild(standTable(teams.sort(by("goat")), "Team", function (t) { return t.goat; }, null, [

@@ -40,6 +40,8 @@ games.home = Home
 rankings.title = MLB Standings
 rankings.lede = The MLB standings, through games of {date}.
 rankings.lede_goat = This site's own ranking of the 30 teams: ESPN's newest power ranking (half the score), strength of schedule, strength of record and head to head.
+# added to the line above once a season's playoffs or tournament have begun
+rankings.frozen = Final for the season: frozen at the end of the regular season.
 rankings.lede_before = The season has not started yet.
 rankings.button_conf = League
 rankings.button_goat = GOAT Ranking

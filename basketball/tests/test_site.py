@@ -442,3 +442,16 @@ def test_espn_power_rankings_are_found_and_read(tmp_path=None):
     finally:
         config.POWER_ABBR, config.POWER, _web.get_bytes = old_abbr, old_power, real
 
+# ----------------------------------------- the GOAT ranking stops with the regular season --
+def test_the_goat_ranking_is_frozen_once_the_postseason_starts(tmp_path=None):
+    state = Path(tmp_path or tempfile.mkdtemp())
+    day = lambda d: dt.datetime(2026, 12, d, tzinfo=dt.timezone.utc)
+    first = {"a": 1, "b": 2}
+    assert run.frozen_credit(state, 2026, False, first, day(1)) == (first, None)            # regular season: follows the poll
+    assert not (state / "goat_frozen.json").exists()
+    assert run.frozen_credit(state, 2026, True, first, day(8)) == (first, "2026-12-08")      # the postseason starts: kept as it stands
+    later = {"b": 1, "a": 2}
+    assert run.frozen_credit(state, 2026, True, later, day(20)) == (first, "2026-12-08")     # a later poll changes nothing
+    assert run.frozen_credit(state, 2027, False, later, day(21)) == (later, None)             # next season: follows the poll again
+    assert run.frozen_credit(state, 2027, True, later, day(22)) == (later, "2026-12-22")      # and is frozen afresh
+

@@ -89,6 +89,20 @@ def parse_contest(c: dict) -> dict | None:
             "away": side(away), "home": side(home)}
 
 
+def frozen_credit(state: Path, season, over: bool, credit: dict, now: dt.datetime) -> tuple[dict, str | None]:
+    """The GOAT ranking stops changing when the regular season ends. Its games and ratings are the
+    regular season's anyway; this keeps the poll (or power ranking, or standings) it is built on as
+    it stood when the first postseason game began. Returns (the credit to use, when it was frozen)."""
+    path = state / "goat_frozen.json"
+    kept = read_json(path, {})
+    if not over:
+        return credit, None
+    if kept.get("season") == season and kept.get("credit"):
+        return kept["credit"], kept.get("frozen")
+    write_json(path, {"season": season, "frozen": now.date().isoformat(), "credit": credit})
+    return credit, now.date().isoformat()
+
+
 def conference_name(code: str) -> str:
     code = (code or "").strip().lower()
     if code in config.NO_CONFERENCE:
@@ -467,7 +481,13 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     # beat, record and the AVCA poll (see pipeline/goat.py).
     in_poll = {t["id"]: t["rank"] for t in ranked if t["id"]}
     division = {t["id"] for t in sel["d1_teams"]} | set(in_poll)
-    ranking = goat.rank(sel["all_games"], rating, division, in_poll)
+    # Regular season only, and frozen once the NCAA tournament starts: the matches, the ratings and
+    # the poll it is built on all stop where the regular season did.
+    regular = [g for g in sel["all_games"] if not g.get("round")]
+    over = any(g.get("round") and g["state"] in ("live", "final") for g in sel["all_games"])
+    credit, frozen = frozen_credit(state, season, over, in_poll, now)
+    goat_rating = odds.rate(regular, start)[0] if over else rating
+    ranking = goat.rank(regular, goat_rating, division, credit)
     place = {t: i + 1 for i, t in enumerate(ranking["order"])}
     polled = [t["id"] for t in ranked if t["id"]]
     for t in ranked:
@@ -506,7 +526,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                 x["beat"].append([in_goat[other], sel["names"][other], wins, other])
             if losses:
                 x["lost"].append([in_goat[other], sel["names"][other], losses, other])
-    goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS,
+    goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS, "frozen": frozen,
                  # among the poll's own 25 teams: results each order has the wrong way round
                  "poll_wrong": goat.contradictions(polled, sel["all_games"], set(polled)),
                  "goat_wrong": goat.contradictions(ranking["order"], sel["all_games"], set(polled))}

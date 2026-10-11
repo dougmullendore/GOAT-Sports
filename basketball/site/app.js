@@ -346,6 +346,8 @@
   }
   // ---- a pro league's standings, in place of a poll: by division, by conference, the whole league, or the GOAT ranking ----
   var standView = "div";
+  // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
+  function goatLede() { return W("rankings.lede_goat") + ((data.goat || {}).frozen ? " " + W("rankings.frozen") : ""); }
   function drawStandings() {
     var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {};
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = ""; ol.hidden = true; head.hidden = true;
@@ -392,7 +394,7 @@
       });
     }
     ol.parentNode.insertBefore(holder, ol);
-    $("rank-lede").textContent = standView === "goat" ? W("rankings.lede_goat") : data.poll.through ? W("rankings.lede", { poll: data.poll.name, date: day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" }) }) : W("rankings.lede_before");
+    $("rank-lede").textContent = standView === "goat" ? goatLede() : data.poll.through ? W("rankings.lede", { poll: data.poll.name, date: day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" }) }) : W("rankings.lede_before");
     $("rank-note").textContent = standView === "goat" ? W("rankings.note_goat") : standView === "conf" ? W("rankings.note_conf") : W("rankings.note");
     $("goat-note").textContent = "";
   }
@@ -430,7 +432,7 @@
     } else if (other) other.teams.forEach(function (t) { ol.appendChild(pollRow(t, false)); });
     else data.poll.teams.forEach(function (t) { ol.appendChild(pollRow(t, false)); });
     function nice(d) { return day(d).toLocaleDateString(undefined, { month: "long", day: "numeric" }); }
-    $("rank-lede").textContent = NOPOLL() ? W("rankings.lede_nopoll") : goatView ? W("rankings.lede_goat") : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
+    $("rank-lede").textContent = NOPOLL() ? W("rankings.lede_nopoll") : goatView ? goatLede() : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : other ? W("rankings.note_other") : W("rankings.note");
     $("goat-note").textContent = !goatView ? "" : "Every " + ALL() + " team is ranked on four things: its place in the AP poll (50%), strength of schedule (20%: how good the teams it has played are, on average), strength of record (20%: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), and head to head (10%: a team is ranked above one it has the better of when the two are that close on the rest). " +
       "Before anyone has played, the order is last season's ratings. " +

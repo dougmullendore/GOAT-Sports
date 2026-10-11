@@ -181,6 +181,20 @@ def power_teams(state: Path) -> dict:
             for t, v in read_json(state / "fbs.json", {}).items()}
 
 
+def frozen_credit(state: Path, season, over: bool, credit: dict, now: dt.datetime) -> tuple[dict, str | None]:
+    """The GOAT ranking stops changing when the regular season ends. Its games and ratings are the
+    regular season's anyway; this keeps the poll (or power ranking, or standings) it is built on as
+    it stood when the first postseason game began. Returns (the credit to use, when it was frozen)."""
+    path = state / "goat_frozen.json"
+    kept = read_json(path, {})
+    if not over:
+        return credit, None
+    if kept.get("season") == season and kept.get("credit"):
+        return kept["credit"], kept.get("frozen")
+    write_json(path, {"season": season, "frozen": now.date().isoformat(), "credit": credit})
+    return credit, now.date().isoformat()
+
+
 def league_order(fbs: dict) -> list[str]:
     """A league with no poll: its teams from first to last by share of games won, then
     wins, then points scored less points allowed."""
@@ -445,7 +459,13 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     # before a league table means anything, the order is the ratings carried over from last season
     # a pro league has no poll: ESPN's newest power ranking stands in for one, and the standings for that
     espn_power = power.stored(state, division) if not config.POLL_TYPE else {}
-    ranking = goat.rank(every, rating, division, espn_power.get("ranks") or (in_poll if sel["numbered"] else {}))
+    # Regular season only, and frozen once the postseason starts: the games, the ratings and the poll
+    # it is built on all stop where the regular season did.
+    regular = [g for g in every if not (g.get("kind") == 3)]
+    over = any((g.get("kind") == 3) and g["state"] in ("live", "final") for g in every)
+    credit, frozen = frozen_credit(state, season, over, espn_power.get("ranks") or (in_poll if sel["numbered"] else {}), now)
+    goat_rating = odds.rate(regular, start, set(fbs))[0] if over else rating
+    ranking = goat.rank(regular, goat_rating, division, credit)
     place = {t: i + 1 for i, t in enumerate(ranking["order"])}
     polled = [t["id"] for t in ranked]
     for t in ranked:
@@ -475,7 +495,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                  "factors": ranking["factors"][t]} for i, t in enumerate(ranking["order"])]
     for x in goat_top:
         if espn_power:
-            x["power"] = espn_power["ranks"].get(x["id"])
+            x["power"] = (credit if frozen else espn_power["ranks"]).get(x["id"])     # once frozen, the ranking it was frozen with
     in_goat = {x["id"]: x["rank"] for x in goat_top[:config.POLL_SIZE]}
     results = goat.head_to_head(every)          # every result so far, not only the poll's
     for x in goat_top:
@@ -491,7 +511,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                 x["beat"].append([in_goat[other], sel["names"][other], wins, other])
             if losses:
                 x["lost"].append([in_goat[other], sel["names"][other], losses, other])
-    goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS,
+    goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS, "frozen": frozen,
                  "power": {k: espn_power.get(k) for k in ("headline", "published", "url")} if espn_power else None,
                  # among the poll's own 25 teams: results each order has the wrong way round
                  "poll_wrong": goat.contradictions(polled, every, set(polled)),

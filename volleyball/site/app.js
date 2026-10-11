@@ -212,6 +212,8 @@
     $("rank-note").textContent = ""; $("goat-note").textContent = ""; $("goat-out").textContent = "";
   }
 
+  // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
+  function goatLede() { return W("rankings.lede_goat") + ((data.goat || {}).frozen ? " " + W("rankings.frozen") : ""); }
   function drawRanks() {
     var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, goatView = rankView === "goat" && G.top;
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = "";
@@ -244,7 +246,7 @@
             el("td", { text: String(Math.round(100 * t.factors[0])) }), el("td", { text: String(Math.round(100 * (t.factors[3] || 0))) })]);
         }));
         ol.parentNode.insertBefore(el("div", { "class": "tablewrap", id: "pro-standings", tabindex: "0", role: "region", "aria-label": "GOAT ranking, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [gHead, gBody])]), ol);
-        $("rank-lede").textContent = W("rankings.lede_goat");
+        $("rank-lede").textContent = goatLede();
         $("rank-note").textContent = W("rankings.note_goat"); $("goat-note").textContent = ""; $("goat-out").textContent = "";
         return;
       }
@@ -285,7 +287,7 @@
       });
     }
     var through = day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" });
-    $("rank-lede").textContent = goatView ? W("rankings.lede_goat") : W("rankings.lede", { poll: data.poll.name, date: through });
+    $("rank-lede").textContent = goatView ? goatLede() : W("rankings.lede", { poll: data.poll.name, date: through });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : W("rankings.note");
     $("goat-note").textContent = !goatView ? "" : "Every Division I team is ranked on four things: its place in the AVCA poll (50%), strength of schedule (20%: how good the teams it has played are, on average), strength of record (20%: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), and head to head (10%: a team is ranked above one it has the better of when the two are that close on the rest). " +
       "Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +

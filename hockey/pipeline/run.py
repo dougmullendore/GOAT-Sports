@@ -108,6 +108,20 @@ def update_schedule(state: Path, season: int, only: list[str] | None = None, now
             "final": sum(1 for g in stored["games"].values() if g["state"] == "final")}
 
 
+def frozen_credit(state: Path, season, over: bool, credit: dict, now: dt.datetime) -> tuple[dict, str | None]:
+    """The GOAT ranking stops changing when the regular season ends. Its games and ratings are the
+    regular season's anyway; this keeps the poll (or power ranking, or standings) it is built on as
+    it stood when the first postseason game began. Returns (the credit to use, when it was frozen)."""
+    path = state / "goat_frozen.json"
+    kept = read_json(path, {})
+    if not over:
+        return credit, None
+    if kept.get("season") == season and kept.get("credit"):
+        return kept["credit"], kept.get("frozen")
+    write_json(path, {"season": season, "frozen": now.date().isoformat(), "credit": credit})
+    return credit, now.date().isoformat()
+
+
 def update_standings(state: Path, now: dt.datetime) -> dict:
     table = nhl.fetch_standings()
     if len(table) < 30:
@@ -507,8 +521,11 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
 
     # The GOAT ranking: head to head, then who it beat, the standings and record
     # (see pipeline/goat.py), as on every other GOAT site. Regular season only.
+    # Frozen once the playoffs start: the ratings and ESPN's ranking stop where the regular season did.
     espn_power = power.stored(state, [t["id"] for t in table])
-    ranking = goat.rank(counted, rating, table, chances, espn_power.get("ranks"))
+    over = any(g["type"] not in config.STATS_GAME_TYPES and g["state"] in ("live", "final") for g in games)
+    credit, frozen = frozen_credit(state, season, over, espn_power.get("ranks") or {}, now)
+    ranking = goat.rank(counted, odds.rate(counted, start)[0] if over else rating, table, chances, credit or None)
     spot = {t: i + 1 for i, t in enumerate(ranking["order"])}
     by_schedule = sorted(ranking["sos"], key=lambda t: -ranking["sos"][t])
     for t in table:
@@ -518,9 +535,9 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         t["sos_rank"] = by_schedule.index(tid) + 1
         t["xg_pct"] = round(100 * ranking["xg_pct"][tid], 1) if sum(chances[tid]) else None
         t["g_pct"] = round(100 * ranking["goal_pct"][tid], 1)
-        t["power"] = (espn_power.get("ranks") or {}).get(tid)             # its place in ESPN's newest power ranking
+        t["power"] = (credit or {}).get(tid)             # its place in ESPN's newest power ranking
         t["beat_score"] = round(100 * ranking["factors"][tid][0])       # strength of record: 100 is the best in the league
-    goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD,
+    goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD, "frozen": frozen,
                  "power": {k: espn_power.get(k) for k in ("headline", "published", "url")} if espn_power else None}
 
     words = read_words()                       # checked before anything is written
