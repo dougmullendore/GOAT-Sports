@@ -84,6 +84,8 @@ XG_STEADY_GOALS = 1500
 WATCH_COUNTRIES = ("US", "CA")
 WATCH_MAX = 4
 
+# Wikidata's name for the kind of player id this league uses; players' social media pages are looked up by it (pipeline/social.py).
+SOCIAL_IDS = "P3522"          # the NHL's own id
 # Where scores are read from when the NHL's feed cannot be: Yahoo's public scoreboard (pipeline/backup.py).
 BACKUP = "nhl"
 

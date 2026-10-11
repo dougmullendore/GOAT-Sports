@@ -34,7 +34,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import backup, cards, careers, config, espn, goat, odds, players, teams, web
+from . import backup, cards, careers, config, espn, goat, odds, players, social, teams, web
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -540,6 +540,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "goat": goat_info, "nr": shown, "words": words,
         "fbs": [[t["id"], t["name"], (fbs.get(t["id"]) or {}).get("conf") or "", (fbs.get(t["id"]) or {}).get("rec") or {}] for t in fbs_teams],
         "games": every})
+    for r in (rated, rated_fbs):
+        social.add(state, r["players"])          # links to a player's own pages, where they are known
     write_json(out / "players_fbs.json", rated_fbs)
     write_json(out / "teams_fbs.json", teams.compute(fbs_teams, every, boxes, rating, fbs, "conf" if has_poll_type else "div"))
     if has_poll:
@@ -609,6 +611,7 @@ def main(state_dir: str, out_dir: str) -> int:
                 stage(named("box scores"), lambda: update_boxes(st, now))
                 stage(named("rosters"), lambda: update_rosters(st, now))
                 stage(named("careers"), lambda: update_careers(st, now))
+                stage(named("social links"), lambda: social.update(st, now.date(), log))
             # the first league's pages are built first: they are the folder the others' pages go inside
             stage(named("site"), lambda: build_site(st, dest, now))
     finally:

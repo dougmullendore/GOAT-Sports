@@ -82,6 +82,8 @@ FETCH_RETRIES = 4
 USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
 
 
+# Wikidata's name for the kind of player id this league uses; players' social media pages are looked up by it (pipeline/social.py).
+SOCIAL_IDS = "P7262"          # ESPN's college football id
 # Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
 BACKUP = "ncaaf"
 
@@ -93,7 +95,7 @@ _NFL_API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
 NFL = {
     "LEAGUE": "nfl", "LEAGUE_NAME": "NFL", "ALL_NAME": "the NFL", "STATE_FOLDER": "nfl", "SITE_FOLDER": "nfl",
     "POLL_NAME": "NFL standings", "POLL_TYPE": None, "POLL_SIZE": 32, "MIN_TEAMS": 32, "OTHER_POLLS": {},
-    "SITE_API": _NFL_API, "BACKUP": "nfl",
+    "SITE_API": _NFL_API, "BACKUP": "nfl", "SOCIAL_IDS": "P3686",
     "SCOREBOARD": _NFL_API + "scoreboard?limit=100",
     "WEEK": _NFL_API + "scoreboard?dates={season}&seasontype={kind}&week={week}&limit=100",
     "RANKINGS": None,

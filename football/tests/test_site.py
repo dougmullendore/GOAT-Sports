@@ -341,3 +341,34 @@ def test_scores_come_from_the_backup_when_the_feed_is_down():
     finally:
         _web.get_bytes = real
 
+# ------------------------------------------------- social media pages on cards --
+def test_social_links_are_read_and_put_on_cards(tmp_path=None):
+    from pipeline import social
+    row = lambda pid, **names: {"id": {"value": pid}, **{k: {"value": v} for k, v in names.items()}}
+    doc = {"results": {"bindings": [row("101", instagram="some.player_1", twitter="SomePlayer"), row("101", instagram="second.account"),
+                                    row("102", tiktok="@dancer"), row("103", twitter="not a name"), row("", instagram="nobody")]}}
+    found = social.parse(doc)
+    assert found == {"101": {"instagram": "https://www.instagram.com/some.player_1", "twitter": "https://x.com/SomePlayer"},
+                     "102": {"tiktok": "https://www.tiktok.com/@dancer"}}
+    assert "wdt:P1234 ?id" in social.query("P1234") and "P2003" in social.query("P1234")
+    state = Path(tmp_path or tempfile.mkdtemp())
+    today = dt.date(2026, 10, 11)
+    old_ids, old_fetch = getattr(config, "SOCIAL_IDS", None), social.fetch
+    try:
+        config.SOCIAL_IDS = "P1234"
+        asked = []
+        social.fetch = lambda url: (asked.append(url), json.dumps(doc).encode())[1]
+        assert social.update(state, today, lambda m: None) == {"read": True, "players": 2}
+        assert social.update(state, today + dt.timedelta(days=3), lambda m: None)["read"] is False and len(asked) == 1     # read once a week
+        def down(url):
+            raise OSError("down")
+        social.fetch = down
+        again = social.update(state, today + dt.timedelta(days=8), lambda m: None)                  # cannot be read: the stored list stays
+        assert again == {"read": False, "players": 2, "failed": True}
+        players = [{"id": 101, "bio": {"ht": "6-2"}}, {"id": "102"}, {"id": "999", "bio": {}}]
+        assert social.add(state, players) == 2
+        assert players[0]["bio"]["ht"] == "6-2" and players[0]["bio"]["social"]["twitter"] == "https://x.com/SomePlayer"
+        assert players[1]["bio"]["social"] == {"tiktok": "https://www.tiktok.com/@dancer"} and "social" not in players[2]["bio"]
+    finally:
+        config.SOCIAL_IDS, social.fetch = old_ids, old_fetch
+

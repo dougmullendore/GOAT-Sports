@@ -31,7 +31,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import backup, careers, config, goat, lines, nhl, odds, players, playoffs, teams, web, xg
+from . import backup, careers, config, goat, lines, nhl, odds, players, playoffs, social, teams, web, xg
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -556,6 +556,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "game_page": config.GAME_PAGE, "player_page": config.PLAYER_PAGE, "logo": config.LOGO_URL,
         "live_feed": config.ESPN_SCOREBOARD, "live_seconds": config.LIVE_SECONDS, "espn_abbr": config.ESPN_ABBR,
         "odds_tested": config.ODDS_TESTED, "playoffs": {"sims": config.PLAYOFF_SIMS, "tested": config.PLAYOFF_TESTED}, "xg": {"scale": round(xg_scale, 4), "tested": xg.model().get("tested")}})
+    social.add(state, rated["players"])
     write_json(out / "players.json", rated)
     write_json(out / "teams.json", teams.compute(table, counted, boxes, rating, xg_scale))
     combos = team_lines(games, boxes, read_json(state / "lines.json", {}), people, table)
@@ -608,6 +609,7 @@ def main(state_dir: str, out_dir: str) -> int:
         stage("box scores", lambda: update_boxes(state, now))
         stage("people", lambda: update_people(state, now))
         stage("careers", lambda: update_careers(state, now))
+        stage("social links", lambda: social.update(state, now.date(), log))
         stage("lines", lambda: update_lines(state, now))
     stage("site", lambda: build_site(state, out, now))
     status["finished_utc"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
