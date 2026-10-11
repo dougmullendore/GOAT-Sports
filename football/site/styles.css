@@ -515,3 +515,13 @@ a.opp:hover .n { color: var(--teal); }
   .game .more { grid-area: more; text-align: left; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 2px 0 0; }
   .game .more > * { display: inline; }
 }
+
+/* ---- conference rankings (Rankings page, college) ---- */
+#conf-standings .tablewrap { margin-top: 14px; }
+#conf-standings .ptable.stand { width: 100%; }
+#conf-standings .ptable.stand thead th.l { font: 700 .8125rem/1 Barlow, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+#conf-standings .ptable.stand .tcell a { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+#conf-standings .ptable.stand td:first-child, #conf-standings .ptable.stand th:first-child { width: 2.5rem; }
+#conf-standings .ptable.stand .rec { width: 4.75rem; }
+#rank-sort select { margin-left: auto; }
+

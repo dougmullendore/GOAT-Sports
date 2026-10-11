@@ -220,15 +220,62 @@
     $("goat-note").textContent = "";
   }
 
+  // ---- conference rankings: every conference, strongest first, each with its own standings ----
+  // `rows` are [team, name, conference, { all: "5-1", conf: "2-0" }]. A conference's strength is its
+  // teams' average place in the GOAT ranking; inside it, teams go by their record in conference games.
+  var confPick = "";
+  function hasConferences(rows) { return (rows || []).some(function (r) { return r[2]; }); }
+  function drawConferences(rows) {
+    var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), place = {};
+    ((data.goat || {}).top || []).forEach(function (t) { place[t.id] = t.rank; });
+    function split(s) { var p = String(s || "").split("-"); return [+p[0] || 0, +p[1] || 0]; }
+    function share(s) { var p = split(s); return p[0] + p[1] ? p[0] / (p[0] + p[1]) : -1; }
+    function at(r) { return place[r[0]] || 999; }
+    var by = {}, names = [];
+    rows.forEach(function (r) { if (!r[2]) return; if (!by[r[2]]) { by[r[2]] = []; names.push(r[2]); } by[r[2]].push(r); });
+    function strength(c) { return by[c].reduce(function (sum, r) { return sum + at(r); }, 0) / by[c].length; }
+    names.sort(function (a, b) { return strength(a) - strength(b) || (a < b ? -1 : 1); });
+    if (confPick && !by[confPick]) confPick = "";
+    var pick = el("select", { "aria-label": "Conference", onchange: function () { confPick = pick.value; drawRanks(); } },
+      [el("option", { value: "", text: W("rankings.all_conferences") })].concat(names.slice().sort().map(function (c) { return el("option", { value: c, text: c, selected: c === confPick }); })));
+    bar.appendChild(pick);
+    var holder = el("div", { id: "conf-standings" });
+    names.forEach(function (c, i) {
+      if (confPick && c !== confPick) return;
+      var list = by[c].slice().sort(function (a, b) {
+        var x = a[3] || {}, y = b[3] || {};
+        return share(y.conf) - share(x.conf) || split(y.conf)[0] - split(x.conf)[0] || share(y.all) - share(x.all) || at(a) - at(b);
+      });
+      var thead = el("thead", {}, [el("tr", {}, [el("th", { scope: "col", text: "#", title: "Place in the conference" }), el("th", { scope: "col", "class": "l", text: (i + 1) + ". " + c, title: "Conference " + (i + 1) + " of " + names.length + " by its teams' average place in the GOAT ranking" }),
+        el("th", { scope: "col", "class": "rec", text: "Conf", title: "Record in conference games" }), el("th", { scope: "col", "class": "rec", text: "Overall", title: "Record in all games" })])]);
+      var body = el("tbody", {}, list.map(function (r, n) {
+        var rec = r[3] || {}, polled = rankOf(r[0]);
+        return el("tr", {}, [el("td", { text: String(n + 1) }),
+          el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [rankTag(polled && polled.rank, r[0]), logo(r[0]), teamA(r[0], r[1])])]),
+          el("td", { "class": "strong rec", text: rec.conf || "0-0" }), el("td", { "class": "rec", text: rec.all || "0-0" })]);
+      }));
+      holder.appendChild(el("div", { "class": "tablewrap", tabindex: "0", role: "region", "aria-label": c + " standings" }, [el("table", { "class": "ptable stand" }, [thead, body])]));
+    });
+    ol.hidden = true; head.hidden = true;
+    ol.parentNode.insertBefore(holder, ol);
+    $("rank-lede").textContent = W("rankings.lede_conf");
+    $("rank-note").textContent = ""; $("goat-note").textContent = ""; $("goat-out").textContent = "";
+  }
+
   function drawRanks() {
     if (PRO()) return drawStandings();
+    var was = $("conf-standings");
+    if (was) was.parentNode.removeChild(was);
+    $("ranks").hidden = false; $("ranks-head").hidden = false;
     var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, others = data.polls || {};
-    if (rankView !== "poll" && rankView !== "goat" && !others[rankView]) rankView = "poll";
+    var confs = hasConferences(data.fbs);
+    if (rankView !== "poll" && rankView !== "goat" && !(rankView === "conf" && confs) && !others[rankView]) rankView = "poll";
     var goatView = rankView === "goat" && G.top, other = others[rankView];
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = "";
-    [["poll", W("rankings.button_poll")]].concat(Object.keys(others).map(function (k) { return [k, others[k].label]; })).concat([["goat", W("rankings.button_goat")]]).forEach(function (o) {
+    [["poll", W("rankings.button_poll")]].concat(Object.keys(others).map(function (k) { return [k, others[k].label]; })).concat([["goat", W("rankings.button_goat")]]).concat(confs ? [["conf", W("rankings.button_conf")]] : []).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
+    if (rankView === "conf") return drawConferences(data.fbs);
     (goatView ? ["GOAT", "Team", "Record", "AP"] : [other ? "#" : "AP", "Team", "Record", "Change"]).forEach(function (h) { head.appendChild(el("span", { text: h })); });
     // the Beat and Lost to boxes belong to the GOAT ranking only; on a wide screen they sit in the row, under these two headings
     if (goatView) {

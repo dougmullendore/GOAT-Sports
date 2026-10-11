@@ -79,7 +79,7 @@ def parse_contest(c: dict) -> dict | None:
 
     def side(t):
         score = t.get("score")
-        return {"id": t["seoname"], "name": t.get("nameShort") or t["seoname"],
+        return {"id": t["seoname"], "name": t.get("nameShort") or t["seoname"], "conf": t.get("conferenceSeo") or "",
                 "sets": int(score) if state != "upcoming" and str(score).isdigit() else None}
 
     return {"id": int(c["contestId"]), "date": date,
@@ -87,6 +87,45 @@ def parse_contest(c: dict) -> dict | None:
             "state": state, "note": "" if state != "other" else (c.get("statusCodeDisplay") or c.get("finalMessage") or "").strip(),
             "round": (c.get("roundDescription") or "") if c.get("isChampionship") else "",
             "away": side(away), "home": side(home)}
+
+
+def conference_name(code: str) -> str:
+    code = (code or "").strip().lower()
+    if code in config.NO_CONFERENCE:
+        return ""
+    if code in config.CONFERENCES:
+        return config.CONFERENCES[code]
+    plain = code.strip("-").replace("-", " ")
+    return plain.upper() if len(plain) <= 4 else plain.title()
+
+
+def conference_table(teams: list[dict], games: list[dict]) -> list[list]:
+    """[team, name, conference, {"all": "12-3", "conf": "4-1"}] for each team: its conference
+    (the one the scoreboard gives it most often) and its record, overall and in matches
+    against teams of its own conference."""
+    seen, rec = {}, {}
+    for g in games:
+        for s in (g["away"], g["home"]):
+            if s.get("conf"):
+                seen.setdefault(s["id"], {}).setdefault(s["conf"], 0)
+                seen[s["id"]][s["conf"]] += 1
+    conf = {t: conference_name(max(c, key=c.get)) for t, c in seen.items()}
+    for g in games:
+        a, h = g["away"], g["home"]
+        if g["state"] != "final" or a.get("sets") is None or h.get("sets") is None or a["sets"] == h["sets"]:
+            continue
+        same = bool(conf.get(a["id"])) and conf.get(a["id"]) == conf.get(h["id"])
+        for mine, theirs in ((a, h), (h, a)):
+            r = rec.setdefault(mine["id"], [0, 0, 0, 0])
+            won = mine["sets"] > theirs["sets"]
+            r[0 if won else 1] += 1
+            if same:
+                r[2 if won else 3] += 1
+    out = []
+    for t in teams:
+        r = rec.get(t["id"], [0, 0, 0, 0])
+        out.append([t["id"], t["name"], conf.get(t["id"], ""), {"all": f"{r[0]}-{r[1]}", "conf": f"{r[2]}-{r[3]}"}])
+    return out
 
 
 # ----------------------------------------------------------------- stages --
@@ -528,7 +567,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "poll": {"name": config.POLL_NAME, "through": through, "teams": ranked, "polls_seen": sel["polls_seen"]},
         "game_page": config.GAME_PAGE, "live_feed": config.ESPN_SCOREBOARD, "live_seconds": config.LIVE_SECONDS,
         "logo": config.LOGO_URL, "odds_tested": config.ODDS_TESTED, "goat": goat_info, "nr": shown, "words": words,
-        "d1": [[t["id"], t["name"]] for t in d1], "games": every})
+        "d1": conference_table(d1, every), "games": every})
     write_json(out / "players.json", rated)
     write_json(out / "players_d1.json", rated_d1)
     write_json(out / "teams.json", teams.compute(ranked, listed, boxes, rating))

@@ -726,3 +726,23 @@ def test_scores_come_from_espn_when_the_ncaa_feed_is_down(tmp_path=None):
     finally:
         _web.get_days, _web.get_bytes = real_days, real_bytes
 
+
+# ---------------------------------------------------- conference rankings --
+def test_conferences_and_conference_records_come_from_the_scoreboard():
+    games = [g for g in (run.parse_contest(c) for c in contests()) if g]
+    etsu = next(g for g in games if g["home"]["id"] == "east-tenn-st")
+    assert etsu["home"]["conf"] == "socon" and etsu["away"]["conf"] == "socon"
+    assert run.conference_name("socon") == "SoCon" and run.conference_name("metro") == "MAAC" and run.conference_name("uac-") == "UAC"
+    assert run.conference_name("sec") == "SEC" and run.conference_name("some-new-league") == "Some New League" and run.conference_name("di-independent") == ""
+
+    def match(mid, away, home, a, h, state="final"):
+        return {"id": mid, "date": "2026-10-03", "start": None, "state": state,
+                "away": {"id": away[0], "name": away[0], "conf": away[1], "sets": a}, "home": {"id": home[0], "name": home[0], "conf": home[1], "sets": h}}
+    A, B, C, D = ("a", "big-ten"), ("b", "big-ten"), ("c", "sec"), ("d", "")
+    table = run.conference_table([{"id": t[0], "name": t[0].upper()} for t in (A, B, C, D)],
+                                 [match(1, A, B, 3, 1), match(2, A, C, 0, 3), match(3, B, A, 3, 2), match(4, A, B, None, None, "upcoming"), match(5, D, C, 3, 0)])
+    by = {r[0]: r for r in table}
+    assert by["a"] == ["a", "A", "Big Ten", {"all": "1-2", "conf": "1-1"}]
+    assert by["b"][3] == {"all": "1-1", "conf": "1-1"} and by["c"][2:] == ["SEC", {"all": "1-1", "conf": "0-0"}]
+    assert by["d"][2:] == ["", {"all": "1-0", "conf": "0-0"}]                 # no conference: left out of the conference rankings
+

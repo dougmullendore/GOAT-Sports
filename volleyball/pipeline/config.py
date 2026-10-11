@@ -90,3 +90,17 @@ BIGTEN_SCHEDULE = "https://bigten.org/services/responsive-calendar.ashx?start={s
 FETCH_THREADS = 6
 FETCH_RETRIES = 4
 USER_AGENT = "Mozilla/5.0 (compatible; volleyball-stats-site/2.0)"
+
+# The NCAA's short codes for the conferences, as the site writes them. A code not listed is
+# written in capitals if it is short ("sec" -> "SEC"), with capital initials otherwise.
+CONFERENCES = {
+    "acc": "ACC", "america-east": "America East", "aac": "American", "american": "American", "asun": "ASUN",
+    "atlantic-10": "Atlantic 10", "big-12": "Big 12", "big-east": "Big East", "big-sky": "Big Sky", "big-south": "Big South",
+    "big-ten": "Big Ten", "big-west": "Big West", "caa": "CAA", "cusa": "Conference USA", "horizon": "Horizon League",
+    "ivy-league": "Ivy League", "maac": "MAAC", "metro": "MAAC", "mac": "MAC", "meac": "MEAC", "mountain-west": "Mountain West",
+    "mvc": "Missouri Valley", "nec": "NEC", "ovc": "Ohio Valley", "pac-12": "Pac-12", "patriot": "Patriot League", "sec": "SEC",
+    "socon": "SoCon", "southland": "Southland", "summit-league": "Summit League", "sun-belt": "Sun Belt", "swac": "SWAC",
+    "uac-": "UAC", "uac": "UAC", "wac": "WAC", "wcc": "WCC",
+}
+NO_CONFERENCE = ("", "independent", "di-independent", "independents")      # these teams are left out of the conference rankings
+
