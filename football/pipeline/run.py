@@ -393,7 +393,6 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                 t["lost"].append([in_poll[other], sel["names"][other], losses, other])
     goat_top = [{"rank": i + 1, "id": t, "name": sel["names"].get(t, t), "poll": in_poll.get(t),
                  "factors": ranking["factors"][t]} for i, t in enumerate(ranking["order"])]
-    in_goat = {x["id"]: x["rank"] for x in goat_top[:config.POLL_SIZE]}
     results = goat.head_to_head(every)          # every result so far, not only the poll's
     for x in goat_top:
         won = sum(v[0] for (a, _), v in results.items() if a == x["id"])
@@ -403,12 +402,14 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
             x["record"] = (fbs.get(x["id"]) or {}).get("rec", {}).get("all") or x["record"]      # ties included
             del x["beat"], x["lost"]
             continue
-        for other in sorted(in_goat, key=in_goat.get):
-            wins, losses, _ = results.get((x["id"], other), (0, 0, []))
+        # every team it has played, best first by GOAT place; a team from outside FBS has no place and comes last
+        played = sorted((b for (a, b) in results if a == x["id"]), key=lambda b: (place.get(b) is None, place.get(b) or 0, sel["names"].get(b, b)))
+        for other in played:
+            wins, losses, _ = results[(x["id"], other)]
             if wins:
-                x["beat"].append([in_goat[other], sel["names"][other], wins, other])
+                x["beat"].append([place.get(other), sel["names"].get(other, other), wins, other])
             if losses:
-                x["lost"].append([in_goat[other], sel["names"][other], losses, other])
+                x["lost"].append([place.get(other), sel["names"].get(other, other), losses, other])
     goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS,
                  # among the poll's own 25 teams: results each order has the wrong way round
                  "poll_wrong": goat.contradictions(polled, every, set(polled)),

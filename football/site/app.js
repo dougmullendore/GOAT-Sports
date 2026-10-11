@@ -127,7 +127,7 @@
   function versus(t) {
     function box(label, rows, cls) {
       var opps = rows.map(function (r) {
-        return el("a", { "class": "opp", href: "#/team/" + encodeURIComponent(r[3]), title: r[1] }, [el("span", { "class": "n", text: String(r[0]) }), logo(r[3], "sm", r[1]), r[2] > 1 ? el("span", { "class": "x", text: "x" + r[2] }) : null]);
+        return el("a", { "class": "opp", href: "#/team/" + encodeURIComponent(r[3]), title: r[1] }, [r[0] == null ? null : el("span", { "class": "n", text: String(r[0]) }), logo(r[3], "sm", r[1]), r[2] > 1 ? el("span", { "class": "x", text: "x" + r[2] }) : null]);
       });
       return el("span", { "class": "vsbox " + cls }, [el("b", { text: label }),
         el("span", { "class": "opps" }, opps.length ? opps : [el("span", { "class": "nil", text: W("rankings.none_yet") })])]);
@@ -1023,7 +1023,8 @@
       rec.home || rec.away ? el("p", { "class": "tsub", text: ["Home " + (rec.home || "0-0"), "Away " + (rec.away || "0-0"), PRO() && rec.conf ? "In the conference " + rec.conf : "", rec.ranked ? "Against the AP top 25 " + rec.ranked : "", rec.streak ? "Streak " + rec.streak : ""].filter(Boolean).join(" · ") }) : null])]));
     if (!info && !t) { box.appendChild(el("p", { "class": "note", text: name + " is not an FBS team, so this site lists only its games against FBS teams." })); }
     box.appendChild(el("div", { "class": "nav filters" }, [scopeSwitch(function () { drawTeam(id); }, !t)]));
-    if (t && !PRO()) box.appendChild(el("div", { "class": "tvs" }, [versus(t)]));
+    // everyone it has beaten and lost to, with their GOAT places (the same lists as on the GOAT ranking)
+    if (goat && goat.beat && !PRO()) box.appendChild(el("div", { "class": "tvs" }, [versus(goat)]));
 
     // games: the latest results and what is next
     var next = mine.filter(function (g) { return g.state !== "final" && g.date >= today; }).slice(0, 5);
