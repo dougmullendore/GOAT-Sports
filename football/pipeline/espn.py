@@ -80,7 +80,7 @@ def parse_event(e: dict, kind: int, week: int) -> dict | None:
     def side(c):
         t = c["team"]
         score = c.get("score")
-        out = {"id": str(t["id"]), "name": t.get("location") or t.get("shortDisplayName") or t.get("displayName") or str(t["id"]),
+        out = {"id": str(t["id"]), "name": t.get(config.TEAM_NAME) or t.get("location") or t.get("shortDisplayName") or t.get("displayName") or str(t["id"]),
                "abbr": t.get("abbreviation") or "",
                "score": _int(score) if state in ("final", "live") and str(score or "").strip() != "" else None}
         lines = [_int(x.get("value")) for x in c.get("linescores") or []]
@@ -133,29 +133,52 @@ def parse_rankings(doc: dict) -> dict:
 
 
 # --------------------------------------------------------- the conferences --
+def _ordinal(n: int) -> str:
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
 def parse_standings(doc: dict) -> dict:
-    """{team id: {"name", "abbr", "nick", "conf", "rec": {...}}} for every FBS team."""
+    """Every team of the league (every FBS team; every NFL team):
+    {team id: {"name", "abbr", "nick", "conf", "group", "logo", "w", "l", "t", "pf", "pa", "seed",
+               "rec": {"all", "home", "away", "conf", "div", "ranked", "streak"}}}
+    `conf` is what the team is grouped under on the site: its conference in
+    college ("SEC"), its division in the NFL ("AFC East", with `group` "AFC")."""
     out = {}
 
-    def walk(node, conf):
+    def walk(node, top, conf):
         for e in (node.get("standings") or {}).get("entries") or []:
             t = e.get("team") or {}
             if not real_team(t):
                 continue
-            stats = {s.get("type") or s.get("name"): s for s in e.get("stats") or []}
+            stats = {}
+            for s in e.get("stats") or []:
+                stats.setdefault(s.get("type") or s.get("name"), s)
 
-            def rec(key):
-                return (stats.get(key) or {}).get("summary") or (stats.get(key) or {}).get("displayValue") or ""
+            def rec(*keys):
+                for key in keys:
+                    v = (stats.get(key) or {}).get("summary") or (stats.get(key) or {}).get("displayValue")
+                    if v:
+                        return v
+                return ""
 
-            out[str(t["id"])] = {"name": t.get("location") or t.get("displayName") or "", "abbr": t.get("abbreviation") or "",
-                                 "nick": t.get("name") or "", "conf": conf,
-                                 "rec": {"all": rec("total"), "home": rec("homerecord"), "away": rec("awayrecord"),
-                                         "conf": rec("vsconf"), "ranked": rec("vsaprankedteams"), "streak": rec("streak")}}
+            def num(key):
+                return _int((stats.get(key) or {}).get("value"))
+
+            out[str(t["id"])] = {"name": t.get(config.TEAM_NAME) or t.get("location") or t.get("displayName") or "",
+                                 "abbr": t.get("abbreviation") or "", "nick": t.get("name") or "", "place": t.get("location") or "",
+                                 "conf": conf, "group": top if conf != top else "",
+                                 "logo": next((x.get("href") for x in t.get("logos") or [] if x.get("href")), ""),
+                                 "w": num("wins"), "l": num("losses"), "t": num("ties"), "pf": num("pointsfor"), "pa": num("pointsagainst"),
+                                 "seed": num("playoffseed"),
+                                 "rec": {"all": rec("total"), "home": rec("homerecord", "home"), "away": rec("awayrecord", "road"),
+                                         "conf": rec("vsconf"), "div": rec("vsdiv"), "ranked": rec("vsaprankedteams"), "streak": rec("streak")}}
         for child in node.get("children") or []:
-            walk(child, conf)                 # a division ("Sun Belt - East") belongs to its conference
+            # College: a division ("Sun Belt - East") belongs to its conference. The NFL: a division is the group.
+            walk(child, top, (child.get("name") or conf) if config.LEAGUE == "nfl" else conf)
 
     for top in (doc or {}).get("children") or []:
-        walk(top, top.get("shortName") or top.get("abbreviation") or top.get("name") or "")
+        name = top.get("shortName") or top.get("abbreviation") or top.get("name") or ""
+        walk(top, name, name)
     return out
 
 
@@ -266,6 +289,8 @@ def parse_summary(doc: dict) -> dict:
                     part = None
                     if isinstance(key, tuple):
                         key, part = key
+                    if key not in at and name == "hur":
+                        key = "QBHits"                # the NFL counts quarterback hits where college counts hurries
                     raw = stats[at[key]] if key in at and at[key] < len(stats) else None
                     if part is not None:
                         row.append(_pair(raw)[part])
@@ -286,17 +311,24 @@ def parse_summary(doc: dict) -> dict:
 
 # ---------------------------------------------------------------- a roster --
 def parse_roster(doc: dict) -> dict:
-    """{player id: [name, number, position, height in inches, weight, class, hometown, has a photo]}"""
+    """{player id: [name, number, position, height in inches, weight, class, hometown, has a photo, college]}
+    For the NFL, "class" is how long he has been in the league ("Rookie", "4th season") and
+    the last item is the college he came from."""
     out = {}
     for group in (doc or {}).get("athletes") or []:
         for a in group.get("items") or []:
             if not str(a.get("id") or "").isdigit():
                 continue
+            exp, born = a.get("experience") or {}, a.get("birthPlace") or {}
+            year = exp.get("displayValue") or ""
+            if not year and config.LEAGUE == "nfl" and exp.get("years") is not None:
+                year = "Rookie" if not exp["years"] else f"{_ordinal(int(exp['years']) + 1)} season"
+            home = born.get("displayText") or ", ".join(x for x in (born.get("city"), born.get("state") or born.get("country")) if x)
             out[str(a["id"])] = [a.get("displayName") or a.get("fullName") or "", a.get("jersey") or "",
                                  ((a.get("position") or {}).get("abbreviation") or "").upper(),
                                  _int(a.get("height"), None) if a.get("height") else None, _int(a.get("weight"), None) if a.get("weight") else None,
-                                 ((a.get("experience") or {}).get("displayValue") or ""), ((a.get("birthPlace") or {}).get("displayText") or ""),
-                                 1 if (a.get("headshot") or {}).get("href") else 0]
+                                 year, home, 1 if (a.get("headshot") or {}).get("href") else 0,
+                                 ((a.get("college") or {}).get("name") or "") if config.LEAGUE == "nfl" else ""]
     return out
 
 

@@ -235,6 +235,8 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rosters: dict, l
                 bio["yr"] = listed[5]
             if listed[6]:
                 bio["home"] = listed[6]
+            if len(listed) > 8 and listed[8]:
+                bio["col"] = listed[8]
             if bio:
                 row["bio"] = bio
             if listed[7] and config.SHOW_PHOTOS:

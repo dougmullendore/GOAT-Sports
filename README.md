@@ -1,15 +1,16 @@
 # GOAT Sports
 
-Three sports sites in one: NHL hockey, women's volleyball (college, LOVB and
-MLV) and college football. One front page lists the day's games in every
-league, and a bar across the top of every page switches between the sports.
+Three sports sites in one: women's volleyball (college, LOVB and MLV), NHL
+hockey, and football (college and the NFL). One front page lists the day's
+games in every league, and a bar across the top of every page switches between
+the sports, in that order.
 
 You do not need to run anything. GitHub does it all on a schedule.
 
 - The site: `https://dougmullendore.github.io/GOAT-Sports/`
-- Hockey: `…/GOAT-Sports/hockey/`, volleyball: `…/GOAT-Sports/volleyball/`
-  (LOVB and MLV under `volleyball/lovb/` and `volleyball/mlv/`), football:
-  `…/GOAT-Sports/football/`
+- Volleyball: `…/GOAT-Sports/volleyball/` (LOVB and MLV under
+  `volleyball/lovb/` and `volleyball/mlv/`), hockey: `…/GOAT-Sports/hockey/`,
+  football: `…/GOAT-Sports/football/` (the NFL under `football/nfl/`)
 
 ## How it is put together
 
@@ -17,9 +18,9 @@ Each sport is a site of its own that happens to live in the same repository.
 
 | Folder | What it is |
 | --- | --- |
-| `hockey/` | GOAT Hockey: its code (`pipeline/`), its pages (`site/`), its tests and its own README |
-| `volleyball/` | GOAT Volleyball, the same way; its README covers college, LOVB and MLV |
-| `football/` | GOAT Football, the same way |
+| `volleyball/` | GOAT Volleyball: its code (`pipeline/`), its pages (`site/`), its tests and its own README, which covers college, LOVB and MLV |
+| `hockey/` | GOAT Hockey, the same way |
+| `football/` | GOAT Football, the same way; its README covers college and the NFL |
 | `home/` | The front page (`index.html`, `home.js`, `home.css`) and the bar's stylesheet (`sports.css`) |
 | `tools/assemble.py` | Joins the sports into one site: writes the bar into every page and builds the front page's list of games |
 | `tools/run_sport.sh` | Updates one sport; the workflow calls it once for each |
@@ -48,6 +49,7 @@ and about right; GitHub's scheduled runs are often a few minutes late.
 | Monday about 4pm and 9pm | Volleyball, to look for the new AVCA top 25 |
 | Sunday about 2:23pm and 6:23pm | Football, to look for the new AP top 25 |
 | Every 5 minutes, 11am to 2am, every month but July | Live scores and box scores: each sport looks whether one of its games is on, and stops within seconds when none is |
+| Every 5 minutes on Sunday mornings from about 8am, September to February | The same, for the NFL games played in Europe |
 | Whenever the code changes, or you press **Run workflow** on the **Actions** tab | Every sport's checks, then everything, straight away |
 
 A run updates the sports one after another. If one sport fails, the others are
@@ -60,9 +62,10 @@ not touch the volleyball or football pages.
 
 `home/` is the page at the top of the site. It reads `home.json`, which
 `tools/assemble.py` writes on every run from each sport's own data: the games
-from two days back to ten days ahead, for the NHL, college football (games with
-a team in the AP top 25), college volleyball (matches with a team in the AVCA
-top 25), LOVB and MLV. Scores there are as of the last update; each sport's own
+from two days back to ten days ahead, for college volleyball (matches with a
+team in the AVCA top 25), LOVB, MLV, the NHL, college football (games with a
+team in the AP top 25) and the NFL, in that order (`LEAGUES` in
+`tools/assemble.py`; the order of the bar is `SPORTS` there). Scores there are as of the last update; each sport's own
 pages have the live scores.
 
 ## Adding a sport
@@ -93,5 +96,5 @@ then choose branch `gh-pages` and folder `/ (root)`, and save.
   days. Each run switches the job back on.
 - Run a sport's tests with `cd <sport> && python tests/run_local.py`.
 
-Not affiliated with or endorsed by the NHL, the NCAA, ESPN, the AVCA, the
-Associated Press, LOVB, MLV or any team or school.
+Not affiliated with or endorsed by the NCAA, the AVCA, LOVB, MLV, the NHL, the
+NFL, ESPN, the Associated Press or any team or school.

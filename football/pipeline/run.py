@@ -18,6 +18,9 @@ Usage:  python -m pipeline.run <state_dir> <site_output_dir>
   careers.json      each player's seasons
   ratings.json      every team's rating, this season and last (behind the odds)
   status.json       what happened on the last run
+The NFL's copies of these (all but polls.json: it has no poll) are in the nfl/
+folder inside it, and its pages in the nfl/ folder of the site. One run does
+both leagues, college first; see config.use.
 """
 from __future__ import annotations
 
@@ -105,26 +108,41 @@ def update_rankings(state: Path) -> dict:
 def update_fbs(state: Path) -> dict:
     board = read_json(state / "scoreboard.json", {})
     found = espn.parse_standings(web.get_json(config.STANDINGS.format(season=board.get("season"))))
-    if len(found) < 100:
-        raise RuntimeError(f"the conference standings listed only {len(found)} teams; kept the list already stored")
+    if len(found) < config.MIN_TEAMS:
+        raise RuntimeError(f"the standings listed only {len(found)} teams; kept the list already stored")
     write_json(state / "fbs.json", found)
-    log(f"conferences: {len(found)} FBS teams in {len({t['conf'] for t in found.values()})} conferences")
+    log(f"standings: {len(found)} teams in {len({t['conf'] for t in found.values()})} conferences or divisions")
     return {"teams": len(found)}
 
 
-def selection(state: Path) -> dict:
+def league_order(fbs: dict) -> list[str]:
+    """A league with no poll: its teams from first to last by share of games won (a tie
+    counts half), then wins, then points scored less points allowed."""
+    def key(t):
+        x = fbs[t]
+        played = x.get("w", 0) + x.get("l", 0) + x.get("t", 0)
+        pct = (x.get("w", 0) + 0.5 * x.get("t", 0)) / played if played else 0.0
+        return (-pct, -x.get("w", 0), -(x.get("pf", 0) - x.get("pa", 0)), x["name"])
+    return sorted(fbs, key=key)
+
+
+def selection(state: Path, today: str | None = None) -> dict:
     """The newest AP poll joined to the schedule: the ranked teams, the FBS
-    teams and every game."""
+    teams and every game. For the NFL, which has no poll, every team is
+    "ranked", by its place in the league standings."""
     polls = read_json(state / "polls.json", {})
     board = read_json(state / "scoreboard.json", {})
     fbs = read_json(state / "fbs.json", {})
     main = polls.get(config.POLL_TYPE) or {}
-    if not main or not board.get("weeks"):
-        raise RuntimeError("nothing to build yet: " + ("no rankings" if not main else "no schedule"))
+    if config.POLL_TYPE and not main or not board.get("weeks") or not config.POLL_TYPE and not fbs:
+        raise RuntimeError("nothing to build yet: " + ("no schedule" if not board.get("weeks") else "no rankings" if config.POLL_TYPE else "no standings"))
     games = {}
     for key in sorted(board["weeks"], key=lambda k: [int(x) for x in k.split("-")]):
         for g in board["weeks"][key]:
             games[g["id"]] = g          # a game listed in two weeks is kept once
+    if not config.POLL_TYPE:
+        # only games between the league's own teams (no all-star game)
+        games = {i: g for i, g in games.items() if g["home"]["id"] in fbs and g["away"]["id"] in fbs}
     names = {}
     for g in games.values():
         for s in (g["away"], g["home"]):
@@ -138,12 +156,19 @@ def selection(state: Path) -> dict:
             for s in (g["away"], g["home"]):
                 count[s["id"]] = count.get(s["id"], 0) + 1
         fbs = {t: {"name": names[t], "conf": "", "rec": {}} for t, n in count.items() if n >= 6}
-    newest = main[max(main)]
-    # the poll counts results through the day before it came out
-    through = (dt.date.fromisoformat(newest["date"]) - dt.timedelta(days=1)).isoformat()
-    ranked = [{"rank": r["rank"], "id": r["id"], "name": names.get(r["id"], r["name"]), "record": r.get("record"),
-               "prev": r.get("prev"), "points": r.get("points"), "votes": r.get("votes") or 0}
-              for r in newest["rows"][:config.POLL_SIZE]]
+    if config.POLL_TYPE:
+        newest = main[max(main)]
+        poll_date, poll_week = newest["date"], newest.get("week") or ""
+        # the poll counts results through the day before it came out
+        through = (dt.date.fromisoformat(poll_date) - dt.timedelta(days=1)).isoformat()
+        ranked = [{"rank": r["rank"], "id": r["id"], "name": names.get(r["id"], r["name"]), "record": r.get("record"),
+                   "prev": r.get("prev"), "points": r.get("points"), "votes": r.get("votes") or 0}
+                  for r in newest["rows"][:config.POLL_SIZE]]
+    else:
+        poll_date, poll_week = None, ""
+        through = max((g["date"] for g in games.values() if g["state"] == "final"), default=today or "")
+        ranked = [{"rank": i + 1, "id": t, "name": names.get(t, fbs[t]["name"]), "record": fbs[t]["rec"].get("all") or "",
+                   "prev": None, "points": None, "votes": 0} for i, t in enumerate(league_order(fbs))]
     rank = {t["id"]: t["rank"] for t in ranked}
     every = sorted(games.values(), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
     for g in every:
@@ -159,7 +184,7 @@ def selection(state: Path) -> dict:
             p = seen[max(seen)]
             others[kind] = {"label": label, "name": p["name"], "date": p["date"],
                             "teams": [dict(r, name=names.get(r["id"], r["name"])) for r in p["rows"][:config.POLL_SIZE]]}
-    return {"through": through, "poll_date": newest["date"], "poll_week": newest.get("week") or "", "polls_seen": len(main),
+    return {"through": through, "poll_date": poll_date, "poll_week": poll_week, "polls_seen": len(main),
             "season": board["season"], "calendar": board.get("calendar") or [], "teams": ranked, "games": listed, "all_games": every,
             "fbs_teams": all_fbs, "fbs": fbs, "names": names, "others": others}
 
@@ -349,8 +374,11 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     # Each ranked team's results against the other ranked teams, best opponent first.
     # Only games the poll has seen (played before it came out), so this view changes
     # when the poll does; the GOAT view below is redone on every run.
-    results = goat.head_to_head([g for g in every if g["date"] <= through])
+    has_poll = bool(config.POLL_TYPE)
+    results = goat.head_to_head([g for g in every if g["date"] <= through]) if has_poll else {}
     for t in ranked:
+        if not has_poll:
+            break                               # a league table has no Beat and Lost to boxes
         t["beat"], t["lost"] = [], []
         for other in sorted(in_poll, key=in_poll.get):
             wins, losses, _ = results.get((t["id"], other), (0, 0, []))
@@ -366,6 +394,10 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         won = sum(v[0] for (a, _), v in results.items() if a == x["id"])
         lost = sum(v[1] for (a, _), v in results.items() if a == x["id"])
         x["record"], x["beat"], x["lost"] = f"{won}-{lost}", [], []
+        if not has_poll:
+            x["record"] = (fbs.get(x["id"]) or {}).get("rec", {}).get("all") or x["record"]      # ties included
+            del x["beat"], x["lost"]
+            continue
         for other in sorted(in_goat, key=in_goat.get):
             wins, losses, _ = results.get((x["id"], other), (0, 0, []))
             if wins:
@@ -395,23 +427,34 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         stamp = hashlib.sha256((out / name).read_bytes()).hexdigest()[:10]
         assert f'"{name}"' in page, f"index.html no longer refers to {name}"
         page = page.replace(f'"{name}"', f'"{name}?v={stamp}"')
+    if config.LEAGUE != "college":
+        # the league's own colour and icon for browser tabs and phone home screens
+        page = page.replace('content="#8a4b1c"', 'content="#013369"')
+        (out / "manifest.json").write_text((out / "manifest.json").read_text().replace("#8a4b1c", "#013369").replace("GOAT Football", "GOAT Football: NFL"))
+        for name in ("icon.svg", "icon-32.png", "icon-180.png", "icon-192.png", "icon-512.png"):
+            shutil.copy(out / name.replace("icon", f"icon-{config.LEAGUE}", 1), out / name)
     (out / "index.html").write_text(page)
     # Players and team stats twice: against the ranked 25 only, and against all of
     # FBS. The site's "Top 25 / All FBS" switch chooses which file it reads.
     boxes = read_json(state / "box.json", {})
     rosters = read_json(state / "rosters.json", {})
-    rated = players.compute(ranked, listed, boxes, rosters)
     lines = {}                                  # every FBS player's games, for his card
     rated_fbs = players.compute(fbs_teams, every, boxes, rosters, lines)
+    # with no poll every team is "ranked", so there is one set of players and of team stats, not two
+    rated = players.compute(ranked, listed, boxes, rosters) if has_poll else rated_fbs
     for r, games in ((rated, listed), (rated_fbs, every)):
         r["through"] = max((g["date"] for g in games if g["state"] == "final"), default=None)
     with_box = game_files(out, every, boxes, rated_fbs)
-    extras = cards.build(rated_fbs, lines, careers.by_player(read_json(state / "careers.json", {})), set(in_poll))
+    extras = cards.build(rated_fbs, lines, careers.by_player(read_json(state / "careers.json", {})), set(in_poll) if has_poll else set())
     (out / "cards").mkdir(parents=True, exist_ok=True)
     for team, doc in extras.items():
         write_json(out / "cards" / f"{team}.json", doc)
     write_json(out / "data.json", {
-        "site": config.SITE_NAME, "updated": now.isoformat(timespec="seconds"), "season": season,
+        "site": config.SITE_NAME, "league": config.SITE_FOLDER, "league_name": config.LEAGUE_NAME, "all_name": config.ALL_NAME,
+        "pro": not has_poll, "updated": now.isoformat(timespec="seconds"), "season": season,
+        "logos": {t: x["logo"] for t, x in fbs.items() if x.get("logo")} if not config.LOGO_URL else None,
+        "standings": [{"id": t["id"], "name": t["name"], "rank": t["rank"], **{k: fbs[t["id"]].get(k) for k in ("conf", "group", "w", "l", "t", "pf", "pa", "seed", "rec", "place")}}
+                      for t in ranked] if not has_poll else None,
         "poll": {"name": config.POLL_NAME, "through": through, "date": sel["poll_date"], "week": sel["poll_week"], "teams": ranked,
                  "polls_seen": sel["polls_seen"]},
         "polls": sel["others"], "calendar": sel["calendar"],
@@ -419,13 +462,18 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "logo": config.LOGO_URL, "photo": config.PHOTO_URL if config.SHOW_PHOTOS else "", "odds_tested": config.ODDS_TESTED, "goat": goat_info, "nr": shown, "words": words,
         "fbs": [[t["id"], t["name"], (fbs.get(t["id"]) or {}).get("conf") or "", (fbs.get(t["id"]) or {}).get("rec") or {}] for t in fbs_teams],
         "games": every})
-    write_json(out / "players.json", rated)
     write_json(out / "players_fbs.json", rated_fbs)
-    write_json(out / "teams.json", teams.compute(ranked, listed, boxes, rating, fbs))
-    write_json(out / "teams_fbs.json", teams.compute(fbs_teams, every, boxes, rating, fbs))
+    write_json(out / "teams_fbs.json", teams.compute(fbs_teams, every, boxes, rating, fbs, "conf" if has_poll else "div"))
+    if has_poll:
+        write_json(out / "players.json", rated)
+        write_json(out / "teams.json", teams.compute(ranked, listed, boxes, rating, fbs))
     (out / ".nojekyll").write_text("")
-    log(f"site: {config.POLL_NAME} of {sel['poll_date']}, {len(listed)} games of the {len(ranked)} ranked teams and {len(every)} in all "
-        f"({len(fbs_teams)} FBS teams); {rated['regulars']} top-25 regulars rated, {rated_fbs['regulars']} in FBS")
+    if has_poll:
+        log(f"site: {config.POLL_NAME} of {sel['poll_date']}, {len(listed)} games of the {len(ranked)} ranked teams and {len(every)} in all "
+            f"({len(fbs_teams)} FBS teams); {rated['regulars']} top-25 regulars rated, {rated_fbs['regulars']} in FBS")
+    else:
+        log(f"site ({config.LEAGUE_NAME}): {len(every)} games, {sum(1 for g in every if g['state'] == 'final')} played, {len(fbs_teams)} teams; "
+            f"{len(rated_fbs['players'])} players, {rated_fbs['regulars']} regulars rated")
     return {"poll_date": sel["poll_date"], "games_listed": len(listed), "fbs_teams": len(fbs_teams), "games": len(every),
             "played": sum(1 for g in every if g["state"] == "final"), "game_pages": with_box,
             "players": len(rated["players"]), "regulars": rated["regulars"],
@@ -453,23 +501,45 @@ def main(state_dir: str, out_dir: str) -> int:
             status["stages"][name] = {"ok": False, "error": repr(e)}
         write_json(state / "status.json", status, indent=1)
 
-    if live:
-        # a game-night run: only the games under way or just finished
-        todo = live_now(state, now)
-        if not todo:
-            log("game-night run: no game is on right now; nothing to do")
-            return 0
-        stage("scores now", lambda: update_schedule(state, todo))
-        stage("box scores now", lambda: update_boxes(state, now, live_only=True))
-    elif not offline:
-        # a failed look at any of these leaves the stored copy in use
-        stage("schedule", lambda: update_schedule(state))
-        stage("rankings", lambda: update_rankings(state))
-        stage("conferences", lambda: update_fbs(state))
-        stage("box scores", lambda: update_boxes(state, now))
-        stage("rosters", lambda: update_rosters(state, now))
-        stage("careers", lambda: update_careers(state, now))
-    stage("site", lambda: build_site(state, out, now))
+    def folders(league):
+        config.use(league)
+        return (state / config.STATE_FOLDER if config.STATE_FOLDER else state), (out / config.SITE_FOLDER if config.SITE_FOLDER else out)
+
+    def named(name):         # the NFL's stages are listed under their own names
+        return name if config.LEAGUE == "college" else f"{config.LEAGUE_NAME} {name}"
+
+    try:
+        if live:
+            # a game-night run: only the games under way or just finished, in either league
+            on = {}
+            for league in config.LEAGUES:
+                st, _ = folders(league)
+                on[league] = live_now(st, now)
+            if not any(on.values()):
+                log("game-night run: no game is on right now; nothing to do")
+                return 0
+        for league in config.LEAGUES:
+            st, dest = folders(league)
+            st.mkdir(parents=True, exist_ok=True)
+            if live and on[league]:
+                todo = on[league]
+                stage(named("scores now"), lambda: update_schedule(st, todo))
+                if not config.POLL_TYPE:
+                    stage(named("standings"), lambda: update_fbs(st))     # a team's number is its place in the standings
+                stage(named("box scores now"), lambda: update_boxes(st, now, live_only=True))
+            elif not live and not offline:
+                # a failed look at any of these leaves the stored copy in use
+                stage(named("schedule"), lambda: update_schedule(st))
+                if config.POLL_TYPE:
+                    stage(named("rankings"), lambda: update_rankings(st))
+                stage(named("conferences" if config.POLL_TYPE else "standings"), lambda: update_fbs(st))
+                stage(named("box scores"), lambda: update_boxes(st, now))
+                stage(named("rosters"), lambda: update_rosters(st, now))
+                stage(named("careers"), lambda: update_careers(st, now))
+            # the college pages are built first: they are the folder the NFL's pages go inside
+            stage(named("site"), lambda: build_site(st, dest, now))
+    finally:
+        config.use("college")
     status["finished_utc"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     status["ok"] = all(s["ok"] for s in status["stages"].values())
     write_json(state / "status.json", status, indent=1)

@@ -35,7 +35,7 @@ def main() -> int:
         assert [g["id"] for g in by["nhl"]["games"]] == [1]                    # only the days around today
         assert [g["id"] for g in by["wvb"]["games"]] == [3]                    # college: only games with a ranked team
         assert by["wvb"]["games"][0]["away"] == ["a", "Away", 5, 1] and by["wvb"]["poll"] == "AVCA coaches poll"
-        assert not by["cfb"]["ready"] and [s["ready"] for s in home["sports"]] == [True, True, False]
+        assert not by["cfb"]["ready"] and [s["key"] for s in home["sports"] if s["ready"]] == ["volleyball", "hockey"]
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and 'href="../volleyball/"' in hockey and "football" not in hockey
         assert hockey.index("Skip to the games") < hockey.index(assemble.MARK)
@@ -49,7 +49,9 @@ def main() -> int:
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and hockey.count("sports.css") == 1 and 'href="../football/"' in hockey
         assert 'aria-current="page">Football' in (site / "football" / "index.html").read_text()
-        assert [g["id"] for g in json.loads((site / "home.json").read_text())["leagues"][1]["games"]] == [9]
+        later = {l["key"]: l for l in json.loads((site / "home.json").read_text())["leagues"]}
+        assert [g["id"] for g in later["cfb"]["games"]] == [9] and not later["nfl"]["ready"]
+        assert [l["sport"] for l in later.values()] == ["volleyball"] * 3 + ["hockey"] + ["football"] * 2
         assert (site / "volleyball" / "data.json").exists()
     print("PASS tools.assemble")
     return 0

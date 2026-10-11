@@ -7,5 +7,12 @@
  "https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401864519": "dcbaffc4d9100293",
  "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/251/roster": "d00532c86c7d7ff5",
  "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/201/roster": "99b1c613902f2641",
- "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/5160961/stats": "f9673f1786b034bf"
+ "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/5160961/stats": "f9673f1786b034bf",
+ "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?limit=100": "ce4cef80857ff49e",
+ "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=2026&seasontype=2&week=5&limit=100": "060fe7dcad0552c2",
+ "https://site.api.espn.com/apis/v2/sports/football/nfl/standings?season=2026&level=3": "7c05fb8a3503ec43",
+ "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401872980": "ab45663ce464dd42",
+ "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/6/roster": "468e1320d6543f19",
+ "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/27/roster": "ec2677c03675599e",
+ "https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/3129446/stats": "d7bb10b137a1fa3d"
 }

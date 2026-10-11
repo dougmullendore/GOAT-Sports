@@ -1,4 +1,5 @@
-/* GOAT Football: one page, no libraries. Lists the games of the 25 ranked teams, or of all of FBS. */
+/* GOAT Football: one page, no libraries. Lists the games of the 25 ranked teams, or of all of FBS;
+   the same page, in the site's nfl/ folder, lists the NFL's. */
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
@@ -27,8 +28,9 @@
   // A team's logo, shown from ESPN. With `name`, the logo stands in for the team's name,
   // so it carries the name for screen readers and on hover.
   function logo(teamId, cls, name) {
-    if (!data.logo || !teamId) return name ? el("span", { text: name }) : null;
-    var img = el("img", { src: data.logo.replace("{team}", encodeURIComponent(teamId)), alt: name || "", title: name || null, loading: "lazy", decoding: "async" });
+    var src = !teamId ? null : data.logos && data.logos[teamId] ? data.logos[teamId] : data.logo ? data.logo.replace("{team}", encodeURIComponent(teamId)) : null;
+    if (!src) return name ? el("span", { text: name }) : null;
+    var img = el("img", { src: src, alt: name || "", title: name || null, loading: "lazy", decoding: "async" });
     var pic = el("span", { "class": "logo " + (cls || "") }, [img]);
     img.addEventListener("error", function () {       // no logo for this school: show the name instead, or leave the space
       if (name) { pic.className = ""; pic.textContent = name; } else pic.style.visibility = "hidden";
@@ -54,19 +56,26 @@
   }
   // The site's wording, from words.txt (see the top of that file). {name} is filled from `vars`.
   function W(key, vars) {
-    var s = ((data && data.words) || {})[key];
+    var ws = (data && data.words) || {}, s = PRO() && ws["nfl." + key.replace(".", "_")] != null ? ws["nfl." + key.replace(".", "_")] : ws[key];
     if (s == null) return "";
     return s.replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? String(vars[k]) : m; });
   }
+  // The NFL's copy of the site (nfl/): there is no poll, so every team is "ranked", by the league
+  // standings, and there is no Top 25 switch.
+  function PRO() { return !!(data && data.pro); }
+  function ALL() { return (data && data.all_name) || "FBS"; }          // "FBS", or "the NFL"
   // ---- Top 25 or all of FBS: one switch, remembered, used by every page that has it ----
   var scope = "top25";
   try { if (localStorage.getItem("fb-scope") === "fbs") scope = "fbs"; } catch (e) {}
-  function isAll() { return scope === "fbs"; }
+  function isAll() { return PRO() || scope === "fbs"; }
   // who a player is measured against, in words
-  function POOL() { return isAll() ? "an average FBS regular" : "an average top-25 regular"; }
+  function POOL() { return PRO() ? "an average NFL regular" : isAll() ? "an average FBS regular" : "an average top-25 regular"; }
   function rankOf(id) { for (var i = 0; i < data.poll.teams.length; i++) if (data.poll.teams[i].id === id) return data.poll.teams[i]; return null; }
+  // the ending of a wording line's name: the "All FBS" wording has its own lines; the NFL has one wording
+  function FBS() { return !PRO() && isAll() ? "_fbs" : ""; }
   function setScope(s) { scope = s; try { localStorage.setItem("fb-scope", s); } catch (e) {} }
   function scopeSwitch(redraw, lockAll) {
+    if (PRO()) return el("span", { "class": "noscope" });
     return el("div", { "class": "scope", role: "group", "aria-label": "Which teams" }, [["top25", W("scope.top25")], ["fbs", W("scope.fbs")]].map(function (o) {
       var on = lockAll ? o[0] === "fbs" : scope === o[0];      // a team outside the top 25 is always shown against all of FBS
       return el("button", { type: "button", "aria-pressed": String(on), disabled: lockAll && o[0] === "top25",
@@ -75,8 +84,8 @@
   }
   function setHead(page, key) {      // a page's title and intro for the current switch
     var sec = $("page-" + page), h = sec && sec.querySelector("h1"), l = sec && sec.querySelector(".lede");
-    if (h) h.textContent = W(key + ".title" + (isAll() ? "_fbs" : ""));
-    if (l && W(key + ".lede" + (isAll() ? "_fbs" : ""))) l.textContent = W(key + ".lede" + (isAll() ? "_fbs" : ""), { poll: data.poll.name });
+    if (h) h.textContent = W(key + ".title" + FBS());
+    if (l && W(key + ".lede" + FBS())) l.textContent = W(key + ".lede" + FBS(), { poll: data.poll.name });
   }
   // A team's number: its AP rank, or for an FBS team outside the poll its place
   // from 26 on in the GOAT ranking (data.nr), so no two teams share a number.
@@ -84,8 +93,8 @@
   function rankTag(rank, id) {
     var n = shownRank(id, rank);
     return el("span", { "class": "rk" + (n ? "" : " nr"), text: n ? String(n) : "NR",
-      "aria-label": rank ? "ranked " + rank : n ? "unranked, " + n + " by the GOAT ranking" : "not an FBS team",
-      title: !rank && n ? "Not in the AP poll; " + n + " by the GOAT ranking" : !n ? "Not an FBS team" : null });
+      "aria-label": PRO() ? (n ? ordinal(n) + " in the standings" : null) : rank ? "ranked " + rank : n ? "unranked, " + n + " by the GOAT ranking" : "not an FBS team",
+      title: PRO() ? (n ? ordinal(n) + " in the NFL standings" : null) : !rank && n ? "Not in the AP poll; " + n + " by the GOAT ranking" : !n ? "Not an FBS team" : null });
   }
 
   // ---- the rankings page ----
@@ -103,7 +112,67 @@
     }
     return el("span", { "class": "vs" }, [box(W("rankings.beat"), t.beat || [], "beat"), box(W("rankings.lost_to"), t.lost || [], "lostto")]);
   }
+  // ---- the NFL's standings, in place of a poll: by division, by conference, the whole league, or the GOAT ranking ----
+  var standView = "div";
+  function drawStandings() {
+    var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {};
+    ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = ""; ol.hidden = true; head.hidden = true;
+    $("goat-out").textContent = "";
+    var old = $("pro-standings");
+    if (old) old.parentNode.removeChild(old);
+    [["div", "Division"], ["conf", "Conference"], ["league", "League"], ["goat", W("rankings.button_goat")]].forEach(function (o) {
+      bar.appendChild(el("button", { type: "button", "aria-pressed": String(standView === o[0]), text: o[1], onclick: function () { standView = o[0]; drawStandings(); } }));
+    });
+    var rows = data.standings || [], holder = el("div", { id: "pro-standings" });
+    function pctOf(t) { var n = t.w + t.l + t.t; return n ? ((t.w + t.t / 2) / n).toFixed(3).replace(/^0/, "") : ".000"; }
+    function diff(t) { var d = t.pf - t.pa; return (d > 0 ? "+" : d < 0 ? "−" : "") + Math.abs(d); }
+    var cols = [["W", "Won"], ["L", "Lost"], ["T", "Tied"], ["Pct", "Share of games won; a tie counts as half a win"], ["PF", "Points for"], ["PA", "Points against"], ["Diff", "Points for less points against"],
+      ["Home", ""], ["Away", ""], ["Div", "Record against its own division"], ["Conf", "Record against its own conference"], ["Streak", ""]];
+    function table(title, list, numbered, cut) {
+      var thead = el("thead", {}, [el("tr", {}, [el("th", { scope: "col", text: "#", title: numbered[1] }), el("th", { scope: "col", "class": "l", text: title })]
+        .concat(cols.map(function (c) { return el("th", { scope: "col", title: c[1] || null, text: c[0] }); })))]);
+      var body = el("tbody", {}, list.map(function (t, i) {
+        var r = t.rec || {};
+        return el("tr", { "class": cut && i === cut ? "cut" : "" }, [el("td", { text: String(numbered[0](t, i)) }),
+          el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, (t.place ? t.place + " " : "") + t.name)])]),
+          el("td", { "class": "strong", text: String(t.w) }), el("td", { text: String(t.l) }), el("td", { text: String(t.t) }), el("td", { text: pctOf(t) }),
+          el("td", { text: String(t.pf) }), el("td", { text: String(t.pa) }), el("td", { text: diff(t) }),
+          el("td", { text: r.home || "" }), el("td", { text: r.away || "" }), el("td", { text: r.div || "" }), el("td", { text: r.conf || "" }), el("td", { text: r.streak || "" })]);
+      }));
+      return el("div", { "class": "tablewrap standwrap", tabindex: "0", role: "region", "aria-label": title + " standings, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [thead, body])]);
+    }
+    function group(key) { var seen = [], by = {}; rows.forEach(function (t) { if (!by[t[key]]) { by[t[key]] = []; seen.push(t[key]); } by[t[key]].push(t); }); return seen.sort().map(function (k) { return [k, by[k]]; }); }
+    if (standView === "goat" && G.top) {
+      var thead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", ""], ["Standings", "", "Place in the league standings"],
+        ["Schedule", "", "How hard its schedule has been: 100 is the hardest in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+      var body = el("tbody", {}, G.top.map(function (t) {
+        var st = rows.filter(function (x) { return x.id === t.id; })[0] || {};
+        return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
+          el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, (st.place ? st.place + " " : "") + t.name)])]),
+          el("td", { text: t.record || "" }), el("td", { text: t.poll == null ? "–" : String(t.poll) }), el("td", { text: String(Math.round(100 * t.factors[0])) })]);
+      }));
+      holder.appendChild(el("div", { "class": "tablewrap standwrap", tabindex: "0", role: "region", "aria-label": "GOAT ranking, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [thead, body])]));
+    } else if (standView === "league") {
+      holder.appendChild(table("NFL", rows, [function (t) { return t.rank; }, "Place in the league"]));
+    } else if (standView === "conf") {
+      group("group").forEach(function (g) {
+        var list = g[1].slice().sort(function (a, b) { return (a.seed || 99) - (b.seed || 99) || a.rank - b.rank; });
+        holder.appendChild(table(g[0], list, [function (t, i) { return t.seed || i + 1; }, "Playoff seed as things stand: the four division leaders, then the best of the rest"], 7));
+      });
+    } else {
+      group("conf").forEach(function (g) {
+        var list = g[1].slice().sort(function (a, b) { return a.rank - b.rank; });
+        holder.appendChild(table(g[0], list, [function (t, i) { return i + 1; }, "Place in the division"]));
+      });
+    }
+    ol.parentNode.insertBefore(holder, ol);
+    $("rank-lede").textContent = standView === "goat" ? W("rankings.lede_goat") : W("rankings.lede", { poll: data.poll.name, date: data.poll.through ? day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "" });
+    $("rank-note").textContent = standView === "goat" ? W("rankings.note_goat") : standView === "conf" ? W("rankings.note_conf") : W("rankings.note");
+    $("goat-note").textContent = "";
+  }
+
   function drawRanks() {
+    if (PRO()) return drawStandings();
     var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, others = data.polls || {};
     if (rankView !== "poll" && rankView !== "goat" && !others[rankView]) rankView = "poll";
     var goatView = rankView === "goat" && G.top, other = others[rankView];
@@ -191,7 +260,7 @@
     else if (!note) more.push(el("a", { href: "#/game/" + g.id, text: "Preview" }));
     if (dated === true && !live) when = short(g.date) + (when === "Time not set" ? "" : " · " + when);
     var unplayed = !fin && !live && !note;
-    return el("li", { "class": "game" + (g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null }, [
+    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null }, [
       live ? el("span", { "class": "when live" }, [liveTag(), " " + (when === "In progress" ? "" : when)]) : el("span", { "class": "when", text: when }),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more" }, more)]);
@@ -283,7 +352,7 @@
     holder.appendChild(el("div", { "class": "hahead", "aria-hidden": "true" }, [el("span"), el("span", { "class": "ha away", text: W("games.away") }),
       el("span"), el("span", { "class": "ha home", text: W("games.home") }), el("span")]));
     var pick = el("select", { id: "f-team", "aria-label": "Show one team", onchange: function () { state.team = pick.value || null; draw(); } },
-      [el("option", { value: "", text: isAll() ? W("games.all_teams_fbs") : W("games.all_teams") })].concat(teamsHere.map(function (x) {
+      [el("option", { value: "", text: W("games.all_teams" + FBS()) })].concat(teamsHere.map(function (x) {
         return el("option", { value: x.id, text: (x.rank ? x.rank + ". " : "") + x.name, selected: x.id === state.team });
       })));
     nav.appendChild(pick);
@@ -321,7 +390,8 @@
     nav.appendChild(el("button", { type: "button", text: W("games.later"), disabled: at === weeks.length - 1, onclick: function () { state.week = weeks[at + 1].key; draw(); } }));
     listInto(holder, games);
     var both = games.filter(function (g) { return g.away.rank && g.home.rank; }).length;
-    holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " this week" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
+    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " this week. The visiting team is on the left, and the channel is on the right. Numbers are places in the league standings. Choose a team to see its whole season." }));
+    else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " this week" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
       ". The visiting team is on the left, and the channel is on the right. Numbers are this week's AP rankings, also for earlier weeks; an FBS team outside the poll is numbered from 26 by the GOAT ranking. Choose a team to see its whole season." }));
     if (games.some(function (g) { return g.p != null && g.state !== "final"; })) holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() }));
   }
@@ -382,8 +452,8 @@
     return bits.join("; ");
   }
   var rosters = {};
-  function loadRoster(which) {     // players rated against the top 25, or against all of FBS
-    which = which || scope;
+  function loadRoster(which) {     // players rated against the top 25, or against all of FBS (the NFL has the one list)
+    which = PRO() ? "fbs" : which || scope;
     if (rosters[which]) { roster = rosters[which]; return Promise.resolve(roster); }
     return fetch(which === "fbs" ? "players_fbs.json" : "players.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (d) {
@@ -446,7 +516,7 @@
         pstate.pos = v;
         if (!pcols(v).some(function (c) { return c[0] === pstate.sort; })) { pstate.sort = "impact_g"; pstate.dir = -1; }
       }));
-      bar.appendChild(pick("Team", pstate.team, [["", isAll() ? W("games.all_teams_fbs") : W("games.all_teams")]].concat(roster.teams.slice().sort(function (a, b) { return (shownRank(a.id, a.rank) || 9999) - (shownRank(b.id, b.rank) || 9999) || a.name.localeCompare(b.name); })
+      bar.appendChild(pick("Team", pstate.team, [["", W("games.all_teams" + FBS())]].concat(roster.teams.slice().sort(function (a, b) { return (shownRank(a.id, a.rank) || 9999) - (shownRank(b.id, b.rank) || 9999) || a.name.localeCompare(b.name); })
         .map(function (t) { var n = shownRank(t.id, t.rank); return [t.id, (n ? n + ". " : "") + t.name]; })), function (v) { pstate.team = v; }));
       var q = el("input", { type: "search", placeholder: "Find a player", "aria-label": "Find a player", value: pstate.q, oninput: function () { pstate.q = q.value; pstate.limit = 200; table(); } });
       bar.appendChild(q);
@@ -487,7 +557,7 @@
           onclick: function () { pstate.limit = limit + 400; table(); } })]));
         holder.appendChild(el("p", { "class": "note", text: total.toLocaleString("en-US") + " players" + (roster.through ? ", through games of " + short(roster.through) : "") +
           ". A regular has played in at least " + Math.round(100 * roster.weights.regular_games) + "% of his team's games and carries a regular's load at his position (ten passes a game for a quarterback, say); only regulars are ranked. Choose a position for its own columns, a name for his card, or a column heading to sort." }));
-        holder.appendChild(el("p", { "class": "note", text: W(isAll() ? "players.note_fbs" : "players.note") }));
+        holder.appendChild(el("p", { "class": "note", text: W("players.note" + FBS()) }));
       }
       table();
     }).catch(function () {
@@ -504,6 +574,7 @@
     if (b.wt) bits.push(b.wt + " lb");
     if (b.yr) bits.push(b.yr);
     if (b.home) bits.push(b.home);
+    if (b.col) bits.push(b.col);
     return bits.length ? el("p", { "class": "pc-bio", text: bits.join(" · ") }) : null;
   }
 
@@ -617,7 +688,7 @@
           face(p, "big"),
           el("div", { "class": "pc-id" }, [
             el("h1", { text: p.name }),
-            el("p", { "class": "pc-team" }, [logo(p.team_id), teamA(p.team_id, p.team), p.team_rank ? el("span", { text: " (ranked " + p.team_rank + ")" }) : null]),
+            el("p", { "class": "pc-team" }, [logo(p.team_id), teamA(p.team_id, p.team), p.team_rank ? el("span", { text: PRO() ? " (" + ordinal(p.team_rank) + " in the standings)" : " (ranked " + p.team_rank + ")" }) : null]),
             el("p", { text: (p.num != null ? "No. " + p.num + ", " : "") + POS_ONE[p.pos] }),
             bioLine(p.bio),
             el("p", { "class": "pc-sub", text: p.gp + (p.gp === 1 ? " game" : " games") + (statLine(p) ? ": " + statLine(p) : "") })]),
@@ -650,7 +721,7 @@
         var extra = el("div", { "class": "pc-extra" }, [el("p", { "class": "empty", text: "Loading his games and career…" })]);
         art.appendChild(extra);
         cardExtras(extra, p);
-        art.appendChild(el("p", { "class": "note", text: "The number beside each bar is his percentile among " + many + " who play regularly " + (scope === "fbs" || !ranked ? "in FBS" : "for a top-25 team") + " and do that job: 90 means better than 90% of them. The tick marks the middle." +
+        art.appendChild(el("p", { "class": "note", text: "The number beside each bar is his percentile among " + many + " who play regularly " + (PRO() ? "in the NFL" : scope === "fbs" || !ranked ? "in FBS" : "for a top-25 team") + " and do that job: 90 means better than 90% of them. The tick marks the middle." +
           (roster.through ? " Through games of " + short(roster.through) + "." : "") }));
         var defs = [];
         CARD.forEach(function (sec) { sec[1].forEach(function (m) { if (m[2] && pctOf(p, m[0]) != null) defs.push(el("div", {}, [el("dt", { text: m[1] }), el("dd", { text: m[2] + "." })])); }); });
@@ -665,19 +736,19 @@
   // ---- the teams page: each team's stats, from box scores ----
   var tstate = { sort: "rank", dir: 1, conf: "" };
   var teamSets = {};
-  function loadTeams(which) {      // the ranked 25, or all of FBS
-    which = which || scope;
+  function loadTeams(which) {      // the ranked 25, or all of FBS (the NFL has the one table)
+    which = PRO() ? "fbs" : which || scope;
     if (teamSets[which]) return Promise.resolve(teamSets[which]);
     return fetch(which === "fbs" ? "teams_fbs.json" : "teams.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (d) { teamSets[which] = d; return d; });
   }
   function signed(v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1); }
   var TCOLS = [   // key, heading, meaning, getter, format, sorts high to low first
-    ["rank", "Rank", "AP poll rank; teams outside the poll are numbered from 26 in GOAT ranking order", function (t) { return shownRank(t.id, t.rank); }, String, 0],
+    ["rank", "Rank", "AP poll rank, or place in the NFL standings; college teams outside the poll are numbered from 26 in GOAT ranking order", function (t) { return shownRank(t.id, t.rank); }, String, 0],
     ["name", "Team", "", function (t) { return t.name; }, null, 0],
-    ["conf", "Conf", "Conference", function (t) { return t.conf; }, function (v) { return v; }, 0],
+    ["conf", "Conf", "Conference; for the NFL, division", function (t) { return t.conf; }, function (v) { return v; }, 0],
     ["rec", "W-L", "Games won and lost", function (t) { return t.w + t.l ? t.w / (t.w + t.l) : null; }, null, 1],
-    ["conf_rec", "In conf", "Record in conference games", function (t) { var p = (t.conf_rec || "").split("-"); return p.length === 2 && +p[0] + +p[1] ? +p[0] / (+p[0] + +p[1]) : null; }, null, 1],
+    ["conf_rec", "In conf", "Record in conference games; for the NFL, in division games", function (t) { var p = (t.conf_rec || "").split("-"); return p.length === 2 && +p[0] + +p[1] ? +p[0] / (+p[0] + +p[1]) : null; }, null, 1],
     ["ppg", "PPG", "Points per game", function (t) { return t.ppg; }, fmt.d1, 1],
     ["opp_ppg", "Opp PPG", "Points allowed per game. Lower is better", function (t) { return t.opp_ppg; }, fmt.d1, 0],
     ["margin", "Margin", "Average margin of victory", function (t) { return t.margin; }, signed, 1],
@@ -690,7 +761,7 @@
     ["to_margin", "TO +/-", "Turnover margin per game: takeaways minus giveaways", function (t) { return t.to_margin; }, function (v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(2); }, 1],
     ["ppd", "Pts/Drive", "Points per drive", function (t) { return t.ppd; }, fmt.d2, 1],
     ["opp_ppd", "Opp P/D", "Points allowed per drive. Lower is better", function (t) { return t.opp_ppd; }, fmt.d2, 0],
-    ["power", "Rating", "Where this site's rating (the one behind the odds) places the team among all FBS teams", function (t) { return t.power; }, String, 0],
+    ["power", "Rating", "Where this site's rating (the one behind the odds) places the team in the league", function (t) { return t.power; }, String, 0],
     ["sos_rank", "SOS", "Strength of schedule among the teams shown: 1 is the hardest, by the average rating of the teams played", function (t) { return t.sos_rank; }, String, 0]
   ];
   function drawTeams() {
@@ -715,8 +786,9 @@
         });
         var head = el("tr", {}, TCOLS.map(function (c) {
           var on = tstate.sort === c[0];
+          var label = PRO() && c[0] === "conf" ? "Div" : PRO() && c[0] === "conf_rec" ? "In div" : c[1];
           return el("th", { scope: "col", "class": c[0] === "name" || c[0] === "conf" ? "l" : "", "aria-sort": on ? (tstate.dir > 0 ? "ascending" : "descending") : null }, [
-            el("button", { type: "button", title: c[2] || null, text: c[1] + (on ? (tstate.dir > 0 ? " ▲" : " ▼") : ""),
+            el("button", { type: "button", title: c[2] || null, text: label + (on ? (tstate.dir > 0 ? " ▲" : " ▼") : ""),
               onclick: function () { if (on) tstate.dir = -tstate.dir; else { tstate.sort = c[0]; tstate.dir = c[5] ? -1 : 1; } table(); } })]);
         }));
         var body = el("tbody", {}, rows.map(function (t) {
@@ -725,7 +797,7 @@
             if (c[0] === "rank") return el("td", { "class": cls }, [rankTag(t.rank, t.id)]);
             if (c[0] === "name") return el("td", { "class": "l " + cls }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, t.name)])]);
             if (c[0] === "conf") return el("td", { "class": "l " + cls, text: t.conf || "" });
-            if (c[0] === "rec") return el("td", { "class": cls, text: t.w + "-" + t.l });
+            if (c[0] === "rec") return el("td", { "class": cls, text: t.w + "-" + t.l + (t.t ? "-" + t.t : "") });
             if (c[0] === "conf_rec") return el("td", { "class": cls, text: t.conf_rec || "" });
             var v = c[3](t);
             return el("td", { "class": cls, text: v == null ? "" : c[4](v) });
@@ -734,7 +806,7 @@
         holder.appendChild(el("div", { "class": "tablewrap", tabindex: "0", role: "region", "aria-label": "Team stats table, scrolls sideways" }, [
           el("table", { "class": "ptable ttable" }, [el("thead", {}, [head]), body])]));
         holder.appendChild(el("p", { "class": "note", text: (d.through ? "Through games of " + short(d.through) + ". " : "") +
-          W(isAll() ? "teams.note_fbs" : "teams.note") }));
+          W("teams.note" + FBS()) }));
       }
       table();
     }).catch(function () {
@@ -917,17 +989,19 @@
     var mine = data.games.filter(function (g) { return g.away.id === id || g.home.id === id; });
     var which = t ? scope : "fbs";            // an unranked team is measured against all of FBS
     var name = t ? t.name : info ? info[1] : (mine.length ? (mine[0].away.id === id ? mine[0].away.name : mine[0].home.name) : id);
+    var st = (data.standings || []).filter(function (x) { return x.id === id; })[0];
+    var full = st && st.place ? st.place + " " + name : name;          // "San Francisco 49ers"
     var goat = ((data.goat || {}).top || []).filter(function (x) { return x.id === id; })[0];
     var rec = (info && info[3]) || {}, bits = [];
     if (rec.all || (t && t.record)) bits.push(rec.all || t.record);
-    if (info && info[2]) bits.push(info[2] + (rec.conf ? " (" + rec.conf + " in conference)" : ""));
-    bits.push(t ? "No. " + t.rank + " in the " + data.poll.name : "Not ranked in the " + data.poll.name);
+    if (info && info[2]) bits.push(info[2] + (PRO() ? (rec.div ? " (" + rec.div + " in the division)" : "") : rec.conf ? " (" + rec.conf + " in conference)" : ""));
+    bits.push(PRO() ? ordinal(t.rank) + " in the NFL" : t ? "No. " + t.rank + " in the " + data.poll.name : "Not ranked in the " + data.poll.name);
     if (goat) bits.push("No. " + goat.rank + " in the GOAT ranking");
-    box.appendChild(el("div", { "class": "thead" }, [logo(id, "big"), el("div", {}, [el("h1", { text: name }), el("p", { "class": "tsub", text: bits.join(" · ") }),
-      rec.home || rec.away ? el("p", { "class": "tsub", text: ["Home " + (rec.home || "0-0"), "Away " + (rec.away || "0-0"), rec.ranked ? "Against the AP top 25 " + rec.ranked : "", rec.streak ? "Streak " + rec.streak : ""].filter(Boolean).join(" · ") }) : null])]));
+    box.appendChild(el("div", { "class": "thead" }, [logo(id, "big"), el("div", {}, [el("h1", { text: full }), el("p", { "class": "tsub", text: bits.join(" · ") }),
+      rec.home || rec.away ? el("p", { "class": "tsub", text: ["Home " + (rec.home || "0-0"), "Away " + (rec.away || "0-0"), PRO() && rec.conf ? "In the conference " + rec.conf : "", rec.ranked ? "Against the AP top 25 " + rec.ranked : "", rec.streak ? "Streak " + rec.streak : ""].filter(Boolean).join(" · ") }) : null])]));
     if (!info && !t) { box.appendChild(el("p", { "class": "note", text: name + " is not an FBS team, so this site lists only its games against FBS teams." })); }
     box.appendChild(el("div", { "class": "nav filters" }, [scopeSwitch(function () { drawTeam(id); }, !t)]));
-    if (t) box.appendChild(el("div", { "class": "tvs" }, [versus(t)]));
+    if (t && !PRO()) box.appendChild(el("div", { "class": "tvs" }, [versus(t)]));
 
     // games: the latest results and what is next
     var next = mine.filter(function (g) { return g.state !== "final" && g.date >= today; }).slice(0, 5);
@@ -936,7 +1010,7 @@
     if (next.length) { m.appendChild(el("h3", { "class": "day", text: W("team.coming_up") })); m.appendChild(el("ol", { "class": "games" }, next.map(function (g) { return row(g, true); }))); }
     if (done.length) { m.appendChild(el("h3", { "class": "day", text: W("team.latest_results") })); m.appendChild(el("ol", { "class": "games" }, done.slice().reverse().map(function (g) { return row(g, true); }))); }
     if (!mine.length) m.appendChild(el("p", { "class": "empty", text: "No games are listed for " + name + "." }));
-    if (mine.length && info) m.appendChild(el("p", { "class": "note" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("fbs"); state.team = id; }, text: "All of " + name + "'s games this season" })]));
+    if (mine.length && info) m.appendChild(el("p", { "class": "note" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("fbs"); state.team = id; }, text: PRO() ? "All " + name + " games this season" : "All of " + name + "'s games this season" })]));
     box.appendChild(m);
     if (!info && !t) return;
 
@@ -954,10 +1028,10 @@
         return el("div", { "class": "tile" + (place && place <= 5 ? " top" : "") }, [el("span", { "class": "lab", text: c[1] }),
           el("b", { text: v == null ? "–" : c[2](v) }), el("span", { "class": "plc", text: place ? ordinal(place) + " of " + vals.length : "" })]);
       });
-      tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Rating" }), el("b", { text: row1.power ? ordinal(row1.power) : "–" }), el("span", { "class": "plc", text: "in FBS, by this site's rating" })]));
+      tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Rating" }), el("b", { text: row1.power ? ordinal(row1.power) : "–" }), el("span", { "class": "plc", text: "in " + ALL() + ", by this site's rating" })]));
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Schedule strength" }), el("b", { text: row1.sos_rank ? ordinal(row1.sos_rank) : "–" }), el("span", { "class": "plc", text: "hardest of " + d.teams.length })]));
       stats.appendChild(el("div", { "class": "tiles" }, tiles));
-      stats.appendChild(el("p", { "class": "note", text: row1.w + "-" + row1.l + ". Stats from " + row1.games + (row1.games === 1 ? " box score" : " box scores") + "; places are among " + (which === "fbs" ? "all " + d.teams.length + " FBS teams" : "the 25 ranked teams") + ". " }));
+      stats.appendChild(el("p", { "class": "note", text: row1.w + "-" + row1.l + (row1.t ? "-" + row1.t : "") + ". Stats from " + row1.games + (row1.games === 1 ? " box score" : " box scores") + "; places are among " + (PRO() ? "the " + d.teams.length + " NFL teams" : which === "fbs" ? "all " + d.teams.length + " FBS teams" : "the 25 ranked teams") + ". " }));
       stats.lastChild.appendChild(el("a", { href: "#/teams", text: "All team stats" }));
     }).catch(function () {});
     loadRoster(which).then(function () {
@@ -984,7 +1058,7 @@
           el("table", { "class": "ptable tptable" }, [el("thead", {}, [head]), body])]));
         if (rows.length < list.length || showAll) people.appendChild(el("p", { "class": "more" }, [el("button", { type: "button", "class": "morebtn",
           text: showAll ? "Show the regulars only" : "Show all " + list.length + " players", onclick: function () { showAll = !showAll; fill(); } })]));
-        people.appendChild(el("p", { "class": "note", text: W(which === "fbs" ? "team.players_note_fbs" : "team.players_note") }));
+        people.appendChild(el("p", { "class": "note", text: W("team.players_note" + (!PRO() && which === "fbs" ? "_fbs" : "")) }));
       }
       fill();
     }).catch(function () {});
@@ -998,7 +1072,7 @@
     Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) {
       if (a.dataset.page === (page === "card" ? "players" : page === "game" ? "games" : page === "team" ? "teams" : page)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    document.title = ({ rankings: W("rankings.title"), teams: W("teams.title"), players: W("players.title"), game: W("games.box_score"), team: "Team", card: "Player card" }[page] || W("games.title")) + " | " + data.site;
+    document.title = ({ rankings: W("rankings.title"), teams: W("teams.title" + FBS()), players: W("players.title" + FBS()), game: W("games.box_score"), team: "Team", card: "Player card" }[page] || W("games.title" + FBS())) + " | " + data.site;
     if (page === "team") drawTeam(decodeURIComponent(tm[1])); else if (page === "game") drawGame(game[1]); else if (page === "rankings") drawRanks(); else if (page === "teams") drawTeams(); else if (page === "players") drawPlayers(); else if (page === "card") drawCard(decodeURIComponent(card[1])); else draw();
     window.scrollTo(0, 0);
   }
@@ -1007,11 +1081,18 @@
     data = d;
     (d.fbs || []).forEach(function (x) { fbs[x[0]] = x; });
     $("brand").textContent = d.site;
+    var lg = $("leagues"), base = d.league ? "../" : "";
+    if (lg) [["", "College"], ["nfl", "NFL"]].forEach(function (o) {
+      lg.appendChild(el("a", { href: base + (o[0] ? o[0] + "/" : ""), "aria-current": (d.league || "") === o[0] ? "page" : null, text: o[1] }));
+    });
+    document.body.classList.add("lg-" + (d.league || "college"));
+    if (d.pro) document.body.classList.add("pro");
     Array.prototype.forEach.call(document.querySelectorAll("[data-w]"), function (n) { var s = W(n.getAttribute("data-w")); if (s) n.textContent = s; });
     $("lede").textContent = W("games.lede", { poll: d.poll.name });
     var u = new Date(d.updated);
     $("foot-updated").textContent = "Scores and schedule updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) +
       (d.poll.date ? ". Rankings: " + d.poll.name + " of " + day(d.poll.date).toLocaleDateString(undefined, { dateStyle: "long" }) : "") + ".";
+    if (d.pro) document.title = W("games.title") + " | " + d.site;
     window.addEventListener("hashchange", route);
     route();
     pollLive();

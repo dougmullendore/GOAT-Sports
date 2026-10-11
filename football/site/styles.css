@@ -466,3 +466,20 @@ a.opp:hover .n { color: var(--teal); }
 .cartable caption, .ptable caption { caption-side: top; text-align: left; padding: 8px 10px; font: 700 .75rem/1 Barlow, sans-serif; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-2); }
 .statline { color: var(--ink-2); white-space: normal; min-width: 12rem; }
 .tsub b { color: var(--ink); }
+
+/* ---- the NFL's copy of the site: its own colour, and standings tables in place of a poll ---- */
+body.lg-nfl { --teal: #013369; --teal-soft: #dfe8f5; --ball: #013369; --ball-ink: #ffffff; --ball-home: #001a3a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.lg-nfl { --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; }
+}
+:root[data-theme="dark"] body.lg-nfl { --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; }
+.standwrap { margin-top: 14px; }
+/* every division's table has the same column widths, so the numbers line up down the page */
+#pro-standings .ptable.stand { table-layout: fixed; min-width: 860px; }
+#pro-standings .ptable.stand th.l { width: 15.5rem; }
+#pro-standings .ptable.stand .tcell { max-width: 100%; }
+#pro-standings .ptable.stand .tcell a { overflow: hidden; text-overflow: ellipsis; }
+.ptable.stand thead th.l { font: 700 .8125rem/1 Barlow, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+.ptable.stand tr.cut td { border-top: 2px dashed var(--ink-2); }
+.ptable.stand .tcell a { font-weight: 600; }
+.ptable.stand td:first-child, .ptable.stand th:first-child { width: 2.5rem; }

@@ -1,7 +1,7 @@
 name: Update the site
 
 # One job keeps all three sports up to date. Each sport has its own folder with its own code
-# (hockey/, volleyball/, football/), its own folder of stored data on the `state` branch and its
+# (volleyball/, hockey/, football/, which does college and the NFL), its own folder of stored data on the `state` branch and its
 # own folder of pages on the `gh-pages` branch. A sport that fails does not stop the others.
 
 on:
@@ -18,6 +18,8 @@ on:
     # Each sport looks whether one of its games is on and stops within seconds when none is.
     - cron: '*/5 16-23 * 1-6,8-12 *'
     - cron: '*/5 0-7 * 1-6,8-12 *'
+    # Sunday mornings in the NFL season, from about 8am Central: the games played in Europe start early
+    - cron: '*/5 13-15 * 1-2,9-12 0'
   workflow_dispatch:
   push:
     branches: [main]

@@ -11,14 +11,16 @@ from .espn import TEAM
 I = {c: i for i, c in enumerate(TEAM)}
 
 
-def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, info: dict | None = None) -> dict:
+def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, info: dict | None = None, conf_key: str = "conf") -> dict:
     """{"teams": [...], "through": date}. `games` are the season's games of the
     teams given; `rating` is every team's rating from pipeline/odds.py; `info`
-    is {team: {"conf", "rec"}} from the conference standings."""
+    is {team: {"conf", "rec"}} from the conference standings, and `conf_key`
+    says which of its records goes beside the conference's name ("div" for the
+    NFL, whose teams are grouped by division)."""
     rank = {t["id"]: t for t in ranked if t.get("id")}
     info = info or {}
     power = {t: i + 1 for i, t in enumerate(sorted((t for t in rating if not info or t in info), key=lambda x: -rating[x]))}
-    acc = {t: {"w": 0, "l": 0, "pf": 0, "pa": 0, "n": 0, "bpf": 0, "bpa": 0, "opp_r": [], "own": [0] * len(TEAM), "opp": [0] * len(TEAM)} for t in rank}
+    acc = {t: {"w": 0, "l": 0, "t": 0, "pf": 0, "pa": 0, "n": 0, "bpf": 0, "bpa": 0, "opp_r": [], "own": [0] * len(TEAM), "opp": [0] * len(TEAM)} for t in rank}
     through = None
     for g in games:
         if g["state"] != "final" or g["away"].get("score") is None or g["home"].get("score") is None:
@@ -30,7 +32,7 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, in
             if t not in acc:
                 continue
             a, mine, theirs = acc[t], g[side]["score"], g[other]["score"]
-            a["w" if mine > theirs else "l"] += 1
+            a["w" if mine > theirs else "l" if mine < theirs else "t"] += 1
             a["pf"] += mine
             a["pa"] += theirs
             if g[other]["id"] in rating:
@@ -46,7 +48,7 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, in
     for t, a in acc.items():
         o = dict(zip(TEAM, a["own"]))
         p = dict(zip(TEAM, a["opp"]))
-        n, played = a["n"], a["w"] + a["l"]
+        n, played = a["n"], a["w"] + a["l"] + a["t"]
 
         def per(x, nd=1):
             return round(x / n, nd) if n else None
@@ -56,7 +58,7 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, in
 
         out.append({
             "id": t, "name": rank[t]["name"], "rank": rank[t]["rank"], "conf": (info.get(t) or {}).get("conf") or "",
-            "conf_rec": ((info.get(t) or {}).get("rec") or {}).get("conf") or "", "w": a["w"], "l": a["l"], "games": n,
+            "conf_rec": ((info.get(t) or {}).get("rec") or {}).get(conf_key) or "", "w": a["w"], "l": a["l"], "t": a["t"], "games": n,
             "ppg": round(a["pf"] / played, 1) if played else None, "opp_ppg": round(a["pa"] / played, 1) if played else None,
             "margin": round((a["pf"] - a["pa"]) / played, 1) if played else None,
             "ypp": ratio(o["yds"], o["att"] + o["car"]), "opp_ypp": ratio(p["yds"], p["att"] + p["car"]),

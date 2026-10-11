@@ -8,10 +8,13 @@ for a little less than its full margin. A team starts a season on most of where
 it finished the last one, measured from the average of its own division, so a
 school from the division below does not drift up toward FBS over the summer.
 
-Tested on 4,547 games from 2021 to 2025, always predicting a game from what was
-known before it: the favorite won 74.3% of them (the home team wins 63.0%),
-and teams given 70-80% won 73%. The settings in config.py were chosen on those
-same games, so expect slightly worse on new ones.
+College, tested on 4,547 games from 2021 to 2025, always predicting a game from
+what was known before it: the favorite won 74.3% of them (the home team wins
+63.0%), and teams given 70-80% won 73%. The NFL, on 1,688 games from 2020 to
+2025: the favorite won 64.3% (the home team wins 53.9%), and teams given
+60-70% won 69%; NFL teams are much closer to one another, so its settings move
+ratings less and count home field for less. The settings in config.py were
+chosen on those same games, so expect slightly worse on new ones.
 """
 from __future__ import annotations
 
@@ -21,13 +24,14 @@ from pathlib import Path
 
 from . import config
 
-SEED_FILE = Path(__file__).resolve().parents[1] / "ratings" / "seed.json"
+SEED_FOLDER = Path(__file__).resolve().parents[1] / "ratings"
 
 
 def seed() -> dict:
     """{"season": the season these ratings finished, "ratings": {team: rating}}:
     where teams stood before this site kept its own ratings."""
-    return json.loads(SEED_FILE.read_text()) if SEED_FILE.exists() else {}
+    path = SEED_FOLDER / config.ODDS_SEED
+    return json.loads(path.read_text()) if path.exists() else {}
 
 
 def chance(home: float, away: float, neutral: bool = False) -> float:

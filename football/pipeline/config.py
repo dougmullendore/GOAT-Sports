@@ -1,14 +1,25 @@
-"""Every setting in one place."""
+"""Every setting in one place.
+
+The job builds two copies of the site: college football (the settings as written
+below) and the NFL (the same settings with the changes listed under NFL at the
+bottom of this file). `use("nfl")` switches to the NFL's, `use("college")` back.
+"""
 
 SITE_NAME = "GOAT Football"
+LEAGUE = "college"        # which copy is being built: "college" or "nfl"
+LEAGUE_NAME = "College"
+ALL_NAME = "FBS"          # what "every team" is called
+STATE_FOLDER = ""         # the league's folder inside this sport's stored data
+SITE_FOLDER = ""          # and inside the site
 
 # The ranking that decides which teams' games are listed first: the AP Top 25.
 # Every ranking ESPN carries is read on each full run, so there is no day to
 # wait for; the others listed here get a button of their own on the Rankings
 # page when they have come out (the playoff committee's starts in November).
 POLL_NAME = "AP Top 25"
-POLL_TYPE = "ap"
+POLL_TYPE = "ap"          # None for a league with no poll: its teams are numbered by the standings instead
 POLL_SIZE = 25
+MIN_TEAMS = 100           # the standings must list at least this many teams to be believed
 OTHER_POLLS = {"cfp": "Playoff Ranking", "usa": "Coaches Poll"}     # ESPN's type: the button's label
 
 # A game belongs to the day it kicks off on the west coast, so a late kickoff in
@@ -25,7 +36,7 @@ ROSTER = SITE_API + "teams/{team}/roster"
 STANDINGS = "https://site.api.espn.com/apis/v2/sports/football/college-football/standings?season={season}&group=80"
 CAREER = "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/{player}/stats"
 GAME_PAGE = "https://www.espn.com/college-football/game/_/gameId/"
-FBS_GROUP = 80
+TEAM_NAME = "location"    # a team is called by its school ("Texas"); the NFL's by its nickname ("Cowboys")
 # If ESPN's calendar cannot be read: the weeks of a normal season (kind 2 is the regular season, 3 the bowls).
 DEFAULT_WEEKS = [[2, w, f"Week {w}"] for w in range(1, 16)] + [[3, 1, "Bowls"], [3, 999, "Playoff"]]
 
@@ -53,6 +64,7 @@ ODDS_NEW = -32.0          # starting rating of a school from outside FBS with no
 ODDS_SOFT_CAP = 60.0      # a blowout counts for a little less than its full margin
 ODDS_SCALE = 9.0          # how many rating units make a clear favorite
 ODDS_TESTED = {"matches": 4547, "favorite_won": 0.743, "seasons": "2021 to 2025"}
+ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before this site kept its own ratings
 
 # The GOAT ranking (pipeline/goat.py) of every FBS team: head to head
 # first, then strength of schedule, the AP poll and record, in that order.
@@ -68,3 +80,43 @@ LIVE_SECONDS = 30
 FETCH_THREADS = 6
 FETCH_RETRIES = 4
 USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
+
+
+# ---------------------------------------------------------------- the NFL --
+# What is different for the NFL's copy of the site. There is no poll: every team is numbered by
+# its place in the league standings, as on the hockey site. The odds settings were chosen by
+# testing on 2020-2025 results.
+_NFL_API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
+NFL = {
+    "LEAGUE": "nfl", "LEAGUE_NAME": "NFL", "ALL_NAME": "the NFL", "STATE_FOLDER": "nfl", "SITE_FOLDER": "nfl",
+    "POLL_NAME": "NFL standings", "POLL_TYPE": None, "POLL_SIZE": 32, "MIN_TEAMS": 32, "OTHER_POLLS": {},
+    "SITE_API": _NFL_API,
+    "SCOREBOARD": _NFL_API + "scoreboard?limit=100",
+    "WEEK": _NFL_API + "scoreboard?dates={season}&seasontype={kind}&week={week}&limit=100",
+    "RANKINGS": None,
+    "SUMMARY": _NFL_API + "summary?event={game}",
+    "ROSTER": _NFL_API + "teams/{team}/roster",
+    "STANDINGS": "https://site.api.espn.com/apis/v2/sports/football/nfl/standings?season={season}&level=3",
+    "CAREER": "https://site.web.api.espn.com/apis/common/v3/sports/football/nfl/athletes/{player}/stats",
+    "GAME_PAGE": "https://www.espn.com/nfl/game/_/gameId/",
+    "TEAM_NAME": "name",
+    "DEFAULT_WEEKS": [[2, w, f"Week {w}"] for w in range(1, 19)] + [[3, 1, "Wild Card"], [3, 2, "Divisional Round"],
+                                                                    [3, 3, "Conference Championship"], [3, 4, "Super Bowl"]],
+    "LOGO_URL": "",          # each team's logo address comes with the standings
+    "PHOTO_URL": "https://a.espncdn.com/i/headshots/nfl/players/full/{player}.png",
+    "ODDS_STEP": 0.06, "ODDS_SETTLE": 6, "ODDS_MIN_STEP": 0.06, "ODDS_KEEP": 0.8, "ODDS_HOME": 1.0, "ODDS_NEW": 0.0,
+    "ODDS_SOFT_CAP": 21.0, "ODDS_SCALE": 7.0,
+    "ODDS_TESTED": {"matches": 1688, "favorite_won": 0.643, "seasons": "2020 to 2025"},
+    "ODDS_SEED": "seed_nfl.json",
+}
+LEAGUES = ["college", "nfl"]
+_COLLEGE = {k: globals()[k] for k in NFL}
+
+
+def use(league: str) -> None:
+    """Switch every setting to one league's."""
+    globals().update(_COLLEGE)
+    if league == "nfl":
+        globals().update(NFL)
+    elif league != "college":
+        raise ValueError(f"no such league: {league}")

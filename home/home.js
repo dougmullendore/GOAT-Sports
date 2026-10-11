@@ -34,8 +34,8 @@
       [["Games", "#/"], ["Standings", "#/standings"], ["Teams", "#/teams"], ["Players", "#/players"], ["Lines", "#/lines"], ["Odds", "#/odds"]]],
     volleyball: ["Women's college, LOVB and MLV", "The top 25's matches day by day, the AVCA poll and the GOAT ranking, and a card for every Division I player.",
       [["Matches", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["LOVB", "lovb/"], ["MLV", "mlv/"]]],
-    football: ["College, FBS", "The top 25's games week by week, the AP poll and the GOAT ranking, team stats and a card for every player.",
-      [["Games", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"]]]
+    football: ["College and the NFL", "Games week by week with each team's chance of winning, the AP poll, NFL standings, the GOAT rankings, team stats and a card for every player.",
+      [["Games", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["NFL", "nfl/"]]]
   };
 
   function logo(lg, id, name) {

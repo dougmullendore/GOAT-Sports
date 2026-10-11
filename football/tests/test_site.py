@@ -15,6 +15,7 @@ os.environ["FETCH_CACHE"] = str(FIXTURES)
 from pipeline import cards, config, espn, goat, odds, players, run, teams, web  # noqa: E402
 
 TEXAS, OKLAHOMA, GAME = "251", "201", 401856717          # Oklahoma 27, Texas 24 at the Cotton Bowl
+NFL_GAME = 401872980                                     # Buccaneers 24, Cowboys 16
 NOW = "2026-10-11T00:05:00+00:00"
 
 
@@ -92,7 +93,7 @@ def test_a_roster_and_a_career_are_read():
     roster = espn.parse_roster(web.get_json(config.ROSTER.format(team=TEXAS)))
     assert roster["4870906"][:3] == ["Arch Manning", "16", "QB"] and roster["4870906"][3] == 76 and roster["4870906"][7] == 1
     index = json.loads((FIXTURES / "index.json").read_text())
-    url = next(u for u in index if "/athletes/" in u)
+    url = next(u for u in index if "/athletes/" in u and "college-football" in u)
     career = espn.parse_career(web.get_json(url))
     assert career and all(len(row) == 2 + len(part[1]) for part in career for row in part[2])
     assert all(isinstance(part[2][0][0], int) for part in career)
@@ -160,6 +161,21 @@ def test_the_site_is_built():
         assert texas["conf"] == "SEC" and texas["games"] == 1 and texas["ypp"] == round(382 / 63, 2) and texas["to_margin"] == -2.0
         # a second run reads nothing it already has, except the last few days' box scores
         assert json.loads((state / "ratings.json").read_text())["2026"]
+        # the NFL's copy, in its own folder inside the college pages
+        nfl = json.loads((out / "nfl" / "data.json").read_text())
+        assert nfl["league"] == "nfl" and nfl["pro"] and len(nfl["fbs"]) == 32 and len(nfl["standings"]) == 32
+        assert [t["rank"] for t in nfl["poll"]["teams"]] == list(range(1, 33)) and nfl["nr"] == {}
+        assert nfl["standings"][0]["w"] >= nfl["standings"][-1]["w"] and len(nfl["logos"]) == 32
+        g = next(g for g in nfl["games"] if g["id"] == NFL_GAME)
+        assert (g["away"]["name"], g["away"]["score"], g["home"]["name"], g["home"]["score"]) == ("Buccaneers", 24, "Cowboys", 16)
+        assert g["box"] == 1 and g["away"]["rank"] and g["home"]["rank"]
+        assert all("beat" not in t for t in nfl["goat"]["top"]) and len(nfl["goat"]["top"]) == 32
+        assert (out / "nfl" / "players_fbs.json").exists() and not (out / "nfl" / "players.json").exists()
+        assert 'content="#013369"' in (out / "nfl" / "index.html").read_text() and 'content="#8a4b1c"' in page
+        assert (out / "nfl" / "icon.svg").read_text() == (out / "icon-nfl.svg").read_text()
+        assert (state / "nfl" / "box.json").exists() and not (state / "nfl" / "polls.json").exists()
+        assert {"NFL schedule", "NFL standings", "NFL site"} <= set(status["stages"]) and "NFL rankings" not in status["stages"]
+        assert config.LEAGUE == "college"                 # the settings are put back when the run ends
 
 
 def test_a_game_night_run_stops_when_no_game_is_on():
@@ -224,6 +240,42 @@ def test_a_career_is_read_again_after_the_next_game():
         web.get_many = real
 
 
+def test_the_nfl_feeds_are_read():
+    config.use("nfl")
+    try:
+        season, weeks = espn.parse_calendar(web.get_json(config.SCOREBOARD))
+        assert season == 2026 and [w[:3] for w in weeks][17:] == [[2, 18, "Week 18"], [3, 1, "Wild Card"], [3, 2, "Divisional Round"],
+                                                                 [3, 3, "Conference Championship"], [3, 4, "Super Bowl"]]
+        teams_ = espn.parse_standings(web.get_json(config.STANDINGS.format(season=2026)))
+        assert len(teams_) == 32 and len({t["conf"] for t in teams_.values()}) == 8 and {t["group"] for t in teams_.values()} == {"AFC", "NFC"}
+        bills = teams_["2"]
+        assert (bills["name"], bills["place"], bills["conf"], bills["w"], bills["l"], bills["t"], bills["pf"], bills["pa"]) == ("Bills", "Buffalo", "AFC East", 3, 1, 0, 127, 107)
+        assert bills["rec"]["home"] == "2-1" and bills["rec"]["away"] == "1-0" and bills["rec"]["div"] == "0-1" and bills["logo"].endswith("buf.png")
+        order = run.league_order(teams_)
+        assert teams_[order[0]]["l"] == 0 and teams_[order[-1]]["w"] == 0
+        box = espn.parse_summary(web.get_json(config.SUMMARY.format(game=NFL_GAME)))
+        assert box["status"] == "F" and set(box["players"]["home"]) >= {"passing", "rushing", "receiving", "defensive"}
+        hits = sum(r[3 + espn.CATS["defensive"].index("hur")] for side in ("home", "away") for r in box["players"][side]["defensive"])
+        assert hits > 0                                   # quarterback hits stand in for college's hurries
+        roster = espn.parse_roster(web.get_json(config.ROSTER.format(team=6)))
+        someone = next(iter(roster.values()))
+        assert len(someone) == 9 and any(p[8] for p in roster.values()) and any(p[5] == "Rookie" for p in roster.values())
+        assert {p[5] for p in roster.values()} - {"Rookie", ""} and all("season" in p[5] or p[5] in ("Rookie", "") for p in roster.values())
+    finally:
+        config.use("college")
+
+
+def test_a_tie_is_not_a_loss():
+    game = {"id": 1, "date": "2026-09-13", "start": 1, "state": "final", "home": {"id": "a", "score": 20}, "away": {"id": "b", "score": 20}}
+    table = teams.compute([{"id": "a", "name": "A", "rank": 1}, {"id": "b", "name": "B", "rank": 2}], [game], {}, {"a": 0.0, "b": 0.0})
+    assert [(t["w"], t["l"], t["t"]) for t in table["teams"]] == [(0, 0, 1), (0, 0, 1)]
+    rating, pregame = odds.rate([game], {"a": 1.0, "b": 0.0}, {"a", "b"})
+    assert pregame == {} and rating["a"] > rating["b"]            # a tie moves no rating
+
+
 def test_the_wording_file_is_complete():
     words = run.read_words()
     assert words["nav.games"] == "Games" and "{poll}" in words["games.lede"]
+    assert words["nfl.nav_rankings"] == "Standings"
+    # every NFL line stands in for a line the college pages have
+    assert all(k.split(".", 1)[1].replace("_", ".", 1) in words for k in words if k.startswith("nfl."))

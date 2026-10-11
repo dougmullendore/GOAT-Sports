@@ -22,27 +22,30 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HOME_SRC = ROOT / "home"
 
-# The sports, in the order of the bar. `pages` are the folders that hold a copy of that sport's
-# page (volleyball has one for college and one for each pro league).
+# The sports, in the order of the bar and of the front page. `pages` are the folders that hold a
+# copy of that sport's page (volleyball has one for college and one for each pro league, football
+# one for college and one for the NFL).
 SPORTS = [
-    {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
-    {"key": "football", "name": "Football", "pages": [""]},
+    {"key": "hockey", "name": "Hockey", "pages": [""]},
+    {"key": "football", "name": "Football", "pages": ["", "nfl/"]},
 ]
-# The front page's lists: one for each league. `score` is the name the league's games give a
-# team's score; `game` is the address of a game's own page; `ranked_only` keeps a long college
-# day down to the games with a ranked team.
+# The front page's lists: one for each league, in the order shown. `score` is the name the
+# league's games give a team's score; `game` is the address of a game's own page; `ranked_only`
+# keeps a long college day down to the games with a ranked team.
 LEAGUES = [
-    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
-     "game": "#/game/", "ranked_only": False, "unit": "games"},
-    {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
-     "game": "#/game/", "ranked_only": True, "unit": "games"},
     {"key": "wvb", "sport": "volleyball", "folder": "volleyball/", "name": "College volleyball", "label": "Volleyball", "score": "sets",
      "game": "#/match/", "ranked_only": True, "unit": "matches"},
     {"key": "lovb", "sport": "volleyball", "folder": "volleyball/lovb/", "name": "LOVB", "label": "Volleyball", "score": "sets",
      "game": "#/match/", "ranked_only": False, "unit": "matches"},
     {"key": "mlv", "sport": "volleyball", "folder": "volleyball/mlv/", "name": "MLV", "label": "Volleyball", "score": "sets",
      "game": "#/match/", "ranked_only": False, "unit": "matches"},
+    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
+     "game": "#/game/", "ranked_only": True, "unit": "games"},
+    {"key": "nfl", "sport": "football", "folder": "football/nfl/", "name": "NFL", "label": "Football", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"

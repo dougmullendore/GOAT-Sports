@@ -6,6 +6,8 @@ teams, team and player stats, and a page for every team, game and player. A
 Top 25 / All FBS switch narrows any page to the ranked teams.
 
 - The page: `https://dougmullendore.github.io/GOAT-Sports/football/`
+- The NFL has a copy of the same site at `…/football/nfl/`, reached from the
+  College / NFL tabs at the top of every page; see "The NFL" below.
 - Every path below is inside this `football/` folder.
 
 ## What the site shows
@@ -31,6 +33,38 @@ results, its stats with its place among the teams shown, and its players);
 each game has one (`#/game/<id>`: score by quarter, chance of winning, the
 betting line before kickoff, a team comparison, every scoring play, and both
 box scores); each player has a card (`#/player/<id>`).
+
+## The NFL
+
+The NFL's pages are the college pages built a second time from the NFL's feeds
+(`NFL` at the bottom of `pipeline/config.py` lists every setting that differs;
+one run of the job does both leagues, college first). What is different:
+
+- **No poll.** Every team is numbered by its place in the league standings, as
+  on the hockey site: share of games won (a tie counts half), then wins, then
+  points scored less points allowed. The league's own tie-breakers are not
+  worked through. There is no Top 25 switch and there are no Beat / Lost to boxes.
+- **Standings** take the place of Rankings: by division, by conference (in
+  ESPN's playoff seeding, with a line under the seventh team), the whole
+  league, or the GOAT ranking, which uses the same method with a team's place
+  in the standings where college uses the AP poll.
+- **Teams** go by nickname (Cowboys), and are grouped by division where
+  college teams are grouped by conference.
+- **Odds** have their own settings, fitted on 2020-2025: tested on 1,688
+  games, the favorite won 64.3% (the home team wins 53.9%), and teams given 60
+  to 70% won 69%. NFL teams are far closer to one another than college teams,
+  so home field counts for 1.0 and ratings move less. `ratings/seed_nfl.json`
+  holds where teams finished 2025.
+- **Players**: the same Impact, against NFL regulars. Quarterback hits stand
+  in for college's hurries. A card shows how long he has been in the league
+  and his college. Career tables are ESPN's NFL regular seasons.
+- **Stored data** is in the `nfl/` folder inside football's folder on the
+  `state` branch; its stages show in `status.json` as "NFL schedule", "NFL
+  standings" and so on.
+- The wording is in the `nfl.` lines at the bottom of `site/words.txt`.
+
+Not built for the NFL: a playoff bracket or playoff odds, the draft order,
+injuries and depth charts, and preseason games.
 
 ## Where the numbers come from
 
@@ -174,7 +208,7 @@ broken line stops the football update and leaves the old pages up.
 | `pipeline/run.py` | The job |
 | `site/` | The page itself (plain HTML, CSS and JavaScript, no build step) |
 | `tests/` | Saved copies of the feeds from October 10, 2026, with checks that they are read correctly |
-| `ratings/seed.json` | Where teams finished 2025 |
+| `ratings/seed.json`, `ratings/seed_nfl.json` | Where teams finished 2025, college and NFL |
 
 Run the tests with `cd football && python tests/run_local.py`.
 
@@ -188,4 +222,4 @@ Run the tests with `cd football && python tests/run_local.py`.
 - Injuries, depth charts, recruiting and transfers.
 - Earlier seasons' games and team stats.
 
-Not affiliated with or endorsed by ESPN, the NCAA, the Associated Press or any school.
+Not affiliated with or endorsed by ESPN, the NCAA, the NFL, the Associated Press or any school or team.
