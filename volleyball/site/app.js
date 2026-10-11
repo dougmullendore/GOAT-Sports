@@ -919,14 +919,15 @@
     var L = g.live, live = L ? L.state === "in" : g.state === "live", fin = L ? L.state === "post" : g.state === "final";
     var t = g.start ? new Date(g.start * 1000) : null;
     function side(t) { return el("span", { "class": "mside" }, [rankTag(t.rank, t.id), logo(t.id), teamA(t.id, t.name)]); }
-    var title = el("h1", { "class": "mtitle" }, [side(g.away), el("span", { "class": "mv", text: " at " }), side(g.home)]);
-    var status = el("p", { "class": "mstatus" }, [live ? liveTag() : null,
-      el("span", { text: (live ? " " : "") + long(g.date) + (t && !isNaN(t) ? ", " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "") + (fin ? " · Final" : "") })]);
+    var title = el("h1", { "class": "mtitle sr" }, [side(g.away), el("span", { "class": "mv", text: " at " }), side(g.home)]);
+    // the day, the time and the channel, on the first line of the card (the teams and the score are right under it)
+    var status = el("p", { "class": "mstatus" }, [
+      el("span", { text: long(g.date) + (t && !isNaN(t) ? ", " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "") + (g.watch && g.watch.length ? " · " + g.watch.join(", ") : "") })]);
     // the game score card: the score, set by set, the chances of winning and how the teams compare
     var sets = el("div", { "class": "msets" }), boxes = el("div", { "class": "mboxes" });
     var cmp = el("div", { "class": "gc-cmp" });
-    var card = el("section", { "class": "gcard", "aria-label": "Match summary" }, [scoreLine(g), sets, oddsLine(g), cmp]);
-    box.appendChild(title); box.appendChild(status); box.appendChild(card); box.appendChild(boxes);
+    var card = el("section", { "class": "gcard", "aria-label": "Match summary" }, [status, scoreLine(g), sets, oddsLine(g), cmp]);
+    box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
     box.appendChild(el("p", { "class": "note" }, data.game_page ? [W("match.note") + " ",
       el("a", { href: data.game_page + g.id, rel: "noopener", text: W("match.ncaa_link") }), "."] : [W("match.note")]));
 

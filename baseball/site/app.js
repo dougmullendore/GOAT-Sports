@@ -1004,15 +1004,15 @@
     if (!g) { box.appendChild(el("p", { "class": "empty", text: "This game is not on this season's schedule." })); return; }
     var t = g.start ? new Date(g.start * 1000) : null;
     function side(x) { return el("span", { "class": "mside" }, [rankTag(x.rank, x.id), logo(x.id), teamA(x.id, x.name)]); }
-    var title = el("h1", { "class": "mtitle" }, [side(g.away), el("span", { "class": "mv", text: g.neutral ? " vs " : " at " }), side(g.home)]);
+    var title = el("h1", { "class": "mtitle sr" }, [side(g.away), el("span", { "class": "mv", text: g.neutral ? " vs " : " at " }), side(g.home)]);
     var status = el("p", { "class": "mstatus" }), top = el("div", {}), periods = el("div", { "class": "msets" });
     var cmp = el("div", { "class": "gc-cmp" }), extra = el("div", {}), boxes = el("div", { "class": "mboxes" });
     function head() {      // the parts that change with the score
       var s = gameState(g);
       status.innerHTML = "";
-      if (s.live) status.appendChild(liveTag());
-      status.appendChild(el("span", { text: (s.live ? " " : "") + ([g.round, g.series].filter(Boolean).join(": ") ? [g.round, g.series].filter(Boolean).join(": ") + " · " : "") + long(g.date) + (t && !isNaN(t) ? ", " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "") +
-        (s.fin ? " · Final" + overtime(s.lines) : "") + (pitchNote(g) ? " · " + (s.fin ? "" : "Probable starters: ") + pitchNote(g) : "") + (!s.fin && g.tv && g.tv.length ? " · " + g.tv.join(", ") : "") + (g.state === "other" && !g.live ? " · " + (g.note || "not played") : "") }));
+      // the round, the day, the time and the channel, on the first line of the card (the teams and the score are right under it)
+      status.appendChild(el("span", { text: ([g.round, g.series].filter(Boolean).join(": ") ? [g.round, g.series].filter(Boolean).join(": ") + " · " : "") + long(g.date) + (t && !isNaN(t) ? ", " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "") +
+        (pitchNote(g) ? " · " + (s.fin ? "" : "Probable starters: ") + pitchNote(g) : "") + (g.tv && g.tv.length ? " · " + g.tv.join(", ") : "") + (g.state === "other" && !g.live ? " · " + (g.note || "not played") : "") }));
       top.innerHTML = ""; top.appendChild(scoreLine(g));
       periods.innerHTML = "";
       var q = periodTable(g);
@@ -1020,8 +1020,8 @@
     }
     head();
     liveHooks.push(function (x) { if (x === g) head(); });
-    var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [top, periods, oddsLine(g), cmp]);
-    box.appendChild(title); box.appendChild(status); box.appendChild(card); box.appendChild(extra); box.appendChild(boxes);
+    var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [status, top, periods, oddsLine(g), cmp]);
+    box.appendChild(title); box.appendChild(card); box.appendChild(extra); box.appendChild(boxes);
     box.appendChild(el("p", { "class": "note" }, data.game_page ? [W("game.note") + " ",
       el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.espn_link") }), "."] : [W("game.note")]));
 

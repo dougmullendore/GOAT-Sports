@@ -986,20 +986,20 @@
     if (!g) { box.appendChild(el("p", { "class": "empty", text: "That game is not on this season's schedule." })); return; }
     var t = g.start ? new Date(g.start * 1000) : null, doc = null;
     function side(x) { return el("span", { "class": "mside" }, [rankTag(x.rank), logo(x.id), teamA(x.id, x.name)]); }
-    var title = el("h1", { "class": "mtitle" }, [side(g.away), el("span", { "class": "mv", text: " at " }), side(g.home)]);
+    var title = el("h1", { "class": "mtitle sr" }, [side(g.away), el("span", { "class": "mv", text: " at " }), side(g.home)]);
     var status = el("p", { "class": "mstatus" }), scoreBox = el("div"), sets = el("div", { "class": "msets" }), boxes = el("div", { "class": "mboxes" }), cmp = el("div", { "class": "gc-cmp" });
-    var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [scoreBox, sets, oddsLine(g), cmp]);
+    var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [status, scoreBox, sets, oddsLine(g), cmp]);
     function top() {       // the parts that change while a game is on
       var s = now(g);
       status.innerHTML = "";
-      if (s.live) status.appendChild(liveTag());
-      status.appendChild(el("span", { text: (s.live ? " " : "") + (g.round ? g.round + " · " : "") + long(g.date) + (t && !isNaN(t) ? ", " + clockTime(t) : "") + (s.fin ? " · " + finalWord(s.end) : "") }));
+      // the round, the day, the time and the channel, on the first line of the card
+      status.appendChild(el("span", { text: (g.round ? g.round + " · " : "") + long(g.date) + (t && !isNaN(t) ? ", " + clockTime(t) : "") + (g.tv && g.tv.length ? " · " + g.tv.join(", ") : "") }));
       scoreBox.innerHTML = ""; scoreBox.appendChild(scoreLine(g));
       var L = g.live;
       if (L && L.lines && L.lines[0].length) periodTable(sets, g, L.lines[0].map(function (a, i) { return [i + 1, i < 3 ? "REG" : (L.end === "SO" || /SO/.test(L.detail)) && i === L.lines[0].length - 1 && i > 3 ? "SO" : "OT", a, L.lines[1][i] || 0]; }));
       else if (doc) periodTable(sets, g, doc.line);
     }
-    box.appendChild(title); box.appendChild(status); box.appendChild(card); box.appendChild(boxes);
+    box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
     box.appendChild(el("p", { "class": "note" }, [W("game.note") + " ", data.game_page ? el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.nhl_link") }) : null, data.game_page ? "." : null]));
     top();
     liveHooks.push(function (x) { if (x === g) top(); });

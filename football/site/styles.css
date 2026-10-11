@@ -489,3 +489,6 @@ a.opp:hover .n { color: var(--teal); }
 
 /* ---- the number in a rank tag: always dark, with a white outline so it reads on every shade ---- */
 .rk:not(.nr) { color: #0f1d33; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }
+
+/* ---- a game's own page: the day, time and channel are the first line of the card ---- */
+.gcard .mstatus { margin: 0 0 12px; justify-content: center; text-align: center; font-size: .875rem; }
