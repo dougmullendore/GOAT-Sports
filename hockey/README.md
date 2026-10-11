@@ -1,5 +1,16 @@
 # GOAT Hockey
 
+> **This is the hockey part of GOAT Sports.** It was moved here from its own repository
+> (github.com/dougmullendore/Hockey), history included. What changed with the move:
+>
+> - The page is at `https://dougmullendore.github.io/GOAT-Sports/hockey/`.
+> - Every path below is inside this `hockey/` folder: `pipeline/config.py` is `hockey/pipeline/config.py`.
+> - What the job stores is in the `hockey/` folder of the `state` branch, and the finished pages are in
+>   the `hockey/` folder of `gh-pages`.
+> - The schedule is in the one workflow all the sports share, `.github/workflows/update.yml` at the top of
+>   the repository; the times in "When it updates" below still hold. The README at the top explains it.
+> - Run the tests from this folder: `cd hockey && python tests/run_local.py`.
+
 Every NHL game, day by day, with each team's chance of winning, where to
 watch and the score as it happens; the standings and a GOAT ranking of the 32
 teams; team and player stats; and a page for every team, game and player.
@@ -364,7 +375,7 @@ It is already on. If it ever needs doing again, in the repository's
 **Settings → Pages → Build and deployment → Source: "Deploy from a branch"**,
 choose branch `gh-pages` and folder `/ (root)`, and save.
 
-The page is at `https://dougmullendore.github.io/Hockey/`.
+The page is at `https://dougmullendore.github.io/GOAT-Sports/hockey/`.
 
 ## Good to know
 

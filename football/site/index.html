@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOAT Football: top 25 games</title>
+<meta name="description" content="Every game played by the top 25 teams in college football, week by week, with each team's chance of winning, where to watch, live scores, rankings, team stats and a card for every player.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="GOAT Football">
+<meta name="theme-color" content="#8a4b1c">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#games">Skip to the games</a>
+<header class="mast">
+  <div class="wrap mast-row">
+    <a class="brand" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.6 20.4c-1.2-5.6 1.1-11.6 6.2-14.7 3.1-1.9 7.1-2.5 10.6-2.1.4 3.5-.2 7.5-2.1 10.6-3.1 5.1-9.1 7.4-14.7 6.2z"/><path d="M9.2 14.8l5.6-5.6"/><path d="M10.3 11.3l2.4 2.4"/><path d="M12.3 9.3l2.4 2.4"/></svg><span id="brand">GOAT Football</span></a>
+    <nav class="pages" aria-label="Pages">
+      <a href="#/" data-page="games" data-w="nav.games">Games</a>
+      <a href="#/rankings" data-page="rankings" data-w="nav.rankings">Rankings</a>
+      <a href="#/teams" data-page="teams" data-w="nav.teams">Teams</a>
+      <a href="#/players" data-page="players" data-w="nav.players">Players</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <section id="page-games">
+    <h1 data-w="games.title">Ranked Games</h1>
+    <p class="lede" id="lede">Every game played by a ranked team in college football.</p>
+    <p class="livenote" id="live-note" role="status" hidden></p>
+    <div id="games" tabindex="-1">
+      <div class="bar">
+        <h2 id="h-list">Loading the games…</h2>
+        <div class="nav" id="nav"></div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section id="page-rankings" hidden>
+    <h1 data-w="rankings.title">Top 25 Rankings</h1>
+    <p class="lede" id="rank-lede"></p>
+    <div class="nav filters" id="rank-sort"></div>
+    <div class="ranks-head" id="ranks-head" aria-hidden="true"></div>
+    <ol class="ranks" id="ranks"></ol>
+    <p class="note" id="rank-note"></p>
+    <p class="note" id="goat-note"></p>
+    <p class="note" id="goat-out"></p>
+  </section>
+
+  <section id="page-teams" hidden>
+    <h1 data-w="teams.title">Top 25 Team Stats</h1>
+    <p class="lede" data-w="teams.lede">How each ranked team scores, moves the ball and defends, per game, and what its opponents manage against it.</p>
+    <div id="t-list"></div>
+  </section>
+
+  <section id="page-players" hidden>
+    <h1 data-w="players.title">Top Players</h1>
+    <p class="lede" data-w="players.lede">Every regular on a ranked team, ranked against the rest by Impact per game.</p>
+    <div class="nav filters" id="p-filters"></div>
+    <div id="p-list"></div>
+  </section>
+
+  <section id="page-team" hidden>
+    <div id="team"></div>
+  </section>
+
+  <section id="page-game" hidden>
+    <p class="back"><a href="#/" data-w="game.back">All games</a></p>
+    <div id="game"></div>
+  </section>
+
+  <section id="page-card" hidden>
+    <p class="back"><a href="#/players" data-w="players.back">All players</a></p>
+    <div id="card"></div>
+  </section>
+</main>
+<footer class="wrap foot">
+  <p id="foot-updated"></p>
+  <p data-w="footer.about">Game times are shown in your own time zone.</p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

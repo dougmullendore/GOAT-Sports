@@ -1,5 +1,16 @@
 # GOAT Volleyball
 
+> **This is the volleyball part of GOAT Sports.** It was moved here from its own repository
+> (github.com/dougmullendore/Volleyball), history included. What changed with the move:
+>
+> - The page is at `https://dougmullendore.github.io/GOAT-Sports/volleyball/`.
+> - Every path below is inside this `volleyball/` folder: `pipeline/config.py` is `volleyball/pipeline/config.py`.
+> - What the job stores is in the `volleyball/` folder of the `state` branch, and the finished pages are in
+>   the `volleyball/` folder of `gh-pages`.
+> - The schedule is in the one workflow all the sports share, `.github/workflows/update.yml` at the top of
+>   the repository; the times in "When it updates" below still hold. The README at the top explains it.
+> - Run the tests from this folder: `cd volleyball && python tests/run_local.py`.
+
 Every Division I women's college volleyball match, day by day, with the
 AVCA poll, a GOAT ranking of all D1 teams, team and player stats, and a page
 for every team and match. A Top 25 / All D1 switch narrows any page to the
@@ -326,7 +337,7 @@ One-time setup in the repository's **Settings**:
 then choose branch `gh-pages` and folder `/ (root)`, and save.
 
 A minute or two later the page is live at
-`https://dougmullendore.github.io/Volleyball/`.
+`https://dougmullendore.github.io/GOAT-Sports/volleyball/`.
 
 ## Good to know
 

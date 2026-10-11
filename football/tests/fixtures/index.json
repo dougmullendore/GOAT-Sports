@@ -1,0 +1,11 @@
+{
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=400": "3039a4faca501ba9",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=2026&seasontype=2&week=6&groups=80&limit=400": "3c1ba9d4409dd328",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings": "6b9e377180d44bf3",
+ "https://site.api.espn.com/apis/v2/sports/football/college-football/standings?season=2026&group=80": "b219041379868f13",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401856717": "eed8b1055815f36b",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401864519": "dcbaffc4d9100293",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/251/roster": "d00532c86c7d7ff5",
+ "https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/201/roster": "99b1c613902f2641",
+ "https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/5160961/stats": "f9673f1786b034bf"
+}

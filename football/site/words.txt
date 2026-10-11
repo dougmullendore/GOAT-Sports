@@ -1,0 +1,89 @@
+# THE WORDS ON THE SITE
+#
+# Each line is:   name = the words shown on the site
+# Change only the words after the = sign. Keep the name before it exactly as it is.
+# Lines starting with # are notes for you; the site ignores them.
+# A word in curly brackets, like {poll} or {date}, is filled in by the site
+# (the poll's name, a date, a number). You can move it or leave it out.
+# After you save, the site updates in about two minutes. If a line is broken,
+# the update stops, the old site stays up, and GitHub emails you.
+
+# ---- the tabs at the top ----
+nav.games = Games
+nav.rankings = Rankings
+nav.teams = Teams
+nav.players = Players
+
+# ---- the Top 25 / All FBS switch (Games, Teams, Players, team pages, player cards) ----
+scope.top25 = Top 25
+scope.fbs = All FBS
+
+# ---- Games page ----
+games.title = Ranked Games
+games.lede = Every game played by a team in the {poll}, week by week.
+games.title_fbs = FBS Games
+games.lede_fbs = Every game played by an FBS team, week by week.
+games.all_teams = All 25 teams
+games.all_teams_fbs = All FBS teams
+games.earlier = Earlier week
+games.this_week = This week
+games.later = Later week
+games.no_broadcast = No broadcast listed
+games.box_score = Box score
+games.live_box_score = Live box score
+games.live = Live
+games.away = Away
+games.home = Home
+
+# ---- Rankings page ----
+rankings.title = Top 25 Rankings
+rankings.lede = The {poll} of {date}.
+rankings.lede_goat = This site's own ranking of every FBS team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then strength of schedule, the poll and record; every other team follows from 26 the same way.
+rankings.lede_other = The {poll} of {date}.
+rankings.button_poll = AP Poll
+rankings.button_goat = GOAT Ranking
+rankings.beat = Beat
+rankings.lost_to = Lost to
+rankings.none_yet = None yet
+rankings.show_all = Show all {n} teams
+rankings.show_top = Show the top 25 only
+rankings.note = Record and change are from the poll, which is looked for on every update and normally comes out on Sunday afternoon. Beside each team are its results this season against the other 24, with their poll places, counting games played before the poll came out. Choose a team to see its page.
+rankings.note_goat = Beside each team are its results this season against the GOAT top 25, with their GOAT places. The AP column is the team's place in the AP poll; a dash means it is not ranked there. Redone on every update.
+rankings.note_other = Record and change are from the ranking itself. The numbers beside teams elsewhere on this site are from the AP poll.
+
+# ---- Teams page ----
+teams.title = Top 25 Team Stats
+teams.lede = How each ranked team scores, moves the ball and defends, per game, and what its opponents manage against it. From the box scores.
+teams.title_fbs = FBS Team Stats
+teams.lede_fbs = How every FBS team scores, moves the ball and defends, per game, and what its opponents manage against it. From the box scores.
+teams.all_conferences = All conferences
+teams.note = Yards, third downs, turnovers, penalties and points per drive count games with a box score. Rating is where this site's rating of results places the team among all FBS teams; SOS ranks the 25 by how strong their opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+teams.note_fbs = Yards, third downs, turnovers, penalties and points per drive count games with a box score. Rating is where this site's rating of results places the team among all FBS teams; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+
+# ---- a team's own page ----
+team.games = Games
+team.coming_up = Coming up
+team.latest_results = Latest results
+team.stats = Team Stats
+team.players = Players
+team.players_note = # is his rank by Impact per game among all regulars on the 25 ranked teams; part-time players are greyed and not ranked. Choose a name for his card.
+team.players_note_fbs = # is his rank by Impact per game among all regulars in FBS; part-time players are greyed and not ranked. Choose a name for his card.
+
+# ---- Players page ----
+players.title = Top Players
+players.lede = Every regular on a ranked team, ranked against the rest by Impact per game: the points he adds per game over an average top-25 regular at his position.
+players.title_fbs = FBS Players
+players.lede_fbs = Every regular in FBS, ranked against the rest by Impact per game: the points he adds per game over an average FBS regular at his position.
+players.note = Impact compares each player only with regulars at his position on this week's top 25 teams, from the box scores. It cannot see blocking, coverage or who was on the field, it does not adjust for the opponent, and offensive linemen have no numbers to rate. Quarterbacks touch the ball most, so they fill the top and the bottom of the list.
+players.note_fbs = Impact compares each player with every regular at his position in FBS, from the box scores. It cannot see blocking, coverage or who was on the field, and it does not adjust for the opponent, so players on weaker schedules can rate higher here than in the Top 25 view. Offensive linemen have no numbers to rate.
+players.back = All players
+players.career_note = Each season's line is ESPN's, with a line for every school he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
+players.career_wait = His earlier seasons have not been read yet. A few thousand players' careers are read on each update, the ranked teams' first, so they appear here within a day or two.
+
+# ---- a game's own page ----
+game.back = All Games
+game.note = The score comes from ESPN and updates every 30 seconds during a game. Team and player stats come from ESPN's box score; during a game they are refreshed about every 5 minutes.
+game.espn_link = This game on ESPN
+
+# ---- bottom of every page ----
+footer.about = Game times are shown in your own time zone. Schedules, scores, box scores, channels and betting lines come from ESPN's public feeds, and rankings are the AP Top 25 as ESPN publishes it. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to their schools and are shown from ESPN. Not affiliated with or endorsed by ESPN, the NCAA, the Associated Press or any school.
