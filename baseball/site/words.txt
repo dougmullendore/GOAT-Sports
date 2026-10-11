@@ -1,0 +1,89 @@
+# THE WORDS ON THE SITE
+#
+# Each line is:   name = the words shown on the site
+# Change only the words after the = sign. Keep the name before it exactly as it is.
+# Lines starting with # are notes for you; the site ignores them.
+# A word in curly brackets, like {date} or {n}, is filled in by the site
+# (a date, a number). You can move it or leave it out.
+# After you save, the site updates in about two minutes. If a line is broken,
+# the update stops, the old site stays up, and GitHub emails you.
+#
+# A few lines here are never shown on the baseball site (the ones about a top 25 and a
+# poll): the page is shared with the college sports, and it checks that every line is present.
+
+# ---- the tabs at the top ----
+nav.games = Games
+nav.rankings = Standings
+nav.teams = Teams
+nav.players = Players
+
+# ---- not shown: baseball has no Top 25 switch ----
+scope.top25 = Top 25
+scope.fbs = All teams
+
+# ---- Games page ----
+games.title = MLB Games
+games.lede = Every MLB game, day by day: each team's chance of winning, the probable starters, where to watch, and the score as it happens.
+games.all_teams = All 30 teams
+games.earlier = Earlier
+games.today = Today
+games.three_days = Today, tomorrow and yesterday
+games.later = Later
+games.no_broadcast = No broadcast listed
+games.box_score = Box score
+games.live_box_score = Live box score
+games.live = Live
+games.away = Away
+games.home = Home
+
+# ---- Standings page ----
+rankings.title = MLB Standings
+rankings.lede = The MLB standings, through games of {date}.
+rankings.lede_goat = This site's own ranking of the 30 teams: head to head first, then strength of schedule, place in the standings and record.
+rankings.lede_before = The season has not started yet.
+rankings.button_conf = League
+rankings.button_goat = GOAT Ranking
+rankings.note = Teams are placed by share of games won, then wins, then runs scored less runs allowed; the league's own tie-breakers are not worked through, so teams level on record can sit in a different order here. Records and runs are the league's, from ESPN, and count the regular season only. Choose a team to see its page.
+rankings.note_conf = Seeds are ESPN's, as things stand: the three division winners, then the three best of the rest. The six teams above the line in each league make the playoffs.
+rankings.note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten more often than not, unless the rest say the gap is wide), strength of schedule, its place in the standings, and its record. Redone on every update.
+# not shown on the baseball site
+rankings.lede_other = The {poll} of {date}.
+rankings.lede_nopoll = The season has not started yet.
+rankings.button_poll = Standings
+rankings.beat = Beat
+rankings.lost_to = Lost to
+rankings.none_yet = None yet
+rankings.show_all = Show all {n} teams
+rankings.show_top = Show the top 25 only
+rankings.note_other = Record and change are from the ranking itself.
+
+# ---- Teams page ----
+teams.title = MLB Team Stats
+teams.lede = How every MLB team hits, pitches and fields. From the box scores of the regular season.
+teams.all_conferences = All divisions
+teams.note = Hitting, pitching and fielding numbers count regular-season games with a box score. Rating is where this site's rating of results places the team in the league; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+
+# ---- a team's own page ----
+team.games = Games
+team.coming_up = Coming up
+team.latest_results = Latest results
+team.stats = Team Stats
+team.players = Players
+team.players_note = # is his rank by Impact among all MLB regulars: runs above average this season. Part-time players are greyed and not ranked. Choose a name for his card.
+
+# ---- Players page ----
+players.title = MLB Players
+players.lede = Every regular in MLB, ranked against the rest by Impact: the runs he has been worth this season beyond an average regular in his job.
+players.note = Impact is runs above average, from the box scores of the regular season. A hitter is measured against regulars at his position on what he does at the plate: 0.54 runs for a single, double or triple (a box score does not say which), 1.40 for a home run, 0.31 for a walk, and 0.26 lost for an out. A pitcher is measured against regular starters or relievers on the earned runs he gives up for the outs he gets. It cannot see fielding or baserunning, and it does not adjust for the ballpark or the opponent. On-base percentage and slugging are ESPN's.
+players.none_yet = No box scores yet this season. Players appear here after the first games.
+players.back = All players
+players.career_note = Each season's line is ESPN's, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
+players.career_wait = His earlier seasons have not been read yet. They appear here within a day or two.
+
+# ---- a game's own page ----
+game.back = All Games
+game.note = The score comes from ESPN and updates every 20 seconds during a game. The box score comes from ESPN too; during a game it is refreshed about every 5 minutes.
+game.espn_link = This game on ESPN
+
+# ---- bottom of every page ----
+footer.about = Game times are shown in your own time zone. Schedules, scores, standings, box scores, probable starters, channels and betting lines come from ESPN's public feeds. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to the league and its teams and are shown from ESPN. Not affiliated with or endorsed by Major League Baseball, ESPN or any team.

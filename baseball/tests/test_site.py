@@ -1,0 +1,222 @@
+"""Checks that the feeds are read correctly and that the site builds, using saved copies of
+ESPN's feeds (tests/fixtures; index.json says which file is which): September 26, 2026, a day
+late in the regular season, with two box scores, and October 10 and 11, in the playoffs.
+
+Run with:  python tests/run_local.py
+"""
+import datetime as dt
+import json
+import os
+import tempfile
+from pathlib import Path
+
+FIXTURES = Path(__file__).resolve().parent / "fixtures"
+os.environ["FETCH_CACHE"] = str(FIXTURES)
+
+from pipeline import cards, config, espn, odds, players, run, teams, web  # noqa: E402
+
+METS, NATIONALS, GAME = "21", "20", 401817091            # Mets 7, Nationals 1
+DAY = "20260926"
+
+
+def games_of(day):
+    doc = web.get_json(config.DAY.format(day=day))
+    return {g["id"]: g for g in (espn.parse_event(e, day) for e in doc["events"]) if g}
+
+
+def box():
+    return espn.parse_summary(web.get_json(config.SUMMARY.format(game=GAME)))
+
+
+def stored(state: Path):
+    """Stored data as it stood on the evening of October 10, built from the saved feeds."""
+    now = dt.datetime(2026, 10, 11, 2, 30, tzinfo=dt.timezone.utc)
+    days = {d: {"read": "2026-10-10", "games": list(games_of(d).values())} for d in (DAY, "20261010", "20261011")}
+    run.write_json(state / "scoreboard.json", {"season": 2026, "first": "2026-02-19", "last": "2026-11-12", "days": days})
+    run.write_json(state / "fbs.json", espn.parse_standings(web.get_json(config.STANDINGS.format(season=2026))))
+    run.update_boxes(state, now)
+    run.update_rosters(state, now)
+    run.update_careers(state, now)
+    return now
+
+
+def test_a_day_is_read():
+    games = games_of(DAY)
+    g = games[GAME]
+    assert g["state"] == "final" and g["date"] == "2026-09-26" and g["kind"] == 2
+    assert (g["away"]["id"], g["away"]["name"], g["away"]["score"], g["away"]["lines"]) == (METS, "Mets", 7, [0, 0, 0, 0, 0, 0, 4, 1, 2])
+    assert (g["home"]["id"], g["home"]["name"], g["home"]["score"]) == (NATIONALS, "Nationals", 1)
+    assert g["extra"] == [[10, 1], [3, 1]]                       # hits and errors, away then home
+    assert g["wp"] == ["4717899", "D. Nunez"] and g["lp"][1] == "J. Irvin"
+    assert len(games) == 13 and all(x["kind"] == 2 for x in games.values())
+
+
+def test_the_playoffs_and_a_game_still_to_come():
+    live = next(iter(games_of("20261010").values()))
+    assert live["kind"] == 3 and live["round"] == "ALDS - Game 5" and live["series"] == "Series tied 2-2"
+    assert live["state"] == "live" and live["detail"] and live["extra"][1] == [5, 0]
+    ahead = next(iter(games_of("20261011").values()))
+    assert ahead["state"] == "upcoming" and ahead["away"]["score"] is None and "extra" not in ahead
+    assert ahead["away"]["sp"][1] and ahead["home"]["sp"][1] and ahead["tv"]         # the probable starters
+
+
+def test_the_season():
+    season, first, last = espn.parse_season(web.get_json(config.SCOREBOARD))
+    assert (season, first, last) == (2026, "2026-02-19", "2026-11-12")
+    assert len(run.each_day(first, last)) == 267
+
+
+def test_the_standings():
+    table = espn.parse_standings(web.get_json(config.STANDINGS.format(season=2026)))
+    assert len(table) == 30
+    ny = table["10"]
+    assert (ny["name"], ny["place"], ny["conf"], ny["group"], ny["w"], ny["l"]) == ("Yankees", "New York", "AL East", "AL", 93, 68)
+    assert ny["rec"]["home"] == "46-34" and ny["rec"]["div"] == "29-22" and ny["rec"]["conf"] == "66-47" and ny["gb"] == "4.5"
+    assert (ny["pf"], ny["pa"], ny["seed"]) == (739, 601, 4) and ny["logo"].startswith("https://")
+    assert {t["group"] for t in table.values()} == {"AL", "NL"} and len({t["conf"] for t in table.values()}) == 6
+
+
+def test_innings():
+    assert [espn.outs(x) for x in ("6.2", "9.0", "0.1", "", None, "7")] == [20, 27, 1, 0, 0, 21]
+    assert [players.innings(x) for x in (20, 27, 1, 0)] == ["6.2", "9.0", "0.1", "0.0"]
+
+
+def test_a_box_score_is_read():
+    b = box()
+    assert b["status"] == "F" and b["home_id"] == NATIONALS and b["away_id"] == METS
+    t = dict(zip(espn.TEAM, b["team"]["away"]))
+    assert (t["ab"], t["r"], t["h"], t["d"], t["hr"], t["bb"], t["k"], t["hbp"], t["tb"], t["lob"]) == (36, 7, 10, 1, 3, 4, 8, 1, 20, 15)
+    assert (t["outs"], t["ph"], t["er"], t["pk"], t["e"]) == (27, 3, 1, 14, 1)
+    at = {c: 5 + i for i, c in enumerate(espn.COLS)}
+    rows = {r[1]: r for r in b["players"]["away"]}
+    soto = rows["Juan Soto"]
+    assert soto[3] == "LF" and soto[4] == 1 and (soto[at["bo"]], soto[at["ab"]], soto[at["h"]], soto[at["k"]]) == (2, 4, 2, 1)
+    assert (soto[at["avg"]], soto[at["obp"]], soto[at["slg"]]) == (278, 397, 522) and soto[at["pn"]] == 0
+    sub = rows["Nick Morabito"]
+    assert sub[4] == 0 and sub[at["bo"]] == 2                    # came in for Soto, in his place in the order
+    tong, nunez = rows["Jonah Tong"], rows["Dedniel Nunez"]
+    assert tong[3] == "SP" and tong[4] == 1 and (tong[at["pn"]], tong[at["outs"]], tong[at["er"]], tong[at["pk"]], tong[at["pc"]], tong[at["era"]]) == (1, 15, 1, 9, 87, 382)
+    assert nunez[2] == "W" and nunez[3] == "RP" and nunez[at["pn"]] == 2 and rows["Nate Lavender"][2] == "H"
+    batters = [r for r in b["players"]["away"] if r[at["bo"]]]
+    assert sum(r[at["ab"]] for r in batters) == 36 and sum(r[at["h"]] for r in batters) == 10 and sum(r[at["hr"]] for r in batters) == 3
+    assert sum(r[at["outs"]] for r in b["players"]["away"]) == 27
+    assert sum(r[4] for r in batters) == 9
+
+
+def test_a_roster_and_a_career_are_read():
+    roster = espn.parse_roster(web.get_json(config.ROSTER.format(team=METS)))
+    assert len(roster) >= 26
+    name, number, pos, height, weight, years, home, photo, hands = roster["36969"]
+    assert name == "Juan Soto" and pos in ("LF", "RF") and height > 60 and "season" in years and hands == "L/L"
+    assert {players.group(p[2]) for p in roster.values()} <= set(players.POSITIONS)
+    career = espn.parse_career(web.get_json(config.CAREER.format(player="36969")))
+    assert [c[0] for c in career][:1] == ["Career Batting"] and all(c[0].startswith(("Career", "Postseason")) for c in career)
+    title, heads, seasons, total = career[0]
+    assert heads[:4] == ["GP", "AB", "R", "H"] and seasons[0][:2] == ["2018", "WSH"] and len(total) == len(heads)
+
+
+def rated(state):
+    sel = run.selection(state)
+    logs = {}
+    out = players.compute(sel["teams"], sel["all_games"], run.read_json(state / "box.json", {}), run.read_json(state / "rosters.json", {}), logs)
+    return out, logs
+
+
+def test_impact_is_runs_above_average():
+    with tempfile.TemporaryDirectory() as tmp:
+        state = Path(tmp)
+        stored(state)
+        out, logs = rated(state)
+    keys = out["metrics"]
+    by = {p["name"]: p for p in out["players"]}
+    soto = by["Juan Soto"]
+    v = dict(zip(keys, soto["v"]))
+    assert soto["group"] == "OF" and soto["team_id"] == METS and soto["tot"]["ab"] == 4 and soto["bio"]["bt"] == "Bats/throws L/L"
+    assert (v["avg"], v["obp"], v["slg"], v["ops"]) == (0.278, 0.397, 0.522, 0.919)          # ESPN's season figures
+    assert v["pit"] is None and abs(v["impact_t"] - (v["hit"] + v["power"] + v["walk"] + v["out"])) < 0.03
+    tong = by["Jonah Tong"]
+    v = dict(zip(keys, tong["v"]))
+    assert tong["group"] == "SP" and v["hit"] is None and abs(v["impact_t"] - v["pit"]) < 0.01 and v["era"] == 3.82 and v["ip_g"] == 5.0
+    assert tong["tot"]["outs"] == 15 and tong["tot"]["gs_p"] == 1 and by["Dedniel Nunez"]["tot"]["w"] == 1 and by["Nate Lavender"]["tot"]["hld"] == 1
+    # the playoffs are not counted: only the two regular-season box scores
+    assert sum(t["games"] for t in out["teams"]) == 4
+    # regular hitters at a position, and regular pitchers in a role, add up to nothing
+    for grp in players.POSITIONS:
+        mine = [p for p in out["players"] if p["regular"] and p["group"] == grp]
+        if len(mine) >= players.MIN_POOL:
+            assert abs(sum(p["impact"] for p in mine)) < 0.6, grp
+    ranked = [p for p in out["players"] if p["regular"]]
+    assert [p["rank"] for p in ranked] == list(range(1, len(ranked) + 1))
+    assert all(a["impact"] >= b["impact"] for a, b in zip(ranked, ranked[1:]))
+    line = logs[tong["id"]][0]
+    assert len(line) == 6 + len(players.LOG) + 1 and line[5] == "W 7-1"
+    extras = cards.build(out, logs, {}, set())[METS]
+    assert extras[tong["id"]]["highs"][0][:2] == ["Strikeouts", 9] and ["Innings", 5.0] in [h[:2] for h in extras[tong["id"]]["highs"]]
+    assert extras[soto["id"]]["marks"] == [["multi-hit games", 1]]
+
+
+def test_team_stats():
+    g = games_of(DAY)[GAME]
+    ranked = [{"id": METS, "name": "Mets", "rank": 1}, {"id": NATIONALS, "name": "Nationals", "rank": 2}]
+    out = teams.compute(ranked, [g], {str(GAME): box()}, {METS: 0.5, NATIONALS: -0.5})
+    ny = next(t for t in out["teams"] if t["id"] == METS)
+    dc = next(t for t in out["teams"] if t["id"] == NATIONALS)
+    assert (ny["w"], ny["l"], ny["rpg"], ny["rapg"], ny["diff"]) == (1, 0, 7.0, 1.0, 6)
+    assert ny["avg"] == round(10 / 36, 3) and ny["slg"] == round(20 / 36, 3) and ny["obp"] == round(15 / 41, 3)
+    assert ny["era"] == 1.0 and ny["whip"] == round(4 / 9, 2) and ny["k9"] == 14.0 and ny["hr_g"] == 3.0
+    assert dc["opp_avg"] == ny["avg"] and ny["power"] == 1 and dc["power"] == 2
+
+
+def test_odds_are_never_far_from_even():
+    assert abs(odds.chance(0, 0, neutral=True) - 0.5) < 1e-9 and 0.5 < odds.chance(0, 0) < 0.56
+    seed = odds.seed()
+    assert seed["season"] == 2025 and len(seed["ratings"]) == 30
+    best, worst = max(seed["ratings"].values()), min(seed["ratings"].values())
+    assert 0.6 < odds.chance(best, worst) < 0.8
+
+
+def test_the_words_file():
+    words = run.read_words()
+    for key in ("games.title", "rankings.title", "rankings.note_conf", "players.note", "footer.about"):
+        assert words[key], key
+
+
+def test_the_site_builds():
+    with tempfile.TemporaryDirectory() as tmp:
+        state, out = Path(tmp) / "state", Path(tmp) / "site"
+        state.mkdir()
+        now = stored(state)
+        info = run.build_site(state, out, now)
+        data = json.loads((out / "data.json").read_text())
+        assert info["teams"] == 30 and info["game_pages"] >= 2 and info["players"] > 40
+        assert data["site"] == "GOAT Baseball" and data["league"] == "" and data["pro"] and data["numbered"] and data["periods"] == 9
+        assert data["leagues"] == [["", "MLB"]] and data["season_label"] == "2026" and "{day}" in data["live_feed"]
+        assert [t["rank"] for t in data["poll"]["teams"]] == list(range(1, 31)) and len(data["standings"]) == 30
+        assert data["standings"][0]["w"] >= data["standings"][-1]["w"] and data["logos"]["10"].startswith("https://")
+        g = next(g for g in data["games"] if g["id"] == GAME)
+        assert g["box"] and 0.3 < g["p0"] < 0.7 and g["extra"] == [[10, 1], [3, 1]]
+        ahead = next(g for g in data["games"] if g["state"] == "upcoming")
+        assert 0.3 < ahead["p"] < 0.7 and ahead["home"]["sp"]
+        page = json.loads((out / "game" / f"{GAME}.json").read_text())
+        assert len(page["team"]["home"]) == len(espn.TEAM) and len(page["players"]["away"][0]) == 5 + len(espn.COLS) + 1
+        for name in ("players_fbs.json", "teams_fbs.json", "index.html", "app.js", "styles.css", "icon-192.png", "manifest.json"):
+            assert (out / name).exists(), name
+        assert not (out / "players.json").exists()                  # no poll, so one list of players
+        everyone = json.loads((out / "players_fbs.json").read_text())
+        assert everyone["metrics"][0] == "impact_t" and any(p["team_id"] == METS for p in everyone["players"])
+        soto = json.loads((out / "cards" / f"{METS}.json").read_text())["36969"]
+        assert soto["games"] and soto["career"] and soto["highs"]
+        html = (out / "index.html").read_text()
+        assert "app.js?v=" in html and "#475569" in html and "GOAT Baseball" in html
+
+
+def test_a_game_day_run_looks_only_while_a_game_is_on():
+    with tempfile.TemporaryDirectory() as tmp:
+        state = Path(tmp)
+        stored(state)
+        on = dt.datetime(2026, 10, 11, 2, 30, tzinfo=dt.timezone.utc)               # the ALDS game is in the eighth
+        assert run.live_now(state, on) == ["20261010"]
+        assert run.live_now(state, on - dt.timedelta(hours=9)) == []
+        first_pitch = next(iter(games_of("20261011").values()))["start"]
+        soon = dt.datetime.fromtimestamp(first_pitch - 600, dt.timezone.utc)
+        assert "20261011" in run.live_now(state, soon)

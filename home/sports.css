@@ -12,5 +12,11 @@
 :root[data-theme="dark"] .sports { background: #060b16; }
 /* the volleyball leagues' tabs sit right under the strip, so they need less room above */
 .sports + .leagues { padding-top: 14px; }
-@media (max-width: 480px) { .sports a { padding-left: 8px; padding-right: 8px; } .sports .sports-home { margin-right: 2px; font-size: .875rem; } }
+/* on a phone the site's name is cut to "GOAT" so every sport's tab fits without scrolling */
+@media (max-width: 480px) {
+  .sports { font-size: .75rem; }
+  .sports a { padding-left: 5px; padding-right: 5px; }
+  .sports .sports-home { margin-right: 0; font-size: 0; letter-spacing: 0; }
+  .sports .sports-home::before { content: "GOAT"; font-size: .8125rem; letter-spacing: .04em; }
+}
 @media print { .sports { display: none; } }

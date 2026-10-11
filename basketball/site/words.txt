@@ -1,0 +1,123 @@
+# THE WORDS ON THE SITE
+#
+# Each line is:   name = the words shown on the site
+# Change only the words after the = sign. Keep the name before it exactly as it is.
+# Lines starting with # are notes for you; the site ignores them.
+# A word in curly brackets, like {poll} or {date}, is filled in by the site
+# (the poll's name, a date, a number). You can move it or leave it out.
+# After you save, the site updates in about two minutes. If a line is broken,
+# the update stops, the old site stays up, and GitHub emails you.
+
+# ---- the tabs at the top ----
+nav.games = Games
+nav.rankings = Rankings
+nav.teams = Teams
+nav.players = Players
+
+# ---- the Top 25 / All D-I switch (Games, Teams, Players, team pages, player cards) ----
+scope.top25 = Top 25
+scope.fbs = All D-I
+
+# ---- Games page ----
+games.title = Ranked Games
+games.lede = Every game played by a team in the {poll}, day by day.
+games.title_fbs = Division I Games
+games.lede_fbs = Every game played by a Division I men's team, day by day.
+games.all_teams = All 25 teams
+games.all_teams_fbs = All Division I teams
+games.earlier = Earlier
+games.today = Today
+games.three_days = Today, tomorrow and yesterday
+games.later = Later
+games.no_broadcast = No broadcast listed
+games.box_score = Box score
+games.live_box_score = Live box score
+games.live = Live
+games.away = Away
+games.home = Home
+
+# ---- Rankings page ----
+rankings.title = Top 25 Rankings
+rankings.lede = The {poll} of {date}.
+rankings.lede_goat = This site's own ranking of every Division I team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then strength of schedule, the poll and record; every other team follows from 26 the same way.
+rankings.lede_other = The {poll} of {date}.
+# shown before the season's first AP poll comes out
+rankings.lede_nopoll = This season's first AP poll is not out yet. Until it is, this is the site's own ranking of every Division I team, and every page shows the whole division.
+# used on the NBA's Standings page only, before its first game
+rankings.lede_before = The season has not started yet.
+rankings.button_poll = AP Poll
+rankings.button_goat = GOAT Ranking
+rankings.button_conf = Conference
+rankings.beat = Beat
+rankings.lost_to = Lost to
+rankings.none_yet = None yet
+rankings.show_all = Show all {n} teams
+rankings.show_top = Show the top 25 only
+rankings.note = Record and change are from the poll, which is looked for on every update and normally comes out on Monday. Beside each team are its results this season against the other 24, with their poll places, counting games played before the poll came out. Choose a team to see its page.
+rankings.note_goat = Beside each team are its results this season against the GOAT top 25, with their GOAT places. The AP column is the team's place in the AP poll; a dash means it is not ranked there. Redone on every update.
+rankings.note_other = Record and change are from the ranking itself. The numbers beside teams elsewhere on this site are from the AP poll.
+# used on the NBA's Standings page only (its own wording is at the bottom of this file)
+rankings.note_conf = The top six teams in each conference make the playoffs.
+
+# ---- Teams page ----
+teams.title = Top 25 Team Stats
+teams.lede = How each ranked team scores, shoots and defends, per game and per 100 possessions. From the box scores.
+teams.title_fbs = Division I Team Stats
+teams.lede_fbs = How every Division I team scores, shoots and defends, per game and per 100 possessions. From the box scores.
+teams.all_conferences = All conferences
+teams.note = Per-possession numbers, shooting, rebounding and turnovers count games with a box score. Rating is where this site's rating of results places the team among all Division I teams; SOS ranks the 25 by how strong their opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+teams.note_fbs = Per-possession numbers, shooting, rebounding and turnovers count games with a box score. Rating is where this site's rating of results places the team among all Division I teams; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+
+# ---- a team's own page ----
+team.games = Games
+team.coming_up = Coming up
+team.latest_results = Latest results
+team.stats = Team Stats
+team.players = Players
+team.players_note = # is his rank by Impact per game among all regulars on the 25 ranked teams; part-time players are greyed and not ranked. Choose a name for his card.
+team.players_note_fbs = # is his rank by Impact per game among all regulars in Division I; part-time players are greyed and not ranked. Choose a name for his card.
+
+# ---- Players page ----
+players.title = Top Players
+players.lede = Every regular on a ranked team, ranked against the rest by Impact per game: what his box score adds over an average top-25 regular at his position in the same minutes.
+players.title_fbs = Division I Players
+players.lede_fbs = Every regular in Division I, ranked against the rest by Impact per game: what his box score adds over an average Division I regular at his position in the same minutes.
+players.note = Impact compares each player only with regulars at his position on this week's top 25 teams, from the box scores. It cannot see defense that leaves no number or who else was on the floor, and it does not adjust for the opponent.
+players.note_fbs = Impact compares each player with every regular at his position in Division I, from the box scores. It cannot see defense that leaves no number or who else was on the floor, and it does not adjust for the opponent, so players on weaker schedules can rate higher here than in the Top 25 view.
+players.none_yet = No box scores yet this season. Players appear here after the first games.
+players.back = All players
+players.career_note = Each season's line is ESPN's, with a line for every school he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
+players.career_wait = His earlier seasons have not been read yet. A few thousand players' careers are read on each update, the ranked teams' first, so they appear here within a day or two.
+
+# ---- a game's own page ----
+game.back = All Games
+game.note = The score comes from ESPN and updates every 20 seconds during a game. Team and player stats come from ESPN's box score; during a game they are refreshed about every 5 minutes.
+game.espn_link = This game on ESPN
+
+# ---- bottom of every page ----
+footer.about = Game times are shown in your own time zone. This is men's college basketball. Schedules, scores, box scores, channels and betting lines come from ESPN's public feeds, and rankings are the AP Top 25 as ESPN publishes it. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to their schools and are shown from ESPN. Not affiliated with or endorsed by ESPN, the NCAA, the Associated Press or any school.
+
+# ---- the NBA pages (the site's nba/ folder) ----
+# These replace the lines above on the NBA pages. There is no poll there: every team is numbered
+# by its place in the league standings, and there is no Top 25 switch.
+nba.nav_rankings = Standings
+nba.games_title = NBA Games
+nba.games_lede = Every NBA game, day by day: each team's chance of winning, where to watch, and the score as it happens.
+nba.games_all_teams = All 30 teams
+nba.rankings_title = NBA Standings
+nba.rankings_lede = The NBA standings, through games of {date}.
+nba.rankings_lede_goat = This site's own ranking of the 30 teams: head to head first, then strength of schedule, place in the standings and record.
+nba.rankings_note = Teams are placed by share of games won, then wins, then points scored less points allowed; the league's own tie-breakers are not worked through, so teams level on record can sit in a different order here. Records and points are the league's, from ESPN. Choose a team to see its page.
+nba.rankings_note_conf = Seeds are ESPN's, as things stand. The six teams above the first line in each conference make the playoffs; the next four, down to the second line, play in for the last two places.
+nba.rankings_note_goat = Every team is ranked on four things, most important first: head to head (a team is ranked above one it has beaten unless the rest say the gap is wide), strength of schedule, its place in the standings, and its record. Redone on every update.
+nba.teams_title = NBA Team Stats
+nba.teams_lede = How every NBA team scores, shoots and defends, per game and per 100 possessions. From the box scores.
+nba.teams_all_conferences = All divisions
+nba.teams_note = Per-possession numbers, shooting, rebounding and turnovers count games with a box score. Rating is where this site's rating of results places the team in the league; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
+nba.team_players_note = # is his rank by Impact per game among all NBA regulars; part-time players are greyed and not ranked. Choose a name for his card.
+nba.players_title = NBA Players
+nba.players_lede = Every regular in the NBA, ranked against the rest by Impact per game: what his box score adds over an average NBA regular at his position in the same minutes.
+nba.players_note = Impact compares each player with every regular at his position in the NBA, from the box scores of the regular season; playoff games are listed but not counted. It cannot see defense that leaves no number or who else was on the floor, and it does not adjust for the opponent.
+nba.players_career_note = Each season's line is ESPN's, regular season only, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
+nba.players_career_wait = His earlier seasons have not been read yet. They appear here within a day.
+nba.footer_about = Game times are shown in your own time zone. Schedules, scores, standings, box scores, channels and betting lines come from ESPN's public feeds. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to the league and its teams and are shown from ESPN. Not affiliated with or endorsed by the NBA, ESPN or any team.

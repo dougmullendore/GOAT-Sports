@@ -2,8 +2,8 @@
 
 Usage:  python -m tools.assemble <built_dir> <site_dir>
 
-<built_dir> holds what this run built: built/hockey, built/volleyball,
-built/football, whichever of them ran. <site_dir> is a copy of the published
+<built_dir> holds what this run built: built/volleyball, built/hockey,
+built/football, built/basketball, built/baseball, whichever of them ran. <site_dir> is a copy of the published
 site. Each sport built this run replaces its folder there; a sport that was not
 rebuilt (a game-night run that found nothing to do) keeps the pages already
 published. Then every sport's pages get the bar across the top that switches
@@ -24,11 +24,13 @@ HOME_SRC = ROOT / "home"
 
 # The sports, in the order of the bar and of the front page. `pages` are the folders that hold a
 # copy of that sport's page (volleyball has one for college and one for each pro league, football
-# one for college and one for the NFL).
+# one for college and one for the NFL, basketball one for college and one for the NBA).
 SPORTS = [
     {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
     {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "football", "name": "Football", "pages": ["", "nfl/"]},
+    {"key": "basketball", "name": "Basketball", "pages": ["", "nba/"]},
+    {"key": "baseball", "name": "Baseball", "pages": [""]},
 ]
 # The front page's lists: one for each league, in the order shown. `score` is the name the
 # league's games give a team's score; `game` is the address of a game's own page; `ranked_only`
@@ -45,6 +47,12 @@ LEAGUES = [
     {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
      "game": "#/game/", "ranked_only": True, "unit": "games"},
     {"key": "nfl", "sport": "football", "folder": "football/nfl/", "name": "NFL", "label": "Football", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "cbb", "sport": "basketball", "folder": "basketball/", "name": "College basketball", "label": "Basketball", "score": "score",
+     "game": "#/game/", "ranked_only": True, "unit": "games"},
+    {"key": "nba", "sport": "basketball", "folder": "basketball/nba/", "name": "NBA", "label": "Basketball", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "mlb", "sport": "baseball", "folder": "baseball/", "name": "MLB", "label": "Baseball", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
@@ -104,17 +112,20 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
         entry.update(ready=True, updated=data.get("updated"), logo=data.get("logo") or None, logos=data.get("logos") or None,
                      abbr=data.get("abbr") or None, poll=(data.get("poll") or {}).get("name"))
         games = data.get("games") or []
+        numbered = data.get("numbered", True)         # False before a season's first poll or first game: no numbers to show
+        if lg["ranked_only"] and data.get("no_poll"):
+            entry["ranked_only"] = False              # no top 25 yet, so nothing to narrow the day down to
         dates = sorted(g["date"] for g in games if g.get("date"))
         entry["first"], entry["last"] = (dates[0], dates[-1]) if dates else (None, None)
         entry["next"] = next((d for d in dates if d > hi), None)        # when the list is empty: the next day with a game
         for g in games:
             if not (lo <= g.get("date", "") <= hi):
                 continue
-            if lg["ranked_only"] and not (g["away"].get("rank") or g["home"].get("rank")):
+            if entry["ranked_only"] and not (g["away"].get("rank") or g["home"].get("rank")):
                 continue
 
             def side(s):
-                return [s.get("id"), s.get("name"), s.get("rank"), s.get(lg["score"])]
+                return [s.get("id"), s.get("name"), s.get("rank") if numbered else None, s.get(lg["score"])]
 
             entry["games"].append({"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
                                    "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),

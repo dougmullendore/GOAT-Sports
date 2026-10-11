@@ -1,0 +1,13 @@
+{
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?limit=400": "547873531deccc33",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=20260926&limit=400": "e22b7c0a4b7cfd48",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=20261010&limit=400": "7982474a75d96792",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=20261011&limit=400": "dd95acffb14bcfbf",
+ "https://site.api.espn.com/apis/v2/sports/baseball/mlb/standings?season=2026&level=3": "bf18be6ac1241bc9",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=401817091": "26a118013eaac3f8",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=401817092": "fb087bdb2f2bf9c7",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21/roster": "40dd46de97ac787f",
+ "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/20/roster": "0b0623586fa8f6ba",
+ "https://site.web.api.espn.com/apis/common/v3/sports/baseball/mlb/athletes/32129/stats": "b58567c121db334d",
+ "https://site.web.api.espn.com/apis/common/v3/sports/baseball/mlb/athletes/36969/stats": "b8318edfd564eccc"
+}

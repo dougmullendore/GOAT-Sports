@@ -1,10 +1,11 @@
 /* GOAT Sports, the front page. Same look as the sports' own pages: one column, left aligned,
-   each sport in its own colour (teal for hockey, purple for volleyball, brown for football). */
+   each sport in its own colour (purple for volleyball, teal for hockey, brown for football,
+   orange for basketball, slate for baseball). */
 :root {
   --floor: #eef2f8; --sheet: #ffffff; --ink: #0f1d33; --ink-2: #4f5d73; --line: #cfd8e6;
   --teal: #1d4ed8; --teal-soft: #e2e9fb; --ball: #f5b83d; --ball-ink: #0f1d33;
   --win: #15803d; --loss: #b3261e; --loss-ink: #ffffff; --lost: #7a8699;
-  --hockey: #0e7490; --volleyball: #6d28d9; --football: #8a4b1c;
+  --hockey: #0e7490; --volleyball: #6d28d9; --football: #8a4b1c; --basketball: #c2410c; --baseball: #475569;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -12,7 +13,7 @@
     --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
     --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #f5b83d; --ball-ink: #0f1d33;
     --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
-    --hockey: #67d3ea; --volleyball: #b794f6; --football: #e3a872;
+    --hockey: #67d3ea; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #a8b5c8;
     color-scheme: dark;
   }
 }
@@ -20,10 +21,11 @@
   --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
   --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #f5b83d; --ball-ink: #0f1d33;
   --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
-  --hockey: #67d3ea; --volleyball: #b794f6; --football: #e3a872;
+  --hockey: #67d3ea; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #a8b5c8;
   color-scheme: dark;
 }
 .s-hockey { --c: var(--hockey); } .s-volleyball { --c: var(--volleyball); } .s-football { --c: var(--football); }
+.s-basketball { --c: var(--basketball); } .s-baseball { --c: var(--baseball); }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }

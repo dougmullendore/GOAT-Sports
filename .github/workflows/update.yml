@@ -1,29 +1,30 @@
 name: Update the site
 
-# One job keeps all three sports up to date. Each sport has its own folder with its own code
-# (volleyball/, hockey/, football/, which does college and the NFL), its own folder of stored data on the `state` branch and its
-# own folder of pages on the `gh-pages` branch. A sport that fails does not stop the others.
+# One job keeps every sport up to date. Each sport has its own folder with its own code
+# (volleyball/, hockey/, football/ which does college and the NFL, basketball/ which does college
+# and the NBA, baseball/), its own folder of stored data on the `state` branch and its own folder
+# of pages on the `gh-pages` branch. A sport that fails does not stop the others.
 
 on:
   schedule:
     - cron: '47 10 * * *'   # every morning, about 5:47am Central: every sport, in full
     - cron: '47 16 * * *'   # every day about 11:47am Central: every sport again
-    - cron: '47 4 * * *'    # every night about 11:47pm Central: volleyball and football, so the night's results are in by morning
-    - cron: '17 8 * * *'    # every night about 3:17am Central: hockey and football, once the late games out west are over
-    - cron: '13 21 * * 1'   # Monday about 4pm Central: volleyball, to look for the new AVCA top 25
+    - cron: '47 4 * * *'    # every night about 11:47pm Central: every sport but hockey, so the night's results are in by morning
+    - cron: '17 8 * * *'    # every night about 3:17am Central: every sport but volleyball, once the late games out west are over
+    - cron: '13 21 * * 1'   # Monday about 4pm Central: volleyball and basketball, to look for the new AVCA and AP top 25
     - cron: '13 2 * * 2'    # Monday about 9pm Central: volleyball again, in case the poll came out late
     - cron: '23 19 * * 0'   # Sunday about 2:23pm Central: football, to look for the new AP top 25
     - cron: '23 23 * * 0'   # Sunday about 6:23pm Central: football again, in case the poll came out late
     # game days: every 5 minutes from about 11am to 2am Central, for live scores and box scores.
     # Each sport looks whether one of its games is on and stops within seconds when none is.
-    - cron: '*/5 16-23 * 1-6,8-12 *'
-    - cron: '*/5 0-7 * 1-6,8-12 *'
+    - cron: '*/5 16-23 * * *'
+    - cron: '*/5 0-7 * * *'
     # Sunday mornings in the NFL season, from about 8am Central: the games played in Europe start early
     - cron: '*/5 13-15 * 1-2,9-12 0'
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['hockey/**', 'volleyball/**', 'football/**', 'home/**', 'tools/**', '.github/workflows/update.yml']
+    paths: ['hockey/**', 'volleyball/**', 'football/**', 'basketball/**', 'baseball/**', 'home/**', 'tools/**', '.github/workflows/update.yml']
 
 concurrency:
   group: update
@@ -51,19 +52,21 @@ jobs:
         env:
           SCHEDULE: ${{ github.event.schedule }}
         run: |
-          H=full; V=full; F=full
+          H=full; V=full; F=full; B=full; M=full
           case "$SCHEDULE" in
-            '*/5 '*) H=live; V=live; F=live ;;
+            '*/5 '*) H=live; V=live; F=live; B=live; M=live ;;
             '47 4 * * *') H=skip ;;
             '17 8 * * *') V=skip ;;
-            '13 21 * * 1'|'13 2 * * 2') H=skip; F=skip ;;
-            '23 19 * * 0'|'23 23 * * 0') H=skip; V=skip ;;
+            '13 21 * * 1') H=skip; F=skip; M=skip ;;
+            '13 2 * * 2') H=skip; F=skip; B=skip; M=skip ;;
+            '23 19 * * 0'|'23 23 * * 0') H=skip; V=skip; B=skip; M=skip ;;
           esac
-          [ -d football/pipeline ] || F=skip
           echo "hockey=$H" >> "$GITHUB_OUTPUT"
           echo "volleyball=$V" >> "$GITHUB_OUTPUT"
           echo "football=$F" >> "$GITHUB_OUTPUT"
-          echo "hockey: $H, volleyball: $V, football: $F"
+          echo "basketball=$B" >> "$GITHUB_OUTPUT"
+          echo "baseball=$M" >> "$GITHUB_OUTPUT"
+          echo "volleyball: $V, hockey: $H, football: $F, basketball: $B, baseball: $M"
 
       - name: Get what was stored last time
         id: state
@@ -109,6 +112,22 @@ jobs:
           RUN_MODE: ${{ steps.plan.outputs.football }}
           CHECK_POLL: ${{ github.event_name != 'schedule' && '1' || '0' }}
         run: ../tools/run_sport.sh football
+
+      - name: Basketball
+        id: basketball
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && steps.plan.outputs.basketball != 'skip' }}
+        working-directory: basketball
+        env:
+          RUN_MODE: ${{ steps.plan.outputs.basketball }}
+        run: ../tools/run_sport.sh basketball
+
+      - name: Baseball
+        id: baseball
+        if: ${{ !cancelled() && steps.state.outcome == 'success' && steps.plan.outputs.baseball != 'skip' }}
+        working-directory: baseball
+        env:
+          RUN_MODE: ${{ steps.plan.outputs.baseball }}
+        run: ../tools/run_sport.sh baseball
 
       - name: Save what was stored
         if: ${{ always() && steps.state.outcome == 'success' }}
