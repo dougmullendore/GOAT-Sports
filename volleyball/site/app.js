@@ -18,6 +18,17 @@
     tag.style.background = "rgb(" + bg.join(",") + ")";       // the number itself is always dark with a white outline (styles)
   }
   function shadeAll(root) { if (!root || root.nodeType !== 1) return; shadeRank(root); Array.prototype.forEach.call(root.querySelectorAll(".rk"), shadeRank); }
+  // ---- a game's whole row opens its page: the preview before it starts, the box score once it has ----
+  // (the team names in the row still go to the teams' own pages)
+  function openRow(ev) {
+    if (ev.type === "keydown" && ev.key !== "Enter") return;
+    var t = ev.target, row = t && t.closest ? t.closest("li.game[data-go]") : null;
+    if (!row || (t.closest("a, button, select, input") && ev.type === "click") || (ev.type === "keydown" && t !== row)) return;
+    location.hash = row.getAttribute("data-go");
+  }
+  document.addEventListener("click", openRow);
+  document.addEventListener("keydown", openRow);
+
   // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
   function liveFirst(ol) {
     var kids = Array.prototype.slice.call(ol.children), ref = null, i;
@@ -40,7 +51,7 @@
   try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { shadeAll(document.body); }); } catch (e) {}
 
   var $ = function (id) { return document.getElementById(id); };
-  var data = null, state = { week: null, day: null, team: null };
+  var data = null, state = { week: null, day: null, team: null }, matchIds = null;
 
   function el(tag, attrs, kids) {
     var n = document.createElement(tag);
@@ -266,9 +277,11 @@
       more.push(g.watch.length ? el("span", { "class": "watch" }, [el("span", { "class": "sr", text: "Watch on " }), g.watch.join(", ")])
         : el("span", { "class": "watch none", text: W("matches.no_broadcast") }));
     }
-    if (fin || live) more.push(el("a", { href: "#/match/" + g.id, text: live ? W("matches.live_box_score") : W("matches.box_score") }));
+    // the row itself opens the match: its box score once it has started, its preview before (for a match the site has a page for)
+    if (!matchIds) { matchIds = {}; data.games.forEach(function (x) { matchIds[x.id] = 1; }); }
+    var go = fin || live || (!note && matchIds[g.id]) ? "#/match/" + g.id : null;
     var unplayed = !fin && !live && !note;
-    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id }, [
+    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-go": go, role: go ? "link" : null, tabindex: go ? "0" : null }, [
       live ? el("span", { "class": "when live" }, [liveTag(), " " + (when === "In progress" ? "" : when)]) : el("span", { "class": "when", text: when }),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more" }, more)]);

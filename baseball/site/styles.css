@@ -499,3 +499,8 @@ a.opp:hover .n { color: var(--teal); }
 
 /* ---- a game's own page: the day, time and channel are the first line of the card ---- */
 .gcard .mstatus { margin: 0 0 12px; justify-content: center; text-align: center; font-size: .875rem; }
+
+/* ---- a game's row opens its page ---- */
+.game[data-go] { cursor: pointer; }
+.game[data-go]:hover { background: color-mix(in srgb, var(--teal) 7%, transparent); }
+.game[data-go]:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; }

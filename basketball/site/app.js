@@ -19,6 +19,17 @@
     tag.style.background = "rgb(" + bg.join(",") + ")";       // the number itself is always dark with a white outline (styles)
   }
   function shadeAll(root) { if (!root || root.nodeType !== 1) return; shadeRank(root); Array.prototype.forEach.call(root.querySelectorAll(".rk"), shadeRank); }
+  // ---- a game's whole row opens its page: the preview before it starts, the box score once it has ----
+  // (the team names in the row still go to the teams' own pages)
+  function openRow(ev) {
+    if (ev.type === "keydown" && ev.key !== "Enter") return;
+    var t = ev.target, row = t && t.closest ? t.closest("li.game[data-go]") : null;
+    if (!row || (t.closest("a, button, select, input") && ev.type === "click") || (ev.type === "keydown" && t !== row)) return;
+    location.hash = row.getAttribute("data-go");
+  }
+  document.addEventListener("click", openRow);
+  document.addEventListener("keydown", openRow);
+
   // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
   function liveFirst(ol) {
     var kids = Array.prototype.slice.call(ol.children), ref = null, i;
@@ -470,11 +481,10 @@
       more.push(g.tv && g.tv.length ? el("span", { "class": "watch" }, [el("span", { "class": "sr", text: "Watch on " }), g.tv.join(", ")])
         : g.start ? el("span", { "class": "watch none", text: W("games.no_broadcast") }) : null);
     }
-    if ((fin || live) && (g.box || live)) more.push(el("a", { href: "#/game/" + g.id, text: live ? W("games.live_box_score") : W("games.box_score") }));
-    else if (!note) more.push(el("a", { href: "#/game/" + g.id, text: "Preview" }));
+    var go = note && !fin && !live ? null : "#/game/" + g.id;       // the row itself opens the game: its preview, or its box score once it has started
     if (dated === true && !live) when = short(g.date) + (when === "Time not set" ? "" : " · " + when);
     var unplayed = !fin && !live && !note;
-    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null }, [
+    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null, "data-go": go, role: go ? "link" : null, tabindex: go ? "0" : null }, [
       live ? el("span", { "class": "when live" }, [liveTag(), " " + (when === "In progress" ? "" : when)]) : el("span", { "class": "when", text: when }),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more" }, more)]);
