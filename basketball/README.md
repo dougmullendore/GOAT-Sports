@@ -4,7 +4,8 @@ The basketball part of GOAT Sports: men's college basketball, built the way the
 college football site is, and the NBA as a second copy of the same pages.
 
 - College: `https://dougmullendore.github.io/GOAT-Sports/basketball/`
-- NBA: `…/basketball/nba/`, reached from the College / NBA tabs at the top of
+- NBA: `…/basketball/nba/`. The NBA is the first of the NBA / College tabs, and
+  "Basketball" in the bar across the top opens it. The tabs are at the top of
   every page; see "The NBA" below.
 - Every path below is inside this `basketball/` folder.
 

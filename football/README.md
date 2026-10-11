@@ -7,7 +7,8 @@ Top 25 / All FBS switch narrows any page to the ranked teams.
 
 - The page: `https://dougmullendore.github.io/GOAT-Sports/football/`
 - The NFL has a copy of the same site at `…/football/nfl/`, reached from the
-  College / NFL tabs at the top of every page; see "The NFL" below.
+  NFL / College tabs at the top of every page; see "The NFL" below. The NFL is
+  the first tab, and "Football" in the bar across the top opens it.
 - Every path below is inside this `football/` folder.
 
 ## What the site shows

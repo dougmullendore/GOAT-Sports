@@ -1082,7 +1082,7 @@
     (d.fbs || []).forEach(function (x) { fbs[x[0]] = x; });
     $("brand").textContent = d.site;
     var lg = $("leagues"), base = d.league ? "../" : "";
-    if (lg) [["", "College"], ["nfl", "NFL"]].forEach(function (o) {
+    if (lg) [["nfl", "NFL"], ["", "College"]].forEach(function (o) {
       lg.appendChild(el("a", { href: base + (o[0] ? o[0] + "/" : ""), "aria-current": (d.league || "") === o[0] ? "page" : null, text: o[1] }));
     });
     document.body.classList.add("lg-" + (d.league || "college"));

@@ -24,15 +24,17 @@ HOME_SRC = ROOT / "home"
 
 # The sports, in the order of the bar and of the front page. `pages` are the folders that hold a
 # copy of that sport's page (volleyball has one for college and one for each pro league, football
-# one for college and one for the NFL, basketball one for college and one for the NBA).
+# one for college and one for the NFL, basketball one for college and one for the NBA). `home`
+# is the page the sport's tab opens: the pro league, where a sport has a college one too.
 SPORTS = [
     {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
     {"key": "hockey", "name": "Hockey", "pages": [""]},
-    {"key": "football", "name": "Football", "pages": ["", "nfl/"]},
-    {"key": "basketball", "name": "Basketball", "pages": ["", "nba/"]},
+    {"key": "football", "name": "Football", "pages": ["", "nfl/"], "home": "nfl/"},
+    {"key": "basketball", "name": "Basketball", "pages": ["", "nba/"], "home": "nba/"},
     {"key": "baseball", "name": "Baseball", "pages": [""]},
 ]
-# The front page's lists: one for each league, in the order shown. `score` is the name the
+# The front page's lists: one for each league, in the order shown (a sport's pro league before its
+# college one, except volleyball). `score` is the name the
 # league's games give a team's score; `game` is the address of a game's own page; `ranked_only`
 # keeps a long college day down to the games with a ranked team.
 LEAGUES = [
@@ -44,14 +46,14 @@ LEAGUES = [
      "game": "#/match/", "ranked_only": False, "unit": "matches"},
     {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
-    {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
-     "game": "#/game/", "ranked_only": True, "unit": "games"},
     {"key": "nfl", "sport": "football", "folder": "football/nfl/", "name": "NFL", "label": "Football", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
-    {"key": "cbb", "sport": "basketball", "folder": "basketball/", "name": "College basketball", "label": "Basketball", "score": "score",
+    {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
      "game": "#/game/", "ranked_only": True, "unit": "games"},
     {"key": "nba", "sport": "basketball", "folder": "basketball/nba/", "name": "NBA", "label": "Basketball", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "cbb", "sport": "basketball", "folder": "basketball/", "name": "College basketball", "label": "Basketball", "score": "score",
+     "game": "#/game/", "ranked_only": True, "unit": "games"},
     {"key": "mlb", "sport": "baseball", "folder": "baseball/", "name": "MLB", "label": "Baseball", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
 ]
@@ -67,17 +69,18 @@ def stamp(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:10]
 
 
-def bar(current: str, up: str, ready: list[str]) -> str:
+def bar(current: str, up: str, ready: dict) -> str:
     """The strip across the top of every page: the site's name and one tab for each sport
-    that has pages. `up` is the way from this page back to the front page ("../" or "../../")."""
+    that has pages. `up` is the way from this page back to the front page ("../" or "../../");
+    `ready` is {sport: the page its tab opens} for the sports that have pages."""
     tabs = "".join(
-        f'<a href="{up}{s["key"]}/"' + (' aria-current="page"' if s["key"] == current else "") + f'>{s["name"]}</a>'
+        f'<a href="{up}{ready[s["key"]]}"' + (' aria-current="page"' if s["key"] == current else "") + f'>{s["name"]}</a>'
         for s in SPORTS if s["key"] in ready)
     return (f'{MARK}<nav class="sports" aria-label="Sports"><div class="wrap sports-row">'
             f'<a class="sports-home" href="{up}">GOAT Sports</a>{tabs}</div></nav>')
 
 
-def add_bar(page: Path, current: str, up: str, css: str, ready: list[str]) -> bool:
+def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
     """Write the bar into one page, in place of the one already there if it has one.
     Returns whether the page changed."""
     before = html = page.read_text(encoding="utf-8")
@@ -157,7 +160,9 @@ def main(built_dir: str, site_dir: str) -> int:
         assert f'"{name}"' in page, f"home/index.html no longer refers to {name}"
         page = page.replace(f'"{name}"', f'"{name}?v={stamp(site / name)}"')
     (site / "index.html").write_text(page, encoding="utf-8")
-    ready = [s["key"] for s in SPORTS if (site / s["key"] / "index.html").exists()]
+    # where each sport's tab goes: its pro league's page if that has been built, its first page otherwise
+    ready = {s["key"]: s["key"] + "/" + (s.get("home", "") if (site / s["key"] / s.get("home", "") / "index.html").exists() else "")
+             for s in SPORTS if (site / s["key"] / "index.html").exists()}
     front = (site / "index.html").read_text(encoding="utf-8")
     front = re.sub(r'<nav class="sports".*?</nav>', bar("", "", ready).replace(MARK, "").replace(
         '<a class="sports-home" href=""', '<a class="sports-home" href="./" aria-current="page"'), front, count=1, flags=re.S)
@@ -171,7 +176,7 @@ def main(built_dir: str, site_dir: str) -> int:
     leagues = front_games(site, now.date())
     (site / "home.json").write_text(json.dumps({
         "updated": now.isoformat(timespec="seconds"),
-        "sports": [{"key": s["key"], "name": s["name"], "href": s["key"] + "/", "ready": (site / s["key"] / "index.html").exists()} for s in SPORTS],
+        "sports": [{"key": s["key"], "name": s["name"], "href": ready.get(s["key"], s["key"] + "/"), "ready": (site / s["key"] / "index.html").exists()} for s in SPORTS],
         "leagues": leagues}, separators=(",", ":")))
     (site / ".nojekyll").write_text("")
     log(f"assembled: rebuilt {fresh or 'no sport'}; the bar was written into {barred} pages; front page lists "

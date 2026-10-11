@@ -12,7 +12,7 @@ LEAGUE_NAME = "College"
 ALL_NAME = "Division I"   # what "every team" is called
 STATE_FOLDER = ""         # the league's folder inside this sport's stored data
 SITE_FOLDER = ""          # and inside the site
-LEAGUE_TABS = [["", "College"], ["nba", "NBA"]]      # the tabs at the top of every page: folder, label
+LEAGUE_TABS = [["nba", "NBA"], ["", "College"]]      # the tabs at the top of every page, the pro league first: folder, label
 COLOURS = ("#c2410c", "#1d428a")                     # the main colour of the college pages, and of the NBA's
 SEASON_SPANS_YEARS = True                            # a season is named "2026-27"
 

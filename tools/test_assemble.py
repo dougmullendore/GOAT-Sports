@@ -64,6 +64,13 @@ def main() -> int:
         nba = (site / "basketball" / "nba" / "index.html").read_text()
         assert 'href="../../baseball/"' in nba and nba.index("Football<") < nba.index("Basketball<") < nba.index("Baseball<")
         assert 'aria-current="page">Baseball' in (site / "baseball" / "index.html").read_text()
+        # the pro league comes first: a sport's tab opens it, and the front page lists it before the college one
+        assert 'href="../../basketball/nba/"' in nba and 'href="../basketball/nba/"' in (site / "hockey" / "index.html").read_text()
+        assert 'href="basketball/nba/"' in (site / "index.html").read_text()
+        final = json.loads((site / "home.json").read_text())
+        assert {s["key"]: s["href"] for s in final["sports"]} == {"volleyball": "volleyball/", "hockey": "hockey/", "football": "football/",
+                                                                  "basketball": "basketball/nba/", "baseball": "baseball/"}       # football has no NFL pages here
+        assert [l["key"] for l in final["leagues"]] == ["wvb", "lovb", "mlv", "nhl", "nfl", "cfb", "nba", "cbb", "mlb"]
         assert (site / "volleyball" / "data.json").exists()
     print("PASS tools.assemble")
     return 0

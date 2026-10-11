@@ -243,7 +243,7 @@ def test_the_college_site_builds_in_season():
     def check(info, out, data):
         assert info["poll_date"] == "2026-04-07" and info["game_pages"] == 2 and info["players"] > 30
         assert data["site"] == "GOAT Basketball" and data["league"] == "" and not data["pro"] and not data["no_poll"] and data["numbered"]
-        assert data["leagues"] == [["", "College"], ["nba", "NBA"]] and data["periods"] == 2 and data["season_label"] == "2025-26"
+        assert data["leagues"] == [["nba", "NBA"], ["", "College"]] and data["periods"] == 2 and data["season_label"] == "2025-26"
         assert len(data["poll"]["teams"]) == 25 and data["poll"]["teams"][0]["name"] == "Michigan"
         assert len(data["fbs"]) >= config.MIN_TEAMS and "{day}" in data["live_feed"]
         g = next(g for g in data["games"] if g["id"] == GAME)

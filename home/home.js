@@ -36,10 +36,10 @@
       [["Games", "#/"], ["Standings", "#/standings"], ["Teams", "#/teams"], ["Players", "#/players"], ["Lines", "#/lines"], ["Odds", "#/odds"]]],
     volleyball: ["Women's college, LOVB and MLV", "The top 25's matches day by day, the AVCA poll and the GOAT ranking, and a card for every Division I player.",
       [["Matches", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["LOVB", "lovb/"], ["MLV", "mlv/"]]],
-    football: ["College and the NFL", "Games week by week with each team's chance of winning, the AP poll, NFL standings, the GOAT rankings, team stats and a card for every player.",
-      [["Games", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["NFL", "nfl/"]]],
-    basketball: ["Men's college and the NBA", "Games day by day with each team's chance of winning, the AP poll, NBA standings, the GOAT rankings, team stats and a card for every player.",
-      [["Games", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["NBA", "nba/"]]],
+    football: ["The NFL and college", "Games week by week with each team's chance of winning, NFL standings, the AP poll, the GOAT rankings, team stats and a card for every player.",
+      [["Games", "#/"], ["Standings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["College", "../"]]],
+    basketball: ["The NBA and men's college", "Games day by day with each team's chance of winning, NBA standings, the AP poll, the GOAT rankings, team stats and a card for every player.",
+      [["Games", "#/"], ["Standings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["College", "../"]]],
     baseball: ["MLB", "Every game with the probable starters and each team's chance of winning, standings, team stats and a card for every hitter and pitcher.",
       [["Games", "#/"], ["Standings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"]]]
   };
