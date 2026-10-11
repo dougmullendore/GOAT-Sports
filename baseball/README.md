@@ -75,9 +75,9 @@ game's box score, team rosters, standings, and each player's career.
 
 The schedule is read a day at a time: today and the days around it on every
 run, every other day about once a week. Box scores are read once a game is
-over, and again for two days in case of corrections; at most 500 are read on
-one run (a baseball box score is large), so a first run late in a season
-catches up over several runs, newest games first. Until it has, team stats
+over, and again for two days in case of corrections; at most 1,500 are read on
+one run, so a first run late in a season
+catches up over two runs, newest games first. Until it has, team stats
 and Impact cover only the games read so far.
 
 During games, a run every 5 minutes reads only the days with a game on and

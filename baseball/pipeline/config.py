@@ -42,7 +42,7 @@ DAYS_AHEAD = 7
 FAR_REFRESH_DAYS = 7
 
 BOX_REFRESH_DAYS = 2     # box scores this recent are read again: stats are corrected for a day or two
-BOXES_PER_RUN = 500      # at most this many box scores a run, newest first (a first run in mid-season catches up over a few)
+BOXES_PER_RUN = 1500     # at most this many box scores a run, newest first (a first run late in a season catches up over two)
 LIVE_HOURS = 5           # a game is looked for on game-day runs for this long after the first pitch
 
 # Team logos and player photos are not stored here: the page shows them straight from ESPN.
