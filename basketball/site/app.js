@@ -369,8 +369,8 @@
     function group(key) { var seen = [], by = {}; rows.forEach(function (t) { if (!by[t[key]]) { by[t[key]] = []; seen.push(t[key]); } by[t[key]].push(t); }); return seen.sort().map(function (k) { return [k, by[k]]; }); }
     if (standView === "goat" && G.top) {
       var thead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", ""], ["Standings", "", "Place in the league standings"]].concat(G.power ? [["ESPN", "", "Place in ESPN's newest power rankings (" + new Date(G.power.published).toLocaleDateString(undefined, { month: "long", day: "numeric" }) + ")"]] : []).concat([
-        ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
-        ["Strength", "", "How good it is, by this site's rating of its results and margins: 100 is the best in the league"]]).map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+        ["SOR", "", "Strength of record: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
+        ["SOS", "", "Strength of schedule: how good the teams it has played are, on average. 100 is the hardest in the league"]]).map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
       var body = el("tbody", {}, G.top.map(function (t) {
         var st = rows.filter(function (x) { return x.id === t.id; })[0] || {};
         return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
@@ -432,8 +432,8 @@
     function nice(d) { return day(d).toLocaleDateString(undefined, { month: "long", day: "numeric" }); }
     $("rank-lede").textContent = NOPOLL() ? W("rankings.lede_nopoll") : goatView ? W("rankings.lede_goat") : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : other ? W("rankings.note_other") : W("rankings.note");
-    $("goat-note").textContent = !goatView ? "" : "Every " + ALL() + " team is ranked on five things, most important first: head to head, its place in the AP poll, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), and its record. " +
-      "A team is ranked above one it has beaten unless the rest say the gap is wide. Before anyone has played, the order is last season's ratings. " +
+    $("goat-note").textContent = !goatView ? "" : "Every " + ALL() + " team is ranked on four things: its place in the AP poll (50%), strength of schedule (20%: how good the teams it has played are, on average), strength of record (20%: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), and head to head (10%: a team is ranked above one it has the better of when the two are that close on the rest). " +
+      "Before anyone has played, the order is last season's ratings. " +
       (NOPOLL() ? "" : "Elsewhere on the site, teams outside the poll are numbered from 26 in this order. Among the poll's 25 teams, the poll ranks a team below one it has beaten " + G.poll_wrong + " times; the GOAT ranking does " + G.goat_wrong + " times.");
     var out = $("goat-out");
     out.textContent = "";

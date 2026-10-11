@@ -312,9 +312,10 @@ def test_goat_ranking():
     assert r["order"] == ["AAA", "BBB", "CCC"]
     assert abs(r["xg_pct"]["AAA"] - 9 / 14) < 1e-9 and abs(r["goal_pct"]["AAA"] - 8 / 11) < 1e-9      # the shootout win is not a goal
     assert r["sos"]["CCC"] > r["sos"]["AAA"]                             # the bottom team has played only the top two
-    assert abs(sum(config.GOAT_WEIGHTS) - 1) < 1e-9 and len(config.GOAT_WEIGHTS) == 4
-    # who it beat, the standings, record, how good it is: the unbeaten team leads on all four; expected goals no longer decide anything
-    assert r["factors"]["AAA"] == [1.0, 1.0, 1.0, 1.0] and r["factors"]["CCC"][0] == 0.0 and r["factors"]["CCC"][2] == 0.0
+    # the poll (or standings), strength of schedule and strength of record, with head to head as the last tenth
+    assert abs(sum(config.GOAT_WEIGHTS) + config.GOAT_HEAD_TO_HEAD - 1) < 1e-9 and len(config.GOAT_WEIGHTS) == 3
+    # [strength of record, standings, share won, strength of schedule]: the unbeaten team has the best record and the easiest schedule
+    assert r["factors"]["AAA"] == [1.0, 1.0, 1.0, 0.0] and r["factors"]["CCC"][0] == 0.0 and r["factors"]["CCC"][3] == 1.0
     swapped = goat.rank(games, rating, table, {**chances, "AAA": chances["BBB"], "BBB": chances["AAA"]})
     assert swapped["order"] == r["order"] and swapped["score"] == r["score"]
     # a win over a better team is worth more: beating the top team lifts the middle team's "who it beat" above a win over the bottom one

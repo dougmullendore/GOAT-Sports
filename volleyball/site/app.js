@@ -235,8 +235,8 @@
       ol.hidden = true; head.hidden = true;
       if (goatView) {        // the site's own order of the league's teams, as a table like the standings
         var gHead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", "Matches won and lost, playoffs included"], ["Standings", "", "Place in the league standings"],
-          ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
-          ["Strength", "", "How good it is, by this site's rating of its results set by set: 100 is the best in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+          ["SOR", "", "Strength of record: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
+          ["SOS", "", "Strength of schedule: how good the teams it has played are, on average. 100 is the hardest in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
         var gBody = el("tbody", {}, G.top.map(function (t) {
           return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
             el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, t.name)])]),
@@ -287,8 +287,8 @@
     var through = day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" });
     $("rank-lede").textContent = goatView ? W("rankings.lede_goat") : W("rankings.lede", { poll: data.poll.name, date: through });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : W("rankings.note");
-    $("goat-note").textContent = !goatView ? "" : "Every Division I team is ranked on five things, most important first: head to head, its place in the AVCA poll, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), and its record. " +
-      "A team is ranked above one it has beaten unless the rest say the gap is wide. Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +
+    $("goat-note").textContent = !goatView ? "" : "Every Division I team is ranked on four things: its place in the AVCA poll (50%), strength of schedule (20%: how good the teams it has played are, on average), strength of record (20%: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), and head to head (10%: a team is ranked above one it has the better of when the two are that close on the rest). " +
+      "Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +
       "Among the poll's 25 teams, the poll ranks a team below one it has beaten " + G.poll_wrong + " times; the GOAT ranking does " + G.goat_wrong + " times.";
     var out = $("goat-out");
     out.textContent = "";

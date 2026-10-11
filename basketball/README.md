@@ -91,30 +91,30 @@ games, the favorite won 74.2%; home court is worth 3 points.
 
 ## GOAT ranking
 
-`pipeline/goat.py`, for every Division I team and for the NBA. Five things
-decide it, most important first:
+`pipeline/goat.py`, for every Division I team and for the NBA. Four things
+decide it:
 
-1. **Head to head.** A team is ranked above one it has beaten, unless the
-   rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
-   form a circle cannot all be honored; the ranking keeps as many as it can.
-2. **Who it beat (25%).** Every win adds the quality of the team beaten,
+1. **The poll (50%).** The AP poll for college: a ranked team gets credit for its
+   place in it. For the NBA, ESPN's newest power ranking (`pipeline/power.py`),
+   or the standings until one has been read.
+2. **Strength of schedule (20%).** The average rating of the teams it has
+   played (the ratings behind the odds), stretched to run from 0 for the
+   easiest schedule to 1 for the hardest.
+3. **Strength of record (20%).** Every win adds the quality of the team beaten,
    squared; every loss takes away a quarter, plus three quarters of how weak
    the team lost to was, squared. Quality is a team's place among all the
-   teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
-   So a win over a top team is worth far more than a win over a weak one, a
-   loss to a weak team costs far more than a loss to a top one, and no loss
-   is free. The totals are stretched to run from 0 to 1.
-3. **How good it is (15%):** its own rating, the one behind the odds, which
-   follows the margins it wins and loses by and who they came against,
-   stretched to run from 0 to 1.
-4. **Record (10%):** its share of games won.
-5. **The AP poll, or the NBA standings (50%):** credit for its place in it.
+   teams by the ratings, from 0 (weakest) to 1 (strongest). So a win over a
+   top team is worth far more than a win over a weak one, a loss to a weak
+   team costs far more than a loss to a top one, and no loss is free. The
+   totals are stretched to run from 0 to 1.
+4. **Head to head (10%).** A team that has the better of another is ranked
+   above it when the two are within 0.10 of each other on the first three
+   (`GOAT_HEAD_TO_HEAD`). A lead counts once, however many games it is by.
+   Results that form a circle cannot all be honored; the ranking keeps as
+   many as it can.
 
-The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
-`pipeline/config.py`. Every GOAT site uses this formula.
-
-In the pro league ESPN's newest power ranking takes the poll's place
-(`pipeline/power.py`); the standings stand in until one has been read.
+The settings are `GOAT_WEIGHTS`, `GOAT_HEAD_TO_HEAD`, `GOAT_CURVE` and
+`GOAT_LOSS` in `pipeline/config.py`. Every GOAT site uses this formula.
 
 ## Where the numbers come from
 

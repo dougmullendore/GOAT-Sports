@@ -519,8 +519,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         t["xg_pct"] = round(100 * ranking["xg_pct"][tid], 1) if sum(chances[tid]) else None
         t["g_pct"] = round(100 * ranking["goal_pct"][tid], 1)
         t["power"] = (espn_power.get("ranks") or {}).get(tid)             # its place in ESPN's newest power ranking
-        t["beat_score"] = round(100 * ranking["factors"][tid][0])       # who it beat: 100 is the best set of results in the league
-        t["strength"] = round(100 * ranking["factors"][tid][3])         # how good it is, by its rating: 100 is the best in the league
+        t["beat_score"] = round(100 * ranking["factors"][tid][0])       # strength of record: 100 is the best in the league
     goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD,
                  "power": {k: espn_power.get(k) for k in ("headline", "published", "url")} if espn_power else None}
 

@@ -183,34 +183,32 @@ belong to the schools. To remove them, set `LOGO_URL = ""` in
 ## GOAT ranking
 
 The Rankings page's GOAT tab is the site's own ranking of every Division I
-team (`pipeline/goat.py`), redone on every update. Five things decide it, most
-important first:
+team (`pipeline/goat.py`), redone on every update. Four things decide it:
 
-1. **Head to head.** A team is ranked above one it has beaten, unless the
-   rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
-   form a circle cannot all be honored; the ranking keeps as many as it can.
-2. **Who it beat (25%).** Every win adds the quality of the team beaten,
+1. **The poll (50%).** The AVCA poll for college: a ranked team gets credit for
+   its place in it. LOVB and MLV use their standings (`GOAT_WEIGHTS_PRO`).
+2. **Strength of schedule (20%).** The average rating of the teams it has
+   played (the ratings behind the odds), stretched to run from 0 for the
+   easiest schedule to 1 for the hardest.
+3. **Strength of record (20%).** Every win adds the quality of the team beaten,
    squared; every loss takes away a quarter, plus three quarters of how weak
    the team lost to was, squared. Quality is a team's place among all the
-   teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
-   So a win over a top team is worth far more than a win over a weak one, a
-   loss to a weak team costs far more than a loss to a top one, and no loss
-   is free. The totals are stretched to run from 0 to 1.
-3. **How good it is (15%):** its own rating, the one behind the odds, which
-   follows the margins it wins and loses by and who they came against,
-   stretched to run from 0 to 1.
-4. **Record (10%):** its share of matches won.
-5. **The AVCA poll (50%):** credit for its place in it.
+   teams by the ratings, from 0 (weakest) to 1 (strongest). So a win over a
+   top team is worth far more than a win over a weak one, a loss to a weak
+   team costs far more than a loss to a top one, and no loss is free. The
+   totals are stretched to run from 0 to 1.
+4. **Head to head (10%).** A team that has the better of another is ranked
+   above it when the two are within 0.10 of each other on the first three
+   (`GOAT_HEAD_TO_HEAD`). A lead counts once, however many games it is by.
+   Results that form a circle cannot all be honored; the ranking keeps as
+   many as it can.
 
-The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
-`pipeline/config.py`. Every GOAT site uses this formula.
+The settings are `GOAT_WEIGHTS`, `GOAT_HEAD_TO_HEAD`, `GOAT_CURVE` and
+`GOAT_LOSS` in `pipeline/config.py`. Every GOAT site uses this formula.
 
 The top 25 are always the poll's 25 teams, in GOAT order. Everywhere else on
 the site a team's number is its AVCA rank, or, for a team outside the poll,
 its place from 26 onward in GOAT order, so no two teams share a number.
-
-LOVB and MLV use the same weights (`GOAT_WEIGHTS_PRO`), with the standings in
-the poll's place.
 
 ## Odds
 
