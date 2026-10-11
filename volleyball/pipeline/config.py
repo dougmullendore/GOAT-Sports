@@ -73,7 +73,8 @@ ODDS_TESTED = {"matches": 23008, "favorite_won": 0.768, "seasons": "2022 to 2026
 
 # The GOAT ranking (pipeline/goat.py) of every Division I team: head to head
 # first, then strength of schedule, the AVCA poll and record, in that order.
-GOAT_WEIGHTS = (0.4, 0.3, 0.2, 0.1)   # who it beat, how good it is, record, AVCA poll (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.3, 0.2, 0.1, 0.4)   # who it beat, how good it is, record, AVCA poll: the poll counts most (head to head comes first, see goat.py)
+GOAT_WEIGHTS_PRO = (0.4, 0.3, 0.2, 0.1)   # LOVB and MLV, as in every pro league: who it beat counts most, the standings least
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head win outweighs a score gap up to this size (scores run 0 to 1)

@@ -38,7 +38,7 @@ games.home = Home
 # ---- Rankings page ----
 rankings.title = Top 25 Rankings
 rankings.lede = The {poll} of {date}.
-rankings.lede_goat = This site's own ranking of every FBS team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then who each team has beaten and lost to, how good it is, its record and the poll; every other team follows from 26 the same way.
+rankings.lede_goat = This site's own ranking of every FBS team. The top 25 are the same 25 teams as the AP poll, put in order by head to head first, then the poll itself, who each team has beaten and lost to, how good it is and its record; every other team follows from 26 the same way.
 rankings.lede_other = The {poll} of {date}.
 rankings.button_poll = AP Poll
 rankings.button_goat = GOAT Ranking

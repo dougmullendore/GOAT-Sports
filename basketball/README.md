@@ -113,6 +113,9 @@ decide it, most important first:
 The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
 `pipeline/config.py`. Every GOAT site uses this formula.
 
+The weights above are the pro league's. For college the poll counts most: the
+AP poll 40%, who it beat 30%, how good it is 20%, record 10%.
+
 ## Where the numbers come from
 
 ESPN's public feeds, with no key: the scoreboard one day at a time, each

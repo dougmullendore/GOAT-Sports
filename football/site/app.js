@@ -302,7 +302,7 @@
     function nice(d) { return day(d).toLocaleDateString(undefined, { month: "long", day: "numeric" }); }
     $("rank-lede").textContent = goatView ? W("rankings.lede_goat") : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : other ? W("rankings.note_other") : W("rankings.note");
-    $("goat-note").textContent = !goatView ? "" : "Every FBS team is ranked on five things, most important first: head to head, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), its record, and its place in the AP poll. " +
+    $("goat-note").textContent = !goatView ? "" : "Every FBS team is ranked on five things, most important first: head to head, its place in the AP poll, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), and its record. " +
       "A team is ranked above one it has beaten unless the rest say the gap is wide. Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +
       "Among the poll's 25 teams, the poll ranks a team below one it has beaten " + G.poll_wrong + " times; the GOAT ranking does " + G.goat_wrong + " times.";
     var out = $("goat-out");

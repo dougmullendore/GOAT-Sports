@@ -86,7 +86,7 @@ ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before 
 
 # The GOAT ranking (pipeline/goat.py) of every Division I team: head to head
 # first, then strength of schedule, the AP poll and record, in that order.
-GOAT_WEIGHTS = (0.4, 0.3, 0.2, 0.1)   # who it beat, how good it is, record, AP poll (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.3, 0.2, 0.1, 0.4)   # who it beat, how good it is, record, AP poll: the poll counts most (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head win outweighs a score gap up to this size (scores run 0 to 1)
@@ -128,6 +128,7 @@ NBA = {
     "REGULAR_MINUTES": 15, "BIG_GAME": 30,
     "ODDS_STEP": 0.05, "ODDS_SETTLE": 10, "ODDS_MIN_STEP": 0.02, "ODDS_KEEP": 0.7, "ODDS_HOME": 2.0, "ODDS_NEW": 0.0,
     "ODDS_SOFT_CAP": 50.0, "ODDS_SCALE": 7.0,
+    "GOAT_WEIGHTS": (0.4, 0.3, 0.2, 0.1),      # the pro leagues: who it beat counts most, the standings least
     "ODDS_TESTED": {"matches": 5267, "favorite_won": 0.657, "seasons": "2022-23 to 2025-26"}, "ODDS_SEED": "seed_nba.json",
 }
 LEAGUES = ["college", "nba"]

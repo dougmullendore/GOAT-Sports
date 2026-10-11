@@ -60,7 +60,7 @@ def _percentile(values: dict) -> dict:
             for k, v in values.items()}
 
 
-def rank(games: list[dict], rating: dict, teams: set, avca: dict) -> dict:
+def rank(games: list[dict], rating: dict, teams: set, avca: dict, weights: tuple | None = None) -> dict:
     """Rank `teams` (ids). `avca` is {id: poll rank} for the ranked teams.
     Returns {"order": [ids, best first], "base": {id: place by score alone},
     "score": {id: score}, "factors": {id: [who it beat, poll, record, how good it is]}}."""
@@ -91,7 +91,7 @@ def rank(games: list[dict], rating: dict, teams: set, avca: dict) -> dict:
     # stretched to run from 0 for the lowest-rated team to 1 for the highest
     low, high = min((rating.get(t, floor) for t in teams), default=0.0), max((rating.get(t, floor) for t in teams), default=0.0)
     power = {t: (rating.get(t, floor) - low) / (high - low) if high > low else 0.0 for t in teams}
-    wb, wg, wr, wp = config.GOAT_WEIGHTS
+    wb, wg, wr, wp = weights or config.GOAT_WEIGHTS
     score = {t: wb * beat[t] + wg * power[t] + wr * rec[t] + wp * poll[t] for t in teams}
     # before anyone has played, every score is level: the ratings carried over from last season decide
     order = sorted(teams, key=lambda t: (-score[t], -rating.get(t, floor), t))

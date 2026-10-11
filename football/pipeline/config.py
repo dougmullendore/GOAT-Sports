@@ -68,7 +68,7 @@ ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before 
 
 # The GOAT ranking (pipeline/goat.py) of every FBS team: head to head
 # first, then strength of schedule, the AP poll and record, in that order.
-GOAT_WEIGHTS = (0.4, 0.3, 0.2, 0.1)   # who it beat, how good it is, record, AP poll (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.3, 0.2, 0.1, 0.4)   # who it beat, how good it is, record, AP poll: the poll counts most (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head win outweighs a score gap up to this size (scores run 0 to 1)
@@ -113,6 +113,7 @@ NFL = {
     "PHOTO_URL": "https://a.espncdn.com/i/headshots/nfl/players/full/{player}.png",
     "ODDS_STEP": 0.06, "ODDS_SETTLE": 6, "ODDS_MIN_STEP": 0.06, "ODDS_KEEP": 0.8, "ODDS_HOME": 1.0, "ODDS_NEW": 0.0,
     "ODDS_SOFT_CAP": 21.0, "ODDS_SCALE": 7.0,
+    "GOAT_WEIGHTS": (0.4, 0.3, 0.2, 0.1),      # the pro leagues: who it beat counts most, the standings least
     "ODDS_TESTED": {"matches": 1688, "favorite_won": 0.643, "seasons": "2020 to 2025"},
     "ODDS_SEED": "seed_nfl.json",
 }

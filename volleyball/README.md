@@ -209,6 +209,10 @@ The top 25 are always the poll's 25 teams, in GOAT order. Everywhere else on
 the site a team's number is its AVCA rank, or, for a team outside the poll,
 its place from 26 onward in GOAT order, so no two teams share a number.
 
+The weights above are LOVB's and MLV's (`GOAT_WEIGHTS_PRO`). For college the
+poll counts most: the AVCA poll 40%, who it beat 30%, how good it is 20%,
+record 10% (`GOAT_WEIGHTS`).
+
 ## Odds
 
 Each match not yet played shows both teams' chance of winning, the favorite

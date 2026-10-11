@@ -305,7 +305,7 @@ def build(state: Path, out: Path, site: str, now: dt.datetime, words: dict, writ
 
     # The GOAT ranking of the league's teams, by the same formula as every other GOAT site: head to head,
     # then who it beat, how good it is, record and its place in the standings (see pipeline/goat.py).
-    ranking = goat.rank(games, rating, {t["id"] for t in table}, rank if finals else {})
+    ranking = goat.rank(games, rating, {t["id"] for t in table}, rank if finals else {}, config.GOAT_WEIGHTS_PRO)
     results = goat.head_to_head(games)
     goat_top = []
     for i, t in enumerate(ranking["order"]):
@@ -353,7 +353,7 @@ def build(state: Path, out: Path, site: str, now: dt.datetime, words: dict, writ
         "updated": now.isoformat(timespec="seconds"), "season": s["season"],
         "poll": {"name": poll_name, "through": through, "teams": table, "polls_seen": []},
         "game_page": None, "live_feed": None, "live_seconds": config.LIVE_SECONDS, "logo": None,
-        "odds_tested": None, "goat": {"top": goat_top, "weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD},
+        "odds_tested": None, "goat": {"top": goat_top, "weights": config.GOAT_WEIGHTS_PRO, "weight": config.GOAT_HEAD_TO_HEAD},
         "nr": {}, "words": words, "logos": logos,
         "abbr": {t: [((media.get("teams") or {}).get(t) or {}).get("abbr") or s["abbr"].get(t) or names[t][:3].upper(),
                      ((media.get("teams") or {}).get(t) or {}).get("color") or COLORS[i % len(COLORS)]] for i, t in enumerate(sorted(names))}, "d1": [[t["id"], t["name"]] for t in table], "games": games})

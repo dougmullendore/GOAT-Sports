@@ -139,6 +139,9 @@ Everywhere on the site a team's number is its AP rank, or, for an FBS team
 outside the poll, its place from 26 on in GOAT order. A school from outside
 FBS shows NR and has no page.
 
+The weights above are the pro league's. For college the poll counts most: the
+AP poll 40%, who it beat 30%, how good it is 20%, record 10%.
+
 ## Players and Impact
 
 Impact is points added over an average regular at the same position, from the
