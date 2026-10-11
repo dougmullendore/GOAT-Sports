@@ -68,7 +68,7 @@ ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before 
 
 # The GOAT ranking (pipeline/goat.py) of every FBS team: head to head
 # first, then strength of schedule, the AP poll and record, in that order.
-GOAT_WEIGHTS = (0.3, 0.2, 0.1, 0.4)   # who it beat, how good it is, record, AP poll: the poll counts most (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.25, 0.15, 0.1, 0.5)   # who it beat, how good it is, record, AP poll: the poll (or power ranking) counts for half (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head win outweighs a score gap up to this size (scores run 0 to 1)
@@ -84,6 +84,9 @@ FETCH_RETRIES = 4
 USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
 
 
+# ESPN's power rankings stand in for a poll in a pro league (pipeline/power.py): the league as ESPN's addresses write it.
+POWER = None
+POWER_ABBR = {}             # ESPN's short names for teams where they differ from the ones used here
 # Wikidata's name for the kind of player id this league uses; players' social media pages are looked up by it (pipeline/social.py).
 SOCIAL_IDS = "P7262"          # ESPN's college football id
 # Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
@@ -97,7 +100,7 @@ _NFL_API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
 NFL = {
     "LEAGUE": "nfl", "LEAGUE_NAME": "NFL", "ALL_NAME": "the NFL", "STATE_FOLDER": "nfl", "SITE_FOLDER": "nfl",
     "POLL_NAME": "NFL standings", "POLL_TYPE": None, "POLL_SIZE": 32, "MIN_TEAMS": 32, "OTHER_POLLS": {},
-    "SITE_API": _NFL_API, "BACKUP": "nfl", "SOCIAL_IDS": "P3686",
+    "SITE_API": _NFL_API, "BACKUP": "nfl", "POWER": "nfl", "SOCIAL_IDS": "P3686",
     "SCOREBOARD": _NFL_API + "scoreboard?limit=100",
     "WEEK": _NFL_API + "scoreboard?dates={season}&seasontype={kind}&week={week}&limit=100",
     "RANKINGS": None,
@@ -113,8 +116,7 @@ NFL = {
     "PHOTO_URL": "https://a.espncdn.com/i/headshots/nfl/players/full/{player}.png",
     "ODDS_STEP": 0.06, "ODDS_SETTLE": 6, "ODDS_MIN_STEP": 0.06, "ODDS_KEEP": 0.8, "ODDS_HOME": 1.0, "ODDS_NEW": 0.0,
     "ODDS_SOFT_CAP": 21.0, "ODDS_SCALE": 7.0,
-    "GOAT_WEIGHTS": (0.4, 0.3, 0.2, 0.1),      # the pro leagues: who it beat counts most, the standings least
-    "ODDS_TESTED": {"matches": 1688, "favorite_won": 0.643, "seasons": "2020 to 2025"},
+        "ODDS_TESTED": {"matches": 1688, "favorite_won": 0.643, "seasons": "2020 to 2025"},
     "ODDS_SEED": "seed_nfl.json",
 }
 LEAGUES = ["college", "nfl"]

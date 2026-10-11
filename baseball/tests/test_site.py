@@ -313,3 +313,45 @@ def test_social_links_are_read_and_put_on_cards(tmp_path=None):
     finally:
         config.SOCIAL_IDS, social.fetch = old_ids, old_fetch
 
+# ----------------------------------------------- ESPN's power rankings (pro leagues) --
+def test_espn_power_rankings_are_found_and_read(tmp_path=None):
+    from pipeline import power, web as _web
+    def hit(i, name, date, league="xyz"):
+        return {"displayName": name, "date": date, "link": {"web": f"https://www.espn.com/{league}/story/_/id/{i}/slug"}}
+    search = {"results": [{"contents": [hit(11, "XYZ Power Rankings: Week 3", "2026-10-06T15:00:00Z"), hit(12, "XYZ Power Rankings: Week 2", "2026-09-29T15:00:00Z"),
+                                        hit(13, "XYZ Future Power Rankings: three years out", "2026-10-08T15:00:00Z"),
+                                        hit(14, "XYZ survivor power rankings", "2026-10-09T15:00:00Z"), hit(15, "ABC Power Rankings", "2026-10-10T15:00:00Z", "abc"),
+                                        hit(16, "Trade grades", "2026-10-10T15:00:00Z")]}]}
+    assert [a["id"] for a in power.candidates(search, "xyz")] == ["11", "12"]            # newest first; the look-alikes are left out
+    def story(order):
+        return {"headlines": [{"story": "".join(f'<h2>{i}. <a data-x="1" href="https://www.espn.com/xyz/team/_/name/{a.lower()}/the-{a.lower()}">{n}</a> (1-0)</h2><p>words</p>'
+                                                for i, (a, n) in enumerate(order, 1))}]}
+    teams = {"1": ["AAA", "Alpha Aces", "Aces"], "2": ["BBB", "Beta Bears", "Bears"], "3": ["CCC", "Gamma Cats", "Cats"]}
+    old_abbr = getattr(config, "POWER_ABBR", {})
+    old_power, real = getattr(config, "POWER", None), _web.get_bytes
+    try:
+        config.POWER_ABBR, config.POWER = {"GC": "CCC"}, "xyz"
+        good = [("BBB", "Beta Bears"), ("GC", "Gamma Cats"), ("ZZZ", "Alpha Aces")]            # one by ESPN's other short name, one by its name
+        assert power.parse_story(story(good))[0] == (1, "BBB", "Beta Bears")
+        assert power.match(power.parse_story(story(good)), teams) == {"2": 1, "3": 2, "1": 3}
+        assert power.match(power.parse_story(story(good[:2])), teams) is None                      # a team missing: not used
+        assert power.match(power.parse_story(story(good + [("QQQ", "Nobody")])), teams) is None  # a team that is not in the league
+        state = Path(tmp_path or tempfile.mkdtemp())
+        now = dt.datetime(2026, 10, 11, 12, 0, tzinfo=dt.timezone.utc)
+        pages = {"search": search, "11": story(good[:2]), "12": story(good)}                       # the newest article cannot be read in full
+        def fake(url, *a, **k):
+            key = "search" if "search" in url else url.rsplit("/", 1)[1]
+            return json.dumps(pages[key]).encode()
+        _web.get_bytes = fake
+        got = power.update(state, now, teams, lambda m: None)
+        assert got["read"] and got["newest"] == "XYZ Power Rankings: Week 2"
+        kept = power.stored(state, teams)
+        assert kept["ranks"] == {"2": 1, "3": 2, "1": 3} and kept["published"].startswith("2026-09-29")
+        assert power.stored(state, {"1", "2"}) == {}                                              # the league has changed: not used
+        def down(url, *a, **k):
+            raise OSError("down")
+        _web.get_bytes = down
+        assert power.update(state, now, teams, lambda m: None)["failed"] and power.stored(state, teams)["ranks"]["2"] == 1
+    finally:
+        config.POWER_ABBR, config.POWER, _web.get_bytes = old_abbr, old_power, real
+

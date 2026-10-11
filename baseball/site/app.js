@@ -385,14 +385,14 @@
     }
     function group(key) { var seen = [], by = {}; rows.forEach(function (t) { if (!by[t[key]]) { by[t[key]] = []; seen.push(t[key]); } by[t[key]].push(t); }); return seen.sort().map(function (k) { return [k, by[k]]; }); }
     if (standView === "goat" && G.top) {
-      var thead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", ""], ["Standings", "", "Place in the league standings"],
+      var thead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", ""], ["Standings", "", "Place in the league standings"]].concat(G.power ? [["ESPN", "", "Place in ESPN's newest power rankings (" + new Date(G.power.published).toLocaleDateString(undefined, { month: "long", day: "numeric" }) + ")"]] : []).concat([
         ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
-        ["Strength", "", "How good it is, by this site's rating of its results and margins: 100 is the best in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+        ["Strength", "", "How good it is, by this site's rating of its results and margins: 100 is the best in the league"]]).map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
       var body = el("tbody", {}, G.top.map(function (t) {
         var st = rows.filter(function (x) { return x.id === t.id; })[0] || {};
         return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
           el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, (st.place ? st.place + " " : "") + t.name)])]),
-          el("td", { text: t.record || "" }), el("td", { text: t.poll == null || !data.numbered ? "–" : String(t.poll) }), el("td", { text: String(Math.round(100 * t.factors[0])) }), el("td", { text: String(Math.round(100 * (t.factors[3] || 0))) })]);
+          el("td", { text: t.record || "" }), el("td", { text: t.poll == null || !data.numbered ? "–" : String(t.poll) }), ].concat(G.power ? [el("td", { text: t.power == null ? "–" : String(t.power) })] : []).concat([el("td", { text: String(Math.round(100 * t.factors[0])) }), el("td", { text: String(Math.round(100 * (t.factors[3] || 0))) })]));
       }));
       holder.appendChild(el("div", { "class": "tablewrap standwrap", tabindex: "0", role: "region", "aria-label": "GOAT ranking, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [thead, body])]));
     } else if (standView === "league") {

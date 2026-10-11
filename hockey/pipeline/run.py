@@ -31,7 +31,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import backup, careers, config, goat, lines, nhl, odds, players, playoffs, social, teams, web, xg
+from . import backup, careers, config, goat, lines, nhl, odds, players, playoffs, power, social, teams, web, xg
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -507,7 +507,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
 
     # The GOAT ranking: head to head, then who it beat, the standings and record
     # (see pipeline/goat.py), as on every other GOAT site. Regular season only.
-    ranking = goat.rank(counted, rating, table, chances)
+    espn_power = power.stored(state, [t["id"] for t in table])
+    ranking = goat.rank(counted, rating, table, chances, espn_power.get("ranks"))
     spot = {t: i + 1 for i, t in enumerate(ranking["order"])}
     by_schedule = sorted(ranking["sos"], key=lambda t: -ranking["sos"][t])
     for t in table:
@@ -517,9 +518,11 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         t["sos_rank"] = by_schedule.index(tid) + 1
         t["xg_pct"] = round(100 * ranking["xg_pct"][tid], 1) if sum(chances[tid]) else None
         t["g_pct"] = round(100 * ranking["goal_pct"][tid], 1)
+        t["power"] = (espn_power.get("ranks") or {}).get(tid)             # its place in ESPN's newest power ranking
         t["beat_score"] = round(100 * ranking["factors"][tid][0])       # who it beat: 100 is the best set of results in the league
         t["strength"] = round(100 * ranking["factors"][tid][3])         # how good it is, by its rating: 100 is the best in the league
-    goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD}
+    goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD,
+                 "power": {k: espn_power.get(k) for k in ("headline", "published", "url")} if espn_power else None}
 
     words = read_words()                       # checked before anything is written
     if out.exists():
@@ -610,6 +613,7 @@ def main(state_dir: str, out_dir: str) -> int:
         stage("people", lambda: update_people(state, now))
         stage("careers", lambda: update_careers(state, now))
         stage("social links", lambda: social.update(state, now.date(), log))
+        stage("power ranking", lambda: power.update(state, now, {t["id"]: [t["id"], t["name"]] for t in read_json(state / "standings.json", {}).get("teams") or []}, log))
         stage("lines", lambda: update_lines(state, now))
     stage("site", lambda: build_site(state, out, now))
     status["finished_utc"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")

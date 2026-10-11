@@ -26,6 +26,9 @@ SITE_API = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/"
 SCOREBOARD = SITE_API + "scoreboard?limit=400"                   # today, and the season's dates
 DAY = SITE_API + "scoreboard?dates={day}&limit=400"              # one day (YYYYMMDD); the page reads live scores from it too
 RANKINGS = None
+# ESPN's power rankings stand in for a poll in a pro league (pipeline/power.py): the league as ESPN's addresses write it.
+POWER = "mlb"
+POWER_ABBR = {}             # ESPN's short names for teams where they differ from the ones used here
 # Wikidata's name for the kind of player id this league uses; players' social media pages are looked up by it (pipeline/social.py).
 SOCIAL_IDS = "P3571"          # ESPN's MLB id
 # Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
@@ -84,7 +87,7 @@ ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before 
 
 # The GOAT ranking (pipeline/goat.py) of every team: head to head first, then
 # strength of schedule, place in the standings and record, in that order.
-GOAT_WEIGHTS = (0.4, 0.3, 0.2, 0.1)   # who it beat, how good it is, record, standings (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.25, 0.15, 0.1, 0.5)   # who it beat, how good it is, record, standings: the poll (or power ranking) counts for half (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head lead outweighs a score gap up to this size (scores run 0 to 1)

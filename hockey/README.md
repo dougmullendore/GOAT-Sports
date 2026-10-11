@@ -181,18 +181,19 @@ important first:
 1. **Head to head.** A team is ranked above one it has beaten, unless the
    rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
    form a circle cannot all be honored; the ranking keeps as many as it can.
-2. **Who it beat (40%).** Every win adds the quality of the team beaten,
+2. **Who it beat (25%).** Every win adds the quality of the team beaten,
    squared; every loss takes away a quarter, plus three quarters of how weak
    the team lost to was, squared. Quality is a team's place among all the
    teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
    So a win over a top team is worth far more than a win over a weak one, a
    loss to a weak team costs far more than a loss to a top one, and no loss
    is free. The totals are stretched to run from 0 to 1.
-3. **How good it is (30%):** its own rating, the one behind the odds, which
+3. **How good it is (15%):** its own rating, the one behind the odds, which
    follows the margins it wins and loses by and who they came against,
    stretched to run from 0 to 1.
-4. **Record (20%):** its share of games (an overtime or shootout loss is a loss) won.
-5. **The standings (10%):** credit for its place in them.
+4. **Record (10%):** its share of games (an overtime or shootout loss is a loss) won.
+5. **ESPN's newest power ranking (50%):** credit for its place in it
+   (`pipeline/power.py`); the standings stand in until one has been read.
 
 The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
 `pipeline/config.py`. Every GOAT site uses this formula.

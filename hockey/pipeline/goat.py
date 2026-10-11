@@ -141,7 +141,7 @@ def played(games: list[dict]) -> list[dict]:
             and g["home"]["score"] != g["away"]["score"]]
 
 
-def rank(games: list[dict], rating: dict, table: list[dict], xg: dict) -> dict:
+def rank(games: list[dict], rating: dict, table: list[dict], xg: dict, power: dict | None = None) -> dict:
     """Rank the teams in `table` (the standings rows). `games` are the games
     that count; `rating` is every team's rating from pipeline/odds.py; `xg` is
     {team: [expected goals for, against]} over the games with play-by-play.
@@ -166,5 +166,7 @@ def rank(games: list[dict], rating: dict, table: list[dict], xg: dict) -> dict:
     xg_pct = {t: xg[t][0] / (xg[t][0] + xg[t][1]) if t in xg and xg[t][0] + xg[t][1] > 0 else 0.5 for t in teams}
     # before the first game the standings are only a list, so they give no credit and the ratings decide
     standing = {t["id"]: t["rank"] for t in table if t.get("rank")} if done else {}
-    out = order_teams(done, rating, set(teams), standing if len(standing) == len(teams) else {})
+    # ESPN's newest power ranking stands in for a poll ({team: place}); without one, the standings do
+    credit = power if power and set(power) == set(teams) else standing if len(standing) == len(teams) else {}
+    out = order_teams(done, rating, set(teams), credit)
     return {**out, "sos": sos, "xg_pct": xg_pct, "goal_pct": goal_pct}

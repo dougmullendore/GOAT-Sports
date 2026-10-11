@@ -86,7 +86,7 @@ ODDS_SEED = "seed.json"   # in ratings/: where teams finished the season before 
 
 # The GOAT ranking (pipeline/goat.py) of every Division I team: head to head
 # first, then strength of schedule, the AP poll and record, in that order.
-GOAT_WEIGHTS = (0.3, 0.2, 0.1, 0.4)   # who it beat, how good it is, record, AP poll: the poll counts most (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.25, 0.15, 0.1, 0.5)   # who it beat, how good it is, record, AP poll: the poll (or power ranking) counts for half (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head win outweighs a score gap up to this size (scores run 0 to 1)
@@ -105,6 +105,9 @@ USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
 # ---------------------------------------------------------------- the NBA --
 # What is different for the NBA's copy of the site. There is no poll: every team is numbered by
 # its place in the league standings, as on the hockey site.
+# ESPN's power rankings stand in for a poll in a pro league (pipeline/power.py): the league as ESPN's addresses write it.
+POWER = None
+POWER_ABBR = {}             # ESPN's short names for teams where they differ from the ones used here
 # Wikidata's name for the kind of player id this league uses; players' social media pages are looked up by it (pipeline/social.py).
 SOCIAL_IDS = None             # none for college basketball
 # Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
@@ -113,7 +116,7 @@ _NBA_API = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/"
 NBA = {
     "LEAGUE": "nba", "LEAGUE_NAME": "NBA", "ALL_NAME": "the NBA", "STATE_FOLDER": "nba", "SITE_FOLDER": "nba",
     "POLL_NAME": "NBA standings", "POLL_TYPE": None, "POLL_SIZE": 30, "MIN_TEAMS": 30, "OTHER_POLLS": {},
-    "SITE_API": _NBA_API, "BACKUP": "nba", "SOCIAL_IDS": "P3685",
+    "SITE_API": _NBA_API, "BACKUP": "nba", "POWER": "nba", "SOCIAL_IDS": "P3685",
     "SCOREBOARD": _NBA_API + "scoreboard?limit=400",
     "DAY": _NBA_API + "scoreboard?dates={day}&limit=400",
     "RANKINGS": None,
@@ -128,8 +131,7 @@ NBA = {
     "REGULAR_MINUTES": 15, "BIG_GAME": 30,
     "ODDS_STEP": 0.05, "ODDS_SETTLE": 10, "ODDS_MIN_STEP": 0.02, "ODDS_KEEP": 0.7, "ODDS_HOME": 2.0, "ODDS_NEW": 0.0,
     "ODDS_SOFT_CAP": 50.0, "ODDS_SCALE": 7.0,
-    "GOAT_WEIGHTS": (0.4, 0.3, 0.2, 0.1),      # the pro leagues: who it beat counts most, the standings least
-    "ODDS_TESTED": {"matches": 5267, "favorite_won": 0.657, "seasons": "2022-23 to 2025-26"}, "ODDS_SEED": "seed_nba.json",
+        "ODDS_TESTED": {"matches": 5267, "favorite_won": 0.657, "seasons": "2022-23 to 2025-26"}, "ODDS_SEED": "seed_nba.json",
 }
 LEAGUES = ["college", "nba"]
 _COLLEGE = {k: globals()[k] for k in NBA}

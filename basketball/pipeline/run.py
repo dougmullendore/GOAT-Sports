@@ -34,7 +34,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import backup, cards, careers, config, espn, goat, odds, players, social, teams, web
+from . import backup, cards, careers, config, espn, goat, odds, players, power, social, teams, web
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -173,6 +173,12 @@ def update_fbs(state: Path) -> dict:
     log(f"standings: {len(found)} teams in {len({t['conf'] for t in found.values()})} conferences or divisions"
         + (" (last season's list: this season's standings are still empty)" if carried else ""))
     return {"teams": len(found), "from_last_season": carried}
+
+
+def power_teams(state: Path) -> dict:
+    """{team: [ESPN's short name, full name, nickname, name]} for matching ESPN's power rankings to the league's teams."""
+    return {t: [v.get("abbr") or "", f"{v.get('place') or ''} {v.get('nick') or ''}".strip(), v.get("nick"), v.get("name")]
+            for t, v in read_json(state / "fbs.json", {}).items()}
 
 
 def league_order(fbs: dict) -> list[str]:
@@ -437,7 +443,9 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     in_poll = {t["id"]: t["rank"] for t in ranked}
     division = set(fbs) | set(in_poll)
     # before a league table means anything, the order is the ratings carried over from last season
-    ranking = goat.rank(every, rating, division, in_poll if sel["numbered"] else {})
+    # a pro league has no poll: ESPN's newest power ranking stands in for one, and the standings for that
+    espn_power = power.stored(state, division) if not config.POLL_TYPE else {}
+    ranking = goat.rank(every, rating, division, espn_power.get("ranks") or (in_poll if sel["numbered"] else {}))
     place = {t: i + 1 for i, t in enumerate(ranking["order"])}
     polled = [t["id"] for t in ranked]
     for t in ranked:
@@ -465,6 +473,9 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
                 t["lost"].append([in_poll[other], sel["names"][other], losses, other])
     goat_top = [{"rank": i + 1, "id": t, "name": sel["names"].get(t, t), "poll": in_poll.get(t),
                  "factors": ranking["factors"][t]} for i, t in enumerate(ranking["order"])]
+    for x in goat_top:
+        if espn_power:
+            x["power"] = espn_power["ranks"].get(x["id"])
     in_goat = {x["id"]: x["rank"] for x in goat_top[:config.POLL_SIZE]}
     results = goat.head_to_head(every)          # every result so far, not only the poll's
     for x in goat_top:
@@ -481,6 +492,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
             if losses:
                 x["lost"].append([in_goat[other], sel["names"][other], losses, other])
     goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS,
+                 "power": {k: espn_power.get(k) for k in ("headline", "published", "url")} if espn_power else None,
                  # among the poll's own 25 teams: results each order has the wrong way round
                  "poll_wrong": goat.contradictions(polled, every, set(polled)),
                  "goat_wrong": goat.contradictions(ranking["order"], every, set(polled))}
@@ -612,6 +624,8 @@ def main(state_dir: str, out_dir: str) -> int:
                 stage(named("rosters"), lambda: update_rosters(st, now))
                 stage(named("careers"), lambda: update_careers(st, now))
                 stage(named("social links"), lambda: social.update(st, now.date(), log))
+                if not config.POLL_TYPE:       # a pro league: ESPN's newest power ranking, in place of a poll
+                    stage(named("power ranking"), lambda: power.update(st, now, power_teams(st), log))
             # the first league's pages are built first: they are the folder the others' pages go inside
             stage(named("site"), lambda: build_site(st, dest, now))
     finally:
