@@ -455,3 +455,48 @@ def test_the_goat_ranking_is_frozen_once_the_postseason_starts(tmp_path=None):
     assert run.frozen_credit(state, 2027, False, later, day(21)) == (later, None)             # next season: follows the poll again
     assert run.frozen_credit(state, 2027, True, later, day(22)) == (later, "2026-12-22")      # and is frozen afresh
 
+# -------------------------------------------- last season stays on show until the new one begins --
+def test_last_season_is_shown_until_the_new_one_begins(tmp_path=None):
+    state = Path(tmp_path or tempfile.mkdtemp())
+    def game(gid, date, st, kind=2):
+        return {"id": gid, "date": date, "start": None, "state": st, "note": "", "round": "", "day": date.replace("-", ""), "kind": kind,
+                "away": {"id": "1", "name": "A", "abbr": "A", "score": 70 if st == "final" else None},
+                "home": {"id": "2", "name": "B", "abbr": "B", "score": 80 if st == "final" else None}}
+    feeds = {"20260110": [game(1, "2026-01-10", "final")], "20260111": [game(2, "2026-01-11", "final")],
+             "20261101": [game(11, "2026-11-01", "upcoming")], "20261102": [game(12, "2026-11-02", "upcoming")]}
+    seasons = {"now": (2027, "2026-11-01", "2026-11-02"), "20260115": (2026, "2026-01-10", "2026-01-11")}
+    down = set()
+    def get_json(url, *a, **k):
+        key = url.split("dates=")[1][:8] if "dates=" in url else "now"
+        if key in down:
+            raise web.FetchError("down")
+        return {"season_key": key}
+    def get_many(urls, *a, **k):
+        for u in urls:
+            day = u.split("dates=")[1][:8]
+            yield (u, None, web.FetchError("down")) if day in down else (u, {"events": feeds.get(day, [])}, None)
+    real = (web.get_json, web.get_many, espn.parse_season, espn.parse_event)
+    web.get_json, web.get_many = get_json, get_many
+    espn.parse_season, espn.parse_event = (lambda doc: seasons[doc["season_key"]]), (lambda e, day: e)
+    at = lambda m, d: dt.datetime(2026, m, d, 12, tzinfo=dt.timezone.utc)
+    try:
+        down.add("20260115")                                   # last season cannot be read: the coming season is shown, as before
+        got = run.update_schedule(state, at(10, 11))
+        assert (got["season"], got["showing_last_season"]) == (2027, False) and not (state / run.NEXT_SEASON).exists()
+        down.clear()
+        got = run.update_schedule(state, at(10, 12))           # three weeks before the first game: last season
+        assert (got["season"], got["games"], got["showing_last_season"]) == (2026, 2, True)
+        assert json.loads((state / "scoreboard.json").read_text())["season"] == 2026
+        assert json.loads((state / run.NEXT_SEASON).read_text())["season"] == 2027
+        run.write_json(state / "fbs.json", {"1": {"name": "A", "conf": "X", "rec": {}}, "2": {"name": "B", "conf": "X", "rec": {}}})
+        sel = run.selection(state)
+        assert sel["last_season"] and sel["next_first"] == "2026-11-01" and sel["season"] == 2026
+        assert [(g["id"], g["state"], g.get("next")) for g in sel["all_games"]] == [(1, "final", None), (2, "final", None), (11, "upcoming", 1), (12, "upcoming", 1)]
+        again = run.update_schedule(state, at(10, 20))          # nothing of last season is read twice
+        assert again["showing_last_season"] and again["days"] == 0
+        got = run.update_schedule(state, at(11, 1))             # the day of the first game: the new season takes over
+        assert (got["season"], got["showing_last_season"]) == (2027, False) and not (state / run.NEXT_SEASON).exists()
+        assert not run.selection(state)["last_season"] and len(run.selection(state)["all_games"]) == 2
+    finally:
+        web.get_json, web.get_many, espn.parse_season, espn.parse_event = real
+

@@ -47,6 +47,9 @@ GAME_MINUTES = 40
 # The schedule is read a day at a time. On a full run a day is read again if it
 # is close (from DAYS_BACK days ago to DAYS_AHEAD days ahead), and a day further
 # ahead once every FAR_REFRESH_DAYS days; a day gone by is not read again.
+# Until a new season's first game that counts, the site goes on showing last season. This is a day
+# in the middle of a season, by the year it ends in: ESPN's scoreboard for it says when that season ran.
+LAST_SEASON_DAY = "{year}0115"
 DAYS_BACK = 2
 DAYS_AHEAD = 7
 FAR_REFRESH_DAYS = 7

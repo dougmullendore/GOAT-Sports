@@ -1162,6 +1162,11 @@
   fetch("data.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
     data = d;
     (d.fbs || []).forEach(function (x) { fbs[x[0]] = x; });
+    if (d.last_season) {      // the new season has not begun: say that these are last season's numbers
+      var starts = d.last_season.starts ? day(d.last_season.starts).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "";
+      var main = document.querySelector("main");
+      main.insertBefore(el("p", { "class": "seasonnote", text: W(starts ? "season.last" : "season.last_undated", { season: d.season_label, next: d.last_season.next, date: starts }) }), main.firstChild);
+    }
     $("brand").textContent = d.site;
     var lg = $("leagues"), base = d.league ? "../" : "";
     if (lg && (d.leagues || []).length > 1) d.leagues.forEach(function (o) {

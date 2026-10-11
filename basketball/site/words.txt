@@ -8,6 +8,10 @@
 # After you save, the site updates in about two minutes. If a line is broken,
 # the update stops, the old site stays up, and GitHub emails you.
 
+# ---- shown at the top of every page until a new season's first game ----
+season.last = These are the final numbers of the {season} season. The {next} season begins {date}; its games are listed as they come up.
+season.last_undated = These are the final numbers of the {season} season. The {next} season has not begun.
+
 # ---- the tabs at the top ----
 nav.games = Games
 nav.rankings = Rankings

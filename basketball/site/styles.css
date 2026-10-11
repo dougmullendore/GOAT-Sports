@@ -517,3 +517,6 @@ a.opp:hover .n { color: var(--teal); }
   .game .more { grid-area: more; text-align: left; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 2px 0 0; }
   .game .more > * { display: inline; }
 }
+
+/* ---- last season on show until the new one begins ---- */
+.seasonnote { margin: 14px 0 0; padding: 9px 12px; border-left: 4px solid var(--ball); background: var(--sheet); border-radius: 0 4px 4px 0; font-size: .9375rem; color: var(--ink); }

@@ -91,12 +91,53 @@ def from_backup(games: list[dict], now: dt.datetime, nothing_read: bool, what: s
     return got["changed"]
 
 
+NEXT_SEASON = "scoreboard_next.json"       # the coming season's schedule, kept aside while last season is still shown
+
+
+def season_started(store: dict, today: dt.date) -> bool:
+    """Whether a game that counts (not a warm-up) has reached its day."""
+    return any(g.get("kind") in (2, 3) and g.get("date") and g["date"] <= today.isoformat()
+               for d in (store.get("days") or {}).values() for g in d["games"])
+
+
+def read_days(store: dict, season: int, first: str, last: str, today: dt.date) -> tuple[dict, list[str], list[str]]:
+    """Bring one season's stored schedule up to date: (the schedule, the days that were due, those that could not be read)."""
+    if store.get("season") != season:
+        store = {"season": season, "days": {}}
+    store["first"], store["last"] = first, last
+    days = each_day(first, last)
+    store["days"] = {d: v for d, v in store["days"].items() if d in set(days)}
+    todo = [d for d in days if day_is_due(d, (store["days"].get(d) or {}).get("read"), today)]
+    urls = {config.DAY.format(day=d): d for d in todo}
+    failed = []
+    for url, doc, err in web.get_many(list(urls)):
+        day = urls[url]
+        if err is not None:
+            failed.append(day)                   # keep the copy already stored for that day
+            continue
+        store["days"][day] = {"read": today.isoformat(), "games": [g for g in (espn.parse_event(e, day) for e in doc.get("events") or []) if g]}
+    return store, todo, failed
+
+
 def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None) -> dict:
-    """Read the days of the season that are due (or, on a game-night run, only the days in `only`)."""
+    """Read the days of the season that are due (or, on a game-night run, only the days in `only`).
+
+    Until a new season's first game that counts reaches its day, the site goes on showing last
+    season: scoreboard.json holds last season, read once, and the coming season's schedule is
+    kept in scoreboard_next.json so its games can be listed as still to come. On the day the
+    new season begins it takes over scoreboard.json, and everything else follows it."""
     stored = read_json(state / "scoreboard.json", {})
     today = now.date()
+    coming = None                    # the coming season's schedule, while last season is shown
     if only and stored.get("season") and stored.get("days"):
-        season, todo = stored["season"], list(only)
+        season, todo, failed = stored["season"], list(only), []
+        urls = {config.DAY.format(day=d): d for d in todo}
+        for url, doc, err in web.get_many(list(urls)):
+            day = urls[url]
+            if err is not None:
+                failed.append(day)
+                continue
+            stored["days"][day] = {"read": today.isoformat(), "games": [g for g in (espn.parse_event(e, day) for e in doc.get("events") or []) if g]}
     else:
         try:
             season, first, last = espn.parse_season(web.get_json(config.SCOREBOARD))
@@ -107,20 +148,39 @@ def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None
                 raise
             log(f"schedule: the season's dates could not be read ({e!r}); using the stored ones"[:200])
             season, first, last = stored["season"], stored["first"], stored["last"]
-        if stored.get("season") != season:
-            stored = {"season": season, "days": {}}
-        stored["first"], stored["last"] = first, last
-        days = each_day(first, last)
-        stored["days"] = {d: v for d, v in stored["days"].items() if d in set(days)}
-        todo = [d for d in days if day_is_due(d, (stored["days"].get(d) or {}).get("read"), today)]
-    urls = {config.DAY.format(day=d): d for d in todo}
-    failed = []
-    for url, doc, err in web.get_many(list(urls)):
-        day = urls[url]
-        if err is not None:
-            failed.append(day)                   # keep the copy already stored for that day
-            continue
-        stored["days"][day] = {"read": today.isoformat(), "games": [g for g in (espn.parse_event(e, day) for e in doc.get("events") or []) if g]}
+        kept = read_json(state / NEXT_SEASON, {})
+        if stored.get("season") == season and not season_started(stored, today):
+            kept, stored = stored, {}            # this season has not begun: its schedule goes aside
+        if stored.get("season") != season:       # last season is on show (or nothing is yet)
+            kept, todo, failed = read_days(kept if kept.get("season") == season else {}, season, first, last, today)
+            if season_started(kept, today):
+                stored = kept                    # the new season begins today: it takes over
+            else:
+                coming = kept
+        fresh = stored is kept                   # a season that has just taken over was read a moment ago
+        if coming is not None:
+            before = season - 1
+            try:
+                if stored.get("season") != before or not stored.get("first"):
+                    found, first, last = espn.parse_season(web.get_json(config.DAY.format(day=config.LAST_SEASON_DAY.format(year=before))))
+                    if found != before or not first or not last:
+                        raise RuntimeError(f"ESPN's scoreboard did not give the dates of the {before} season")
+                else:
+                    first, last = stored["first"], stored["last"]
+                old, old_todo, old_failed = read_days(stored, before, first, last, today)
+                if not any(d["games"] for d in old["days"].values()):
+                    raise RuntimeError("none of last season's days could be read")
+                write_json(state / NEXT_SEASON, coming)
+                stored, todo, failed, season = old, old_todo, old_failed, before
+            except Exception as e:
+                # last season cannot be shown just now: show the coming season, as before any game is played
+                log(f"schedule: last season could not be read ({e!r}); showing the coming season for now"[:220])
+                stored, coming, fresh = coming, None, True
+        if coming is None:
+            if (state / NEXT_SEASON).exists():
+                (state / NEXT_SEASON).unlink()
+            if not fresh:
+                stored, todo, failed = read_days(stored, season, first, last, today)
     patched = 0
     if failed:
         patched = from_backup([g for d in failed for g in (stored["days"].get(d) or {}).get("games") or []], now,
@@ -128,8 +188,10 @@ def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None
     write_json(state / "scoreboard.json", stored)
     n = len({g["id"] for d in stored["days"].values() for g in d["games"]})
     log(f"schedule: {len(todo) - len(failed)} of {len(todo)} days read, {n:,} games in season {season}"
-        + (f"; kept the old copy of {len(failed)} days" if failed else ""))
-    return {"season": season, "days": len(todo), "days_failed": len(failed), "games": n, "from_backup": patched}
+        + (f"; kept the old copy of {len(failed)} days" if failed else "")
+        + (f"; last season is shown until the {coming['season']} season begins" if coming is not None else ""))
+    return {"season": season, "days": len(todo), "days_failed": len(failed), "games": n, "from_backup": patched,
+            "showing_last_season": coming is not None}
 
 
 def update_rankings(state: Path) -> dict:
@@ -222,6 +284,16 @@ def selection(state: Path) -> dict:
     for day in sorted(board["days"], key=lambda d: (board["days"][d].get("read") or "", d)):
         for g in board["days"][day]["games"]:
             games[g["id"]] = g          # a game moved to another day is kept once, from the day read last
+    # While last season is on show, the coming season's games are listed too, as still to come.
+    coming = read_json(state / NEXT_SEASON, {})
+    last_season = coming.get("season") == board["season"] + 1
+    next_first = None
+    if last_season:
+        for day in coming.get("days") or {}:
+            for g in coming["days"][day]["games"]:
+                if g["id"] not in games and g["state"] != "final":
+                    games[g["id"]] = dict(g, next=1)
+                    next_first = min(next_first or g["date"], g["date"])
     if not config.POLL_TYPE:
         # only games between the league's own teams (no all-star game)
         games = {i: g for i, g in games.items() if g["home"]["id"] in fbs and g["away"]["id"] in fbs}
@@ -274,7 +346,8 @@ def selection(state: Path) -> dict:
             others[kind] = {"label": label, "name": p["name"], "date": p["date"],
                             "teams": [dict(r, name=names.get(r["id"], r["name"])) for r in p["rows"][:config.POLL_SIZE]]}
     return {"through": through, "poll_date": poll_date, "poll_week": poll_week, "polls_seen": len(main), "numbered": numbered,
-            "season": board["season"], "first": board.get("first"), "last": board.get("last"), "teams": ranked, "games": listed,
+            "season": board["season"], "first": board.get("first"), "last": (coming.get("last") if last_season else None) or board.get("last"),
+            "last_season": last_season, "next_first": next_first, "teams": ranked, "games": listed,
             "all_games": every, "fbs_teams": all_fbs, "fbs": fbs, "names": names, "others": others}
 
 
@@ -458,7 +531,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     division = set(fbs) | set(in_poll)
     # before a league table means anything, the order is the ratings carried over from last season
     # a pro league has no poll: ESPN's newest power ranking stands in for one, and the standings for that
-    espn_power = power.stored(state, division) if not config.POLL_TYPE else {}
+    # (not while last season is on show: ESPN's newest ranking is about the season to come)
+    espn_power = power.stored(state, division) if not config.POLL_TYPE and not sel["last_season"] else {}
     # Regular season only, and frozen once the postseason starts: the games, the ratings and the poll
     # it is built on all stop where the regular season did.
     regular = [g for g in every if not (g.get("kind") == 3)]
@@ -560,6 +634,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "site": config.SITE_NAME, "league": config.SITE_FOLDER, "league_name": config.LEAGUE_NAME, "all_name": config.ALL_NAME,
         "leagues": config.LEAGUE_TABS, "pro": not has_poll_type, "no_poll": has_poll_type and not has_poll, "numbered": sel["numbered"],
         "updated": now.isoformat(timespec="seconds"), "season": season, "season_label": season_label(season),
+        # set while a new season has not begun and last season's numbers are still on show
+        "last_season": {"next": season_label(season + 1), "starts": sel["next_first"]} if sel["last_season"] else None,
         "first": sel["first"], "last": sel["last"], "periods": config.PERIODS,
         "logos": {t: x["logo"] for t, x in fbs.items() if x.get("logo")} if not config.LOGO_URL else None,
         "standings": [{"id": t["id"], "name": t["name"], "rank": t["rank"], **{k: fbs[t["id"]].get(k) for k in ("conf", "group", "w", "l", "t", "pf", "pa", "seed", "gb", "rec", "place")}}
