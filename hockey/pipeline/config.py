@@ -96,4 +96,4 @@ ESPN_ABBR = {"TB": "TBL", "SJ": "SJS", "LA": "LAK", "NJ": "NJD", "UTAH": "UTA", 
 # Be polite to the servers.
 FETCH_THREADS = 6
 FETCH_RETRIES = 4
-USER_AGENT = "Mozilla/5.0 (compatible; goat-hockey-stats-site/2.0; +https://github.com/dougmullendore/Hockey)"
+USER_AGENT = "Mozilla/5.0 (compatible; goat-hockey-stats-site/2.0; +https://github.com/dougmullendore/GOAT-Sports)"
