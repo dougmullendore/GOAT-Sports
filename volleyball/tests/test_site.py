@@ -682,3 +682,47 @@ def test_the_site_carries_cards():
         one = next(iter(mine.values()))
         assert len(one["games"]) == 1 and one["games"][0][:2] == [6627461, game["date"]] and one["career"]["seasons"][0][0] == 2026
         assert one["career"]["known"] is False and "ranked" in one              # the other team is ranked second
+
+# ------------------------------------------------------ the backup scoreboard --
+def test_scores_come_from_espn_when_the_ncaa_feed_is_down(tmp_path=None):
+    from pipeline import web as _web
+    state = Path(tmp_path or tempfile.mkdtemp())
+    now = dt.datetime(2026, 10, 11, 1, 0, tzinfo=UTC)
+    start = int(now.timestamp()) - 2 * 3600
+
+    def match(mid, st, a=None, h=None):
+        return {"id": mid, "date": "2026-10-10", "start": start, "state": st, "note": "", "round": "",
+                "away": {"id": f"a{mid}", "name": f"A{mid}", "sets": a}, "home": {"id": f"h{mid}", "name": f"H{mid}", "sets": h}}
+
+    def stored():
+        return {"season": 2026, "days": {"2026-10-10": [match(1, "live", 1, 1), match(2, "upcoming"), match(3, "final", 3, 0), match(4, "upcoming")]}}
+    run.write_json(state / "watch.json", {"1": {"espn": "11", "flip": False}, "2": {"espn": "12", "flip": True}, "3": {"espn": "13"}, "4": []})
+
+    def event(eid, st, done, home, away):
+        return {"id": eid, "status": {"type": {"state": st, "completed": done}},
+                "competitions": [{"competitors": [{"homeAway": "home", "score": home}, {"homeAway": "away", "score": away}]}]}
+    doc = {"events": [event("11", "post", True, "3", "1"), event("12", "in", False, "2", "0"), event("13", "post", True, "0", "3")]}
+    real_days, real_bytes = _web.get_days, _web.get_bytes
+    _web.get_days = lambda season, dates: [(d, None, RuntimeError("down")) for d in dates]
+    try:
+        _web.get_bytes = lambda url, *a, **k: json.dumps(doc).encode()
+        run.write_json(state / "scoreboard.json", stored())
+        res = run.update_scoreboard(state, 2026, ["2026-10-10"], now)
+        got = {g["id"]: g for g in json.loads((state / "scoreboard.json").read_text())["days"]["2026-10-10"]}
+        assert res["from_backup"] == 2 and res["days_failed"] == 1
+        assert (got[1]["state"], got[1]["away"]["sets"], got[1]["home"]["sets"]) == ("final", 1, 3)
+        assert (got[2]["state"], got[2]["away"]["sets"], got[2]["home"]["sets"]) == ("live", 2, 0)       # ESPN has the teams the other way round
+        assert (got[3]["home"]["sets"], got[4]["state"]) == (0, "upcoming")                               # over, and unknown to ESPN: untouched
+
+        def down(url, *a, **k):
+            raise _web.FetchError("down")
+        _web.get_bytes = down
+        run.write_json(state / "scoreboard.json", stored())
+        try:
+            run.update_scoreboard(state, 2026, ["2026-10-10"], now)
+            raise AssertionError("with nothing read from either, the stage must fail")
+        except RuntimeError:
+            pass
+    finally:
+        _web.get_days, _web.get_bytes = real_days, real_bytes
+

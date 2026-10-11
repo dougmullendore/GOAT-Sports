@@ -33,7 +33,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import cards, careers, config, espn, goat, odds, players, teams, web
+from . import backup, cards, careers, config, espn, goat, odds, players, teams, web
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -72,6 +72,24 @@ def day_is_due(day: str, read: str | None, today: dt.date) -> bool:
 
 
 # ----------------------------------------------------------------- stages --
+def from_backup(games: list[dict], now: dt.datetime, nothing_read: bool, what: str) -> int:
+    """The usual scoreboard could not be read for these games: bring those under way
+    or just over up to date from the backup scoreboard. With nothing read from either,
+    the stage fails and the stored copy stays in use."""
+    try:
+        got = backup.patch(games, now, config.BACKUP, log)
+    except Exception as e:
+        if nothing_read:
+            raise RuntimeError(f"the scoreboard could not be reached for any {what}") from e
+        log(f"backup scoreboard: not used: {e!r}"[:200])
+        return 0
+    for g in games:
+        g.pop("backup", None)
+    if nothing_read and not got["days"]:
+        raise RuntimeError(f"the scoreboard could not be reached for any {what}")
+    return got["changed"]
+
+
 def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None) -> dict:
     """Read the days of the season that are due (or, on a game-night run, only the days in `only`)."""
     stored = read_json(state / "scoreboard.json", {})
@@ -79,9 +97,15 @@ def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None
     if only and stored.get("season") and stored.get("days"):
         season, todo = stored["season"], list(only)
     else:
-        season, first, last = espn.parse_season(web.get_json(config.SCOREBOARD))
-        if not season or not first or not last:
-            raise RuntimeError("ESPN's scoreboard did not say which season it is, or when it runs")
+        try:
+            season, first, last = espn.parse_season(web.get_json(config.SCOREBOARD))
+            if not season or not first or not last:
+                raise RuntimeError("ESPN's scoreboard did not say which season it is, or when it runs")
+        except Exception as e:
+            if not (stored.get("season") and stored.get("first") and stored.get("last") and stored.get("days")):
+                raise
+            log(f"schedule: the season's dates could not be read ({e!r}); using the stored ones"[:200])
+            season, first, last = stored["season"], stored["first"], stored["last"]
         if stored.get("season") != season:
             stored = {"season": season, "days": {}}
         stored["first"], stored["last"] = first, last
@@ -96,13 +120,15 @@ def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None
             failed.append(day)                   # keep the copy already stored for that day
             continue
         stored["days"][day] = {"read": today.isoformat(), "games": [g for g in (espn.parse_event(e, day) for e in doc.get("events") or []) if g]}
-    if todo and len(failed) == len(todo):
-        raise RuntimeError("the scoreboard could not be reached for any day")
+    patched = 0
+    if failed:
+        patched = from_backup([g for d in failed for g in (stored["days"].get(d) or {}).get("games") or []], now,
+                              len(failed) == len(todo), "day")
     write_json(state / "scoreboard.json", stored)
     n = len({g["id"] for d in stored["days"].values() for g in d["games"]})
     log(f"schedule: {len(todo) - len(failed)} of {len(todo)} days read, {n:,} games in season {season}"
         + (f"; kept the old copy of {len(failed)} days" if failed else ""))
-    return {"season": season, "days": len(todo), "days_failed": len(failed), "games": n}
+    return {"season": season, "days": len(todo), "days_failed": len(failed), "games": n, "from_backup": patched}
 
 
 def update_rankings(state: Path) -> dict:

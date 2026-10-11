@@ -74,13 +74,16 @@ GOAT_REACH = 80           # how far up or down the order one move can take a tea
 
 # While a game is being played, the page itself re-reads ESPN's scoreboard this
 # often (in seconds) and shows the score as it changes.
-LIVE_SECONDS = 30
+LIVE_SECONDS = 20
 
 # Be polite to the servers.
 FETCH_THREADS = 6
 FETCH_RETRIES = 4
 USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
 
+
+# Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
+BACKUP = "ncaaf"
 
 # ---------------------------------------------------------------- the NFL --
 # What is different for the NFL's copy of the site. There is no poll: every team is numbered by
@@ -90,7 +93,7 @@ _NFL_API = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/"
 NFL = {
     "LEAGUE": "nfl", "LEAGUE_NAME": "NFL", "ALL_NAME": "the NFL", "STATE_FOLDER": "nfl", "SITE_FOLDER": "nfl",
     "POLL_NAME": "NFL standings", "POLL_TYPE": None, "POLL_SIZE": 32, "MIN_TEAMS": 32, "OTHER_POLLS": {},
-    "SITE_API": _NFL_API,
+    "SITE_API": _NFL_API, "BACKUP": "nfl",
     "SCOREBOARD": _NFL_API + "scoreboard?limit=100",
     "WEEK": _NFL_API + "scoreboard?dates={season}&seasontype={kind}&week={week}&limit=100",
     "RANKINGS": None,

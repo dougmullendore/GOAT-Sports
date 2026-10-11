@@ -84,6 +84,9 @@ XG_STEADY_GOALS = 1500
 WATCH_COUNTRIES = ("US", "CA")
 WATCH_MAX = 4
 
+# Where scores are read from when the NHL's feed cannot be: Yahoo's public scoreboard (pipeline/backup.py).
+BACKUP = "nhl"
+
 # While a game is being played, the page itself re-reads ESPN's public
 # scoreboard this often (in seconds) and shows the score as it changes. The
 # NHL's own feed cannot be read by a web page, only by the job.

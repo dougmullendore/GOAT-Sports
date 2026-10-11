@@ -26,6 +26,8 @@ SITE_API = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/"
 SCOREBOARD = SITE_API + "scoreboard?limit=400"                   # today, and the season's dates
 DAY = SITE_API + "scoreboard?dates={day}&limit=400"              # one day (YYYYMMDD); the page reads live scores from it too
 RANKINGS = None
+# Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
+BACKUP = "mlb"
 SUMMARY = SITE_API + "summary?event={game}"
 ROSTER = SITE_API + "teams/{team}/roster"
 STANDINGS = "https://site.api.espn.com/apis/v2/sports/baseball/mlb/standings?season={season}&level=3"

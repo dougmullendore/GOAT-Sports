@@ -34,7 +34,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import cards, careers, config, espn, goat, odds, players, teams, web
+from . import backup, cards, careers, config, espn, goat, odds, players, teams, web
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -53,15 +53,39 @@ def write_json(path: Path, obj, indent=None) -> None:
 
 
 # ----------------------------------------------------------------- stages --
-def update_schedule(state: Path, only: list[str] | None = None) -> dict:
+def from_backup(games: list[dict], now: dt.datetime, nothing_read: bool, what: str) -> int:
+    """The usual scoreboard could not be read for these games: bring those under way
+    or just over up to date from the backup scoreboard. With nothing read from either,
+    the stage fails and the stored copy stays in use."""
+    try:
+        got = backup.patch(games, now, config.BACKUP, log)
+    except Exception as e:
+        if nothing_read:
+            raise RuntimeError(f"the scoreboard could not be reached for any {what}") from e
+        log(f"backup scoreboard: not used: {e!r}"[:200])
+        return 0
+    for g in games:
+        g.pop("backup", None)
+    if nothing_read and not got["days"]:
+        raise RuntimeError(f"the scoreboard could not be reached for any {what}")
+    return got["changed"]
+
+
+def update_schedule(state: Path, only: list[str] | None = None, now: dt.datetime | None = None) -> dict:
     """Read the season's weeks (or, on a game-night run, only the weeks in `only`, as "kind-week")."""
     stored = read_json(state / "scoreboard.json", {})
     if only and stored.get("season") and stored.get("calendar"):
         season, calendar = stored["season"], stored["calendar"]
     else:
-        season, calendar = espn.parse_calendar(web.get_json(config.SCOREBOARD))
-        if not season:
-            raise RuntimeError("ESPN's scoreboard did not say which season it is")
+        try:
+            season, calendar = espn.parse_calendar(web.get_json(config.SCOREBOARD))
+            if not season:
+                raise RuntimeError("ESPN's scoreboard did not say which season it is")
+        except Exception as e:
+            if not (stored.get("season") and stored.get("calendar")):
+                raise
+            log(f"schedule: the season's calendar could not be read ({e!r}); using the stored one"[:200])
+            season, calendar = stored["season"], stored["calendar"]
         if not calendar:
             calendar = stored.get("calendar") if stored.get("season") == season else None
             calendar = calendar or [w + ["", ""] for w in config.DEFAULT_WEEKS]
@@ -78,14 +102,16 @@ def update_schedule(state: Path, only: list[str] | None = None) -> dict:
             failed.append(key)                   # keep the copy already stored for that week
             continue
         stored["weeks"][key] = [g for g in (espn.parse_event(e, *keys[key]) for e in doc.get("events") or []) if g]
-    if todo and len(failed) == len(todo):
-        raise RuntimeError("the scoreboard could not be reached for any week")
+    patched = 0
+    if failed:
+        patched = from_backup([g for k in failed for g in stored["weeks"].get(k) or []], now or dt.datetime.now(dt.timezone.utc),
+                              len(failed) == len(todo), "week")
     stored["weeks"] = {k: v for k, v in stored["weeks"].items() if k in keys}
     write_json(state / "scoreboard.json", stored)
     n = len({g["id"] for wk in stored["weeks"].values() for g in wk})
     log(f"schedule: {len(todo) - len(failed)} of {len(todo)} weeks read, {n:,} games in season {season}"
         + (f"; kept the old copy of {failed}" if failed else ""))
-    return {"season": season, "weeks": len(todo), "weeks_failed": len(failed), "games": n}
+    return {"season": season, "weeks": len(todo), "weeks_failed": len(failed), "games": n, "from_backup": patched}
 
 
 def update_rankings(state: Path) -> dict:
@@ -436,8 +462,6 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     if config.LEAGUE != "college":
         # the league's own colour and icon for browser tabs and phone home screens
         (out / "manifest.json").write_text((out / "manifest.json").read_text().replace("GOAT Football", "GOAT Football: NFL"))
-        for name in ("icon.svg", "icon-32.png", "icon-180.png", "icon-192.png", "icon-512.png"):
-            shutil.copy(out / name.replace("icon", f"icon-{config.LEAGUE}", 1), out / name)
     (out / "index.html").write_text(page)
     # Players and team stats twice: against the ranked 25 only, and against all of
     # FBS. The site's "Top 25 / All FBS" switch chooses which file it reads.
@@ -528,13 +552,13 @@ def main(state_dir: str, out_dir: str) -> int:
             st.mkdir(parents=True, exist_ok=True)
             if live and on[league]:
                 todo = on[league]
-                stage(named("scores now"), lambda: update_schedule(st, todo))
+                stage(named("scores now"), lambda: update_schedule(st, todo, now))
                 if not config.POLL_TYPE:
                     stage(named("standings"), lambda: update_fbs(st))     # a team's number is its place in the standings
                 stage(named("box scores now"), lambda: update_boxes(st, now, live_only=True))
             elif not live and not offline:
                 # a failed look at any of these leaves the stored copy in use
-                stage(named("schedule"), lambda: update_schedule(st))
+                stage(named("schedule"), lambda: update_schedule(st, now=now))
                 if config.POLL_TYPE:
                     stage(named("rankings"), lambda: update_rankings(st))
                 stage(named("conferences" if config.POLL_TYPE else "standings"), lambda: update_fbs(st))

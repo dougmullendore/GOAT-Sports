@@ -165,7 +165,7 @@ card says his earlier seasons have not been read yet.
 ## Live scores and box scores
 
 - While a game is on, the page itself re-reads ESPN's scoreboard for that week
-  every 30 seconds and updates the score, the clock and the score by quarter.
+  every 20 seconds and updates the score, the clock and the score by quarter.
   This happens in the reader's browser.
 - Team and player stats for a game under way are fetched by the GitHub job on
   its 5-minute runs, which also rebuild the pages when a game ends.

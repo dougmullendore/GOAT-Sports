@@ -84,11 +84,9 @@ players.career_wait = His earlier seasons have not been read yet. A few thousand
 
 # ---- a game's own page ----
 game.back = All Games
-game.note = The score comes from ESPN and updates every 30 seconds during a game. Team and player stats come from ESPN's box score; during a game they are refreshed about every 5 minutes.
 game.espn_link = This game on ESPN
 
 # ---- bottom of every page ----
-footer.about = Game times are shown in your own time zone. Schedules, scores, box scores, channels and betting lines come from ESPN's public feeds, and rankings are the AP Top 25 as ESPN publishes it. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to their schools and are shown from ESPN. Not affiliated with or endorsed by ESPN, the NCAA, the Associated Press or any school.
 
 # ---- the NFL pages (the site's nfl/ folder) ----
 # These replace the lines above on the NFL pages. There is no poll there: every team is numbered
@@ -113,4 +111,3 @@ nfl.players_lede = Every regular in the NFL, ranked against the rest by Impact p
 nfl.players_note = Impact compares each player with every regular at his position in the NFL, from the box scores. It cannot see blocking, coverage or who was on the field, it does not adjust for the opponent, and offensive linemen have no numbers to rate.
 nfl.players_career_note = Each season's line is ESPN's, regular season only, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
 nfl.players_career_wait = His earlier seasons have not been read yet. They appear here within a day.
-nfl.footer_about = Game times are shown in your own time zone. Schedules, scores, standings, box scores, channels and betting lines come from ESPN's public feeds. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to the league and its teams and are shown from ESPN. Not affiliated with or endorsed by the NFL, ESPN or any team.

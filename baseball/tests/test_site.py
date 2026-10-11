@@ -177,7 +177,7 @@ def test_odds_are_never_far_from_even():
 
 def test_the_words_file():
     words = run.read_words()
-    for key in ("games.title", "rankings.title", "rankings.note_conf", "players.note", "footer.about"):
+    for key in ("games.title", "rankings.title", "rankings.note_conf", "players.note"):
         assert words[key], key
 
 
@@ -220,3 +220,65 @@ def test_a_game_day_run_looks_only_while_a_game_is_on():
         first_pitch = next(iter(games_of("20261011").values()))["start"]
         soon = dt.datetime.fromtimestamp(first_pitch - 600, dt.timezone.utc)
         assert "20261011" in run.live_now(state, soon)
+
+# ------------------------------------------------------ the backup scoreboard --
+def test_scores_come_from_the_backup_when_the_feed_is_down():
+    import json as _json
+    from pipeline import backup, web as _web
+    now = dt.datetime(2026, 10, 11, 1, 0, tzinfo=dt.timezone.utc)
+    start = int(now.timestamp()) - 3 * 3600
+
+    def game(gid, away, home, state, a=None, h=None, when=start):
+        return {"id": gid, "date": "2026-10-10", "start": when, "state": state,
+                "away": {"id": away[1], "name": away[0], "abbr": away[1], "score": a},
+                "home": {"id": home[1], "name": home[0], "abbr": home[1], "score": h}}
+
+    def games():
+        return [game(1, ("Reds", "CIN"), ("Blues", "STL"), "live", 1, 1),          # on when the feed went down
+                game(2, ("Greens", "GRN"), ("Golds", "GLD"), "upcoming"),           # listed the other way round by Yahoo
+                game(3, ("Reds", "CIN"), ("Blues", "STL"), "final", 9, 9),          # over: never touched
+                game(4, ("Nobody", "NOB"), ("Nowhere", "NWH"), "upcoming"),         # not on Yahoo: left alone
+                game(5, ("Greys", "GRY"), ("Pinks", "PNK"), "upcoming", when=start + 9 * 86400)]   # not due yet
+    teams = {f"x.t.{i}": {"first_name": city, "last_name": name, "full_name": f"{city} {name}", "abbr": abbr}
+             for i, (city, name, abbr) in enumerate([("Cincinnati", "Reds", "CIN"), ("St. Louis", "Blues", "STL"),
+                                                     ("Greenville", "Greens", "GRN"), ("Goldsboro", "Golds", "GLD")])}
+    when = "Sat, 10 Oct 2026 22:00:00 +0000"
+    doc = {"service": {"scoreboard": {"teams": teams, "games": {
+        "a": {"start_time": when, "status_type": "status.type.final", "status_display_name": "Final", "current_period_id": "4",
+              "away_team_id": "x.t.0", "home_team_id": "x.t.1", "total_away_points": "3", "total_home_points": "2"},
+        "b": {"start_time": when, "status_type": "status.type.in_progress", "status_display_name": "2nd", "current_period_id": "2",
+              "away_team_id": "x.t.3", "home_team_id": "x.t.2", "total_away_points": "7", "total_home_points": "0"}}}}}
+    asked, real = [], _web.get_bytes
+
+    def up(url, *a, **k):
+        asked.append(url)
+        return _json.dumps(doc).encode()
+
+    def down(url, *a, **k):
+        raise _web.FetchError("down")
+    try:
+        _web.get_bytes = up
+        g = games()
+        assert backup.patch(g, now, "x", log=lambda m: None) == {"days": 1, "changed": 2}
+        assert len(asked) == 1 and "leagues=x&date=2026-10-10" in asked[0]
+        assert (g[0]["state"], g[0]["away"]["score"], g[0]["home"]["score"]) == ("final", 3, 2)
+        assert (g[1]["state"], g[1]["away"]["score"], g[1]["home"]["score"]) == ("live", 0, 7)
+        assert (g[2]["home"]["score"], g[3]["state"], g[4]["state"]) == (9, "upcoming", "upcoming")
+        g = games()
+        assert run.from_backup(g, now, True, "day") == 2 and not any("backup" in x for x in g)
+        assert g[1]["detail"] == "2nd" and "detail" not in g[0]
+        _web.get_bytes = down
+        assert run.from_backup(games(), now, False, "day") == 0          # part of the feed was read: carry on
+        try:
+            run.from_backup(games(), now, True, "day")
+            raise AssertionError("with nothing read from either, the stage must fail")
+        except RuntimeError:
+            pass
+        try:
+            run.from_backup(games()[2:3], now, True, "day")             # nothing to look up is not a reading
+            raise AssertionError("with nothing read, the stage must fail")
+        except RuntimeError:
+            pass
+    finally:
+        _web.get_bytes = real
+

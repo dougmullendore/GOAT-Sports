@@ -82,8 +82,6 @@ players.career_wait = His earlier seasons have not been read yet. They appear he
 
 # ---- a game's own page ----
 game.back = All Games
-game.note = The score comes from ESPN and updates every 20 seconds during a game. The box score comes from ESPN too; during a game it is refreshed about every 5 minutes.
 game.espn_link = This game on ESPN
 
 # ---- bottom of every page ----
-footer.about = Game times are shown in your own time zone. Schedules, scores, standings, box scores, probable starters, channels and betting lines come from ESPN's public feeds. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to the league and its teams and are shown from ESPN. Not affiliated with or endorsed by Major League Baseball, ESPN or any team.

@@ -1125,6 +1125,19 @@
     window.scrollTo(0, 0);
   }
 
+  // ---- a page left open, or come back to later, does not go stale ----
+  // Live scores keep themselves current (above). Everything else, the standings, the rankings and
+  // the schedule, comes with the page: when a newer copy has been published the page is loaded
+  // again, on coming back to it after ten minutes away or, while it sits at its top, every fifteen.
+  var loadedAt = Date.now();
+  function reloadIfNewer() {
+    fetch("data.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (d && data && d.updated && d.updated !== data.updated) location.reload();
+    }).catch(function () {});
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && Date.now() - loadedAt > 10 * 60 * 1000) reloadIfNewer(); });
+  setInterval(function () { if (!document.hidden && (window.pageYOffset || 0) < 60) reloadIfNewer(); }, 15 * 60 * 1000);
+
   fetch("data.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
     data = d;
     (d.fbs || []).forEach(function (x) { fbs[x[0]] = x; });

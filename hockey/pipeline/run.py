@@ -31,7 +31,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import careers, config, goat, lines, nhl, odds, players, playoffs, teams, web, xg
+from . import backup, careers, config, goat, lines, nhl, odds, players, playoffs, teams, web, xg
 
 SITE_SRC = Path(__file__).resolve().parents[1] / "site"
 
@@ -54,7 +54,31 @@ def in_order(games) -> list[dict]:
 
 
 # ----------------------------------------------------------------- stages --
-def update_schedule(state: Path, season: int, only: list[str] | None = None) -> dict:
+def from_backup(games: list[dict], now: dt.datetime, nothing_read: bool, what: str) -> int:
+    """The usual scoreboard could not be read for these games: bring those under way
+    or just over up to date from the backup scoreboard. With nothing read from either,
+    the stage fails and the stored copy stays in use."""
+    try:
+        got = backup.patch(games, now, config.BACKUP, log)
+    except Exception as e:
+        if nothing_read:
+            raise RuntimeError(f"the scoreboard could not be reached for any {what}") from e
+        log(f"backup scoreboard: not used: {e!r}"[:200])
+        return 0
+    for g in games:
+        extra = g.pop("backup", None)
+        if extra and g["state"] == "final":            # how it ended, as the NHL's feed would say it
+            g["end"] = "SO" if extra["shootout"] else "OT" if extra["periods"] > 3 else "REG"
+            g.pop("period", None)
+        elif extra and g["state"] == "live":
+            g["period"] = [extra["periods"] or 1, "OT" if extra["periods"] > 3 else "REG"]
+        g.pop("detail", None)
+    if nothing_read and not got["days"]:
+        raise RuntimeError(f"the scoreboard could not be reached for any {what}")
+    return got["changed"]
+
+
+def update_schedule(state: Path, season: int, only: list[str] | None = None, now: dt.datetime | None = None) -> dict:
     """Read the season's schedule a week at a time. `only` (dates) reads just
     the weeks starting on those dates, on a game-night run."""
     stored = read_json(state / "schedule.json", {})
@@ -69,8 +93,9 @@ def update_schedule(state: Path, season: int, only: list[str] | None = None) -> 
         for g in games:
             if nhl.season_for(dt.date.fromisoformat(g["date"])) == season:
                 found[str(g["id"])] = g
-    if len(failed) == len(weeks):
-        raise RuntimeError("the schedule could not be reached for any week")
+    patched = 0
+    if failed:
+        patched = from_backup(list(stored["games"].values()), now or dt.datetime.now(dt.timezone.utc), len(failed) == len(weeks), "week")
     if only or failed:
         stored["games"].update(found)          # part of the season was read: keep the rest as it was
     elif found:
@@ -79,7 +104,7 @@ def update_schedule(state: Path, season: int, only: list[str] | None = None) -> 
     n = len(stored["games"])
     log(f"schedule: {len(weeks) - len(failed)} of {len(weeks)} weeks read, {n:,} games in season {season}-{(season + 1) % 100:02d}"
         + (f"; kept the old copy of {len(failed)} weeks" if failed else ""))
-    return {"season": season, "weeks": len(weeks), "weeks_failed": len(failed), "games": n,
+    return {"season": season, "weeks": len(weeks), "weeks_failed": len(failed), "games": n, "from_backup": patched,
             "final": sum(1 for g in stored["games"].values() if g["state"] == "final")}
 
 
@@ -573,12 +598,12 @@ def main(state_dir: str, out_dir: str) -> int:
         if not todo:
             log("game-night run: no game is being played right now; nothing to do")
             return 0
-        stage("scores now", lambda: update_schedule(state, season, sorted({g["date"] for g in todo})))
+        stage("scores now", lambda: update_schedule(state, season, sorted({g["date"] for g in todo}), now))
         stage("box scores now", lambda: update_live_boxes(state, now))
         stage("standings", lambda: update_standings(state, now))
     elif not offline:
         # a failed look at any of these leaves the stored copy in use
-        stage("schedule", lambda: update_schedule(state, season))
+        stage("schedule", lambda: update_schedule(state, season, now=now))
         stage("standings", lambda: update_standings(state, now))
         stage("box scores", lambda: update_boxes(state, now))
         stage("people", lambda: update_people(state, now))

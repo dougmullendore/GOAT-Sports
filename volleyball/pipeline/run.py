@@ -28,6 +28,7 @@ import shutil
 import sys
 import traceback
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from . import box, cards, careers, config, goat, odds, photos, players, poll, pro, teams, watch, web
 
@@ -105,7 +106,49 @@ def update_poll(state: Path, now: dt.datetime, forced: bool) -> dict:
     return {"checked": True, "why": why, "found": found["through"], "new": is_new, "newest": max(polls)}
 
 
-def update_scoreboard(state: Path, season: int, only: list[str] | None = None) -> dict:
+def from_espn(state: Path, games: list[dict], now: dt.datetime) -> int | None:
+    """The NCAA's scoreboard could not be read for these matches: bring those under way
+    or just over up to date from ESPN's, which already tells the page the live score.
+    Only matches ESPN's id is known for (watch.json) are touched, and a finished match
+    never is. Returns how many changed, or None if ESPN was not read either."""
+    where = read_json(state / "watch.json", {})
+    t, east = now.timestamp(), ZoneInfo("America/New_York")
+
+    def listing(g):
+        w = where.get(str(g["id"]))
+        return w if isinstance(w, dict) and w.get("espn") else None
+
+    due = [g for g in games if g["state"] in ("upcoming", "live") and g.get("start") and t - 30 * 3600 <= g["start"] <= t + 3600 and listing(g)]
+    if not due:
+        return None
+    days = sorted({dt.datetime.fromtimestamp(listing(g).get("t") or g["start"], east).strftime("%Y%m%d") for g in due})[-3:]
+    events, read = {}, 0
+    for day in days:
+        try:
+            for e in json.loads(web.get_bytes(config.ESPN_SCOREBOARD + day)).get("events") or []:
+                events[str(e.get("id"))] = e
+            read += 1
+        except Exception as e:
+            log(f"backup scoreboard: ESPN {day} could not be read: {e!r}"[:200])
+    if not read:
+        return None
+    changed = 0
+    for g in due:
+        w, e = listing(g), events.get(listing(g)["espn"])
+        kind = ((e or {}).get("status") or {}).get("type") or {}
+        new = "final" if kind.get("state") == "post" and kind.get("completed") else "live" if kind.get("state") == "in" else None
+        sets = {c.get("homeAway"): c.get("score") for c in ((e or {}).get("competitions") or [{}])[0].get("competitors") or []}
+        if not new or not all(str(sets.get(k, "")).isdigit() for k in ("home", "away")):
+            continue
+        home, away = (int(sets["away"]), int(sets["home"])) if w.get("flip") else (int(sets["home"]), int(sets["away"]))
+        before = (g["state"], g["away"]["sets"], g["home"]["sets"])
+        g["state"], g["away"]["sets"], g["home"]["sets"] = new, away, home
+        changed += before != (new, away, home)
+    log(f"backup scoreboard: the NCAA's could not be read; {changed} of {len(due)} matches brought up to date from ESPN")
+    return changed
+
+
+def update_scoreboard(state: Path, season: int, only: list[str] | None = None, now: dt.datetime | None = None) -> dict:
     stored = read_json(state / "scoreboard.json", {})
     if stored.get("season") != season:
         stored = {"season": season, "days": {}}
@@ -116,13 +159,16 @@ def update_scoreboard(state: Path, season: int, only: list[str] | None = None) -
             failed.append(date)      # keep the copy already stored for that day
             continue
         stored["days"][date] = [g for g in (parse_contest(c) for c in contests) if g]
-    if len(failed) == len(days):
+    patched = None
+    if failed:
+        patched = from_espn(state, [g for d in failed for g in stored["days"].get(d) or []], now or dt.datetime.now(dt.timezone.utc))
+    if len(failed) == len(days) and patched is None:
         raise RuntimeError("the scoreboard could not be reached for any day")
     write_json(state / "scoreboard.json", stored)
     n = sum(len(v) for v in stored["days"].values())
     log(f"scoreboard: {len(days) - len(failed)} of {len(days)} days read, {n:,} matches in season {season}"
         + (f"; kept the old copy of {len(failed)} days" if failed else ""))
-    return {"season": season, "days": len(days), "days_failed": len(failed), "matches": n}
+    return {"season": season, "days": len(days), "days_failed": len(failed), "matches": n, "from_backup": patched or 0}
 
 
 def ranked_matches(state: Path) -> dict:
@@ -511,7 +557,7 @@ def build_pro(state: Path, out: Path, now: dt.datetime) -> dict:
         # the league's own icon files (the same purple mark as college's) for browser tabs and phone home screens
         colour = "#6d28d9"
         for name in ("icon.svg", "icon-32.png", "icon-180.png", "icon-192.png", "icon-512.png"):
-            shutil.copy(out / name.replace("icon", f"icon-{site}", 1), dest / name)
+            shutil.copy(out / name, dest / name)
         (dest / "manifest.json").write_text((out / "manifest.json").read_text().replace("#6d28d9", colour))
         page = (dest / "index.html").read_text().replace('content="#6d28d9"', f'content="{colour}"')
         (dest / "index.html").write_text(page)
@@ -559,7 +605,7 @@ def main(state_dir: str, out_dir: str) -> int:
             log("match-night run: no ranked team is playing right now; nothing to do")
             return 0
         if todo:
-            stage("scores now", lambda: update_scoreboard(state, season_for(now.date()), todo))
+            stage("scores now", lambda: update_scoreboard(state, season_for(now.date()), todo, now))
             stage("box scores now", lambda: update_live_boxes(state, now))
         stage("site", lambda: build_site(state, out, now))
         stage("pro leagues", lambda: build_pro(state, out, now))
@@ -572,7 +618,7 @@ def main(state_dir: str, out_dir: str) -> int:
     if not offline:
         # a failed look at the poll or the scoreboard leaves the stored copy in use
         stage("poll", lambda: update_poll(state, now, os.environ.get("CHECK_POLL") == "1"))
-        stage("scoreboard", lambda: update_scoreboard(state, season_for(now.date())))
+        stage("scoreboard", lambda: update_scoreboard(state, season_for(now.date()), now=now))
         stage("watch", lambda: update_watch(state, now))
         stage("boxes", lambda: update_boxes(state, now))
         if config.SHOW_PHOTOS:

@@ -55,8 +55,6 @@ teams.title = Top 25 Team Stats
 teams.lede = How each ranked team attacks, serves, blocks and defends, per set, and what its opponents manage against it. From official box scores.
 teams.title_d1 = Division I Team Stats
 teams.lede_d1 = How every Division I team attacks, serves, blocks and defends, per set, and what its opponents manage against it. From official box scores.
-teams.note = Per-set numbers count every set in matches with an official box score. Rating is where this site's rating of results places the team among all Division I teams; SOS ranks the 25 by how strong their opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
-teams.note_d1 = Per-set numbers count every set in matches with an official box score. Rating is where this site's rating of results places the team among all Division I teams; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
 
 # ---- a team's own page ----
 team.matches = Games
@@ -72,8 +70,6 @@ players.title = Top Players
 players.lede = Every regular on a ranked team, ranked against the rest by Impact per set: the points she adds per set over an average top-25 player at her position.
 players.title_d1 = Division I Players
 players.lede_d1 = Every regular in Division I, ranked against the rest by Impact per set: the points she adds per set over an average Division I player at her position.
-players.note = Impact compares each player only with players on this week's top 25 teams, from official box scores. It cannot see pass quality or who was on the court, and it does not adjust for the opponent. A transfer counts as a new player at her new school.
-players.note_d1 = Impact compares each player with every regular in Division I, from official box scores. It cannot see pass quality or who was on the court, and it does not adjust for the opponent, so players on weaker schedules can rate higher here than in the Top 25 view.
 players.back = All players
 players.career_note = Each season's line is added up from that season's box scores. A player who changed schools starts again at her new one.
 players.career_wait = Only this season so far: her earlier seasons at this school are still being read, a few thousand box scores at a time, and will appear here within a few days.
@@ -81,11 +77,9 @@ players.career_wait = Only this season so far: her earlier seasons at this schoo
 
 # ---- a match's own page ----
 match.back = All Games
-match.note = Set scores come from ESPN and update every 15 seconds during a match. Player stats come from the NCAA's box score; during a match they are refreshed about every 5 minutes.
 match.ncaa_link = Official box score on NCAA.com
 
 # ---- bottom of every page ----
-footer.about = Match times are shown in your own time zone. Scores and schedules come from the NCAA's public scoreboard, and scores of matches in progress from ESPN's; rankings are the AVCA coaches poll as published on ncaa.com. Channels come from ESPN's and the Big Ten's schedules and can change, so check before you tune in; streaming services need their own subscription. Player ratings are worked out by this site from official box scores. Team logos and player photos belong to their schools; logos are shown from ncaa.com and photos from each school's own roster page. Not affiliated with or endorsed by the NCAA, the AVCA or any school.
 
 # ---- the LOVB and MLV pages (the site's lovb/ and mlv/ folders) ----
 pro.players_career_note = Each season's line is added up from the league's own match statistics. A player who changed teams has a line for each.
@@ -103,10 +97,6 @@ pro.rankings_button_poll = Standings
 pro.rankings_note = LOVB teams are placed by wins; MLV teams by points (3 for a win in three or four sets, 2 for a win in five, 1 for a loss in five), as in the league's own table. Ties go to share of matches won, then sets won to sets lost; play-off matches do not count. Choose a team to see its page.
 pro.teams_title = {league} Team Stats
 pro.teams_lede = How each {league} team attacks, serves, blocks and defends, per set, and what its opponents manage against it.
-pro.teams_note = Per-set numbers count every set with a box score. Rating is where this site's rating of results places the team; SOS ranks the teams by how strong their opponents have been. Choose a column heading to sort.
 pro.team_players_note = # is her rank by Impact per set among all {league} regulars; part-time players are greyed and not ranked. Choose a name for her card.
 pro.players_title = {league} Players
 pro.players_lede = Every regular in the {league}, ranked by Impact per set: the points she adds per set over an average {league} player at her position.
-pro.players_note = Impact compares each player with the league's other regulars, from the official match statistics. A block counts whole (the league's statistics do not split solo and shared blocks).
-pro.match_note = Coming matches and live scores come from the league's own website; during a match the score is refreshed about every 5 minutes (every 15 seconds for MLV on the matches page). Player statistics are read from the league's own match pages during the match (about every 5 minutes) and replaced by the official numbers, collected by the volleydata project, once they come in.
-pro.footer_about = Match times are shown in your own time zone. Results and statistics are the leagues' own, collected by the volleydata project (github.com/awosoga/volleydata). Player ratings and standings changes are worked out by this site. Not affiliated with or endorsed by LOVB, MLV or any team.

@@ -178,12 +178,86 @@
     });
   }
 
-  fetch("home.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
-    data = d;
-    var u = new Date(d.updated);
-    $("foot-updated").textContent = "Updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) + ".";
-    draw(); cards();
-  }).catch(function () {
-    $("lede").textContent = "The games could not be loaded. Reload the page to try again.";
-  });
+  // ---- scores as they happen ----
+  // While a game is on, its score is read straight from ESPN's public scoreboard (the one each
+  // sport's own page reads) every 20 seconds. The page's own list of games is read again every
+  // minute, and whenever the page is come back to, so nothing on it goes stale while it is left open.
+  var LIVE_MS = 20 * 1000, LIST_MS = 60 * 1000, liveTimer = null, listTimer = null, seen = {};
+  function key(lg, g) { return lg.key + " " + g.id; }
+  function due(lg, g, t) {
+    return g.f != null && g.start && g.state !== "final" && g.state !== "other" && !g.over && t >= g.start - 900 && t <= g.start + (lg.live_hours || 5) * 3600;
+  }
+  function espnSide(x) { return x.score === "" || x.score == null ? null : +x.score; }
+  function readEvent(lg, e) {
+    var c = (e.competitions || [{}])[0], type = (e.status || {}).type || {}, out = { id: String(e.id), state: type.state, done: !!type.completed };
+    (c.competitors || []).forEach(function (x) {
+      var side = x.homeAway === "home" ? "home" : "away", a = (x.team || {}).abbreviation || "";
+      out[side] = espnSide(x);
+      out[side + "Id"] = (lg.espn_abbr || {})[a] || a;
+    });
+    return out;
+  }
+  function apply(lg, g, r) {
+    if (!r || (r.state !== "in" && r.state !== "post") || r.away == null || r.home == null) return false;
+    if (r.state === "post" && !r.done) return false;                       // postponed or called off: the next update says which
+    var flip = lg.key === "wvb" && g.e && g.e[1], away = flip ? r.home : r.away, home = flip ? r.away : r.home;
+    var state = r.state === "post" ? "final" : "live";
+    if (g.state === state && g.away[3] === away && g.home[3] === home) return false;
+    g.state = state; g.away[3] = away; g.home[3] = home; g.over = state === "final";
+    seen[key(lg, g)] = { state: state, away: away, home: home, at: Date.now() };
+    return true;
+  }
+  function pollLive() {
+    clearTimeout(liveTimer);
+    if (!data || document.hidden) return;                                  // picks up again when the page is shown
+    var t = Date.now() / 1000, jobs = [];
+    data.leagues.forEach(function (lg) {
+      var want = {};
+      (lg.games || []).forEach(function (g) { if (due(lg, g, t) && (lg.feeds || [])[g.f]) (want[g.f] = want[g.f] || []).push(g); });
+      Object.keys(want).forEach(function (f) {
+        jobs.push(fetch(lg.feeds[f], { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : { events: [] }; }).catch(function () { return { events: [] }; }).then(function (doc) {
+          var byId = {}, byTeams = {}, changed = false;
+          (doc.events || []).forEach(function (e) { var r = readEvent(lg, e); byId[r.id] = r; byTeams[r.awayId + "@" + r.homeId] = r; });
+          want[f].forEach(function (g) {
+            var r = lg.key === "nhl" ? byTeams[g.away[0] + "@" + g.home[0]] : lg.key === "wvb" ? byId[String((g.e || [])[0])] : byId[String(g.id)];
+            if (apply(lg, g, r)) changed = true;
+          });
+          return changed;
+        }));
+      });
+    });
+    Promise.all(jobs).then(function (results) {
+      if (results.some(Boolean)) draw();
+      liveTimer = setTimeout(pollLive, LIVE_MS);
+    });
+  }
+  function load(first) {
+    clearTimeout(listTimer);
+    if (!first && document.hidden) return;
+    fetch("home.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
+      var fresh = !data || d.updated !== data.updated;
+      if (fresh) {
+        // a score read live in the last few minutes is newer than the list's; keep it until the list catches up
+        d.leagues.forEach(function (lg) {
+          (lg.games || []).forEach(function (g) {
+            var s = seen[key(lg, g)];
+            if (s && g.state !== "final" && Date.now() - s.at < 30 * 60 * 1000) { g.state = s.state; g.away[3] = s.away; g.home[3] = s.home; g.over = s.state === "final"; }
+          });
+        });
+        data = d;
+        var was = today;
+        today = iso(new Date());
+        if (shown === was) shown = today;                                   // left open overnight: "today" moves on
+        var u = new Date(d.updated);
+        $("foot-updated").textContent = "Updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) + ".";
+        draw();
+        if (first) cards();
+      }
+      if (first) pollLive();
+    }).catch(function () {
+      if (first) $("lede").textContent = "The games could not be loaded. Reload the page to try again.";
+    }).then(function () { listTimer = setTimeout(load, LIST_MS); });
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(!data); pollLive(); } });
+  load(true);
 })();

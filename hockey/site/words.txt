@@ -90,11 +90,9 @@ lines.stats_note = Every line and pair with at least 10 minutes together at five
 
 # ---- a game's own page ----
 game.back = All Games
-game.note = During a game the score comes from ESPN and updates every 15 seconds; player stats come from the NHL's box score and are refreshed about every 5 minutes. A dark edge marks the defensemen.
 game.nhl_link = This game on NHL.com
 
 # ---- bottom of every page ----
-footer.about = Game times are shown in your own time zone. Schedules, scores, standings, channels and box scores come from the NHL's public feed, and scores of games in progress from ESPN's. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site. Team logos and player photos belong to the NHL and its teams and are shown from the league's own site. Not affiliated with or endorsed by the NHL or any team.
 
 # ---- Playoff odds page ----
 odds.title = NHL Playoff Odds

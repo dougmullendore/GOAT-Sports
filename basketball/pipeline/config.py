@@ -103,11 +103,13 @@ USER_AGENT = "Mozilla/5.0 (compatible; goat-sports/1.0)"
 # ---------------------------------------------------------------- the NBA --
 # What is different for the NBA's copy of the site. There is no poll: every team is numbered by
 # its place in the league standings, as on the hockey site.
+# Where scores are read from when ESPN cannot be: Yahoo's public scoreboard (pipeline/backup.py).
+BACKUP = "ncaab"
 _NBA_API = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/"
 NBA = {
     "LEAGUE": "nba", "LEAGUE_NAME": "NBA", "ALL_NAME": "the NBA", "STATE_FOLDER": "nba", "SITE_FOLDER": "nba",
     "POLL_NAME": "NBA standings", "POLL_TYPE": None, "POLL_SIZE": 30, "MIN_TEAMS": 30, "OTHER_POLLS": {},
-    "SITE_API": _NBA_API,
+    "SITE_API": _NBA_API, "BACKUP": "nba",
     "SCOREBOARD": _NBA_API + "scoreboard?limit=400",
     "DAY": _NBA_API + "scoreboard?dates={day}&limit=400",
     "RANKINGS": None,

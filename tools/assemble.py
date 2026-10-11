@@ -97,6 +97,22 @@ def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
     return html != before
 
 
+def live_address(lg: dict, data: dict, g: dict) -> str | None:
+    """Where the front page reads a game's score while it is being played: the same public
+    ESPN scoreboard the sport's own page reads. None for a game that cannot be followed."""
+    feed = data.get("live_feed")
+    if not feed or not g.get("start"):
+        return None
+    if lg["sport"] == "football":
+        week = g.get("week") or []
+        return feed.replace("{season}", str(data.get("season"))).replace("{kind}", str(week[0])).replace("{week}", str(week[1])) if len(week) == 2 else None
+    if lg["sport"] in ("basketball", "baseball"):
+        return feed.replace("{day}", str(g["day"])) if g.get("day") else None
+    if lg["key"] == "nhl" or (lg["key"] == "wvb" and g.get("espn")):
+        return feed + g["date"].replace("-", "")
+    return None
+
+
 def front_games(site: Path, today: dt.date) -> list[dict]:
     """Each league's games around today, cut down to what the front page shows."""
     lo, hi = (today - dt.timedelta(days=DAYS_BACK)).isoformat(), (today + dt.timedelta(days=DAYS_AHEAD)).isoformat()
@@ -113,7 +129,8 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
         except ValueError:
             continue
         entry.update(ready=True, updated=data.get("updated"), logo=data.get("logo") or None, logos=data.get("logos") or None,
-                     abbr=data.get("abbr") or None, poll=(data.get("poll") or {}).get("name"))
+                     abbr=data.get("abbr") or None, poll=(data.get("poll") or {}).get("name"),
+                     feeds=[], espn_abbr=data.get("espn_abbr") or None, live_hours=data.get("live_hours") or 5)
         games = data.get("games") or []
         beyond = data.get("nr") or {}                 # {team: its GOAT number}, for the teams a poll leaves out
         numbered = data.get("numbered", True)         # False before a season's first poll or first game: no numbers to show
@@ -132,9 +149,18 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
                 # a team outside the poll shows its number in the sport's GOAT ranking (26 and up), as on the sport's own pages
                 return [s.get("id"), s.get("name"), (s.get("rank") or beyond.get(str(s.get("id")))) if numbered else None, s.get(lg["score"])]
 
-            entry["games"].append({"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
-                                   "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),
-                                   "p": g.get("p"), "tv": (g.get("tv") or g.get("watch") or [])[:2]})
+            row = {"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
+                   "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),
+                   "p": g.get("p"), "tv": (g.get("tv") or g.get("watch") or [])[:2]}
+            # a game not yet over says where its live score is read: `f` counts into the league's `feeds`
+            address = live_address(lg, data, g) if g.get("state") in ("upcoming", "live") else None
+            if address:
+                if address not in entry["feeds"]:
+                    entry["feeds"].append(address)
+                row["f"] = entry["feeds"].index(address)
+                if lg["key"] == "wvb":
+                    row["e"] = g["espn"]              # ESPN's id for the match, and whether it has the teams the other way round
+            entry["games"].append(row)
         entry["games"].sort(key=lambda g: (g["date"], g["start"] or 0, g["id"]))
     return out
 

@@ -91,11 +91,9 @@ players.career_wait = His earlier seasons have not been read yet. A few thousand
 
 # ---- a game's own page ----
 game.back = All Games
-game.note = The score comes from ESPN and updates every 20 seconds during a game. Team and player stats come from ESPN's box score; during a game they are refreshed about every 5 minutes.
 game.espn_link = This game on ESPN
 
 # ---- bottom of every page ----
-footer.about = Game times are shown in your own time zone. This is men's college basketball. Schedules, scores, box scores, channels and betting lines come from ESPN's public feeds, and rankings are the AP Top 25 as ESPN publishes it. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to their schools and are shown from ESPN. Not affiliated with or endorsed by ESPN, the NCAA, the Associated Press or any school.
 
 # ---- the NBA pages (the site's nba/ folder) ----
 # These replace the lines above on the NBA pages. There is no poll there: every team is numbered
@@ -120,4 +118,3 @@ nba.players_lede = Every regular in the NBA, ranked against the rest by Impact p
 nba.players_note = Impact compares each player with every regular at his position in the NBA, from the box scores of the regular season; playoff games are listed but not counted. It cannot see defense that leaves no number or who else was on the floor, and it does not adjust for the opponent.
 nba.players_career_note = Each season's line is ESPN's, regular season only, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
 nba.players_career_wait = His earlier seasons have not been read yet. They appear here within a day.
-nba.footer_about = Game times are shown in your own time zone. Schedules, scores, standings, box scores, channels and betting lines come from ESPN's public feeds. Channels can change, so check before you tune in; streaming services need their own subscription. Chances of winning, the GOAT ranking and player ratings are worked out by this site and are not betting advice. Team logos and player photos belong to the league and its teams and are shown from ESPN. Not affiliated with or endorsed by the NBA, ESPN or any team.
