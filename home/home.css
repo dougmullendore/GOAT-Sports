@@ -128,3 +128,6 @@ h2.sec { margin: 44px 0 12px; padding-bottom: 10px; border-bottom: 2px solid var
 .team.away.lost::after, .team.home.lost::before { content: "L"; color: var(--loss); }
 /* on a phone the two teams are stacked, so the letter follows the team's name on both lines */
 @media (max-width: 640px) { .team.away::after { order: -1; } .team.home::before { order: 1; } }
+
+/* ---- the number in a rank tag: always dark, with a white outline so it reads on every shade ---- */
+.rk:not(.nr) { color: #0f1d33; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }

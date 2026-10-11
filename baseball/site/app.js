@@ -7,7 +7,6 @@
   // fading to a pale tint for last (or for 25th in a poll; teams numbered past the poll are all pale).
   function topN() { try { return (data.poll && data.poll.teams && data.poll.teams.length) || (data.teams && data.teams.length) || 25; } catch (e) { return 25; } }
   function hexOf(s) { var m = /^#?([0-9a-f]{6})$/i.exec((s || "").trim()); return m ? [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); }) : null; }
-  function lumOf(c) { var v = c.map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; }
   function shadeRank(tag) {
     if (!tag.classList || !tag.classList.contains("rk") || tag.classList.contains("nr")) return;
     var words = (tag.textContent || "").trim(), n = parseInt(words, 10);
@@ -16,10 +15,8 @@
     if (!main || !sheet) return;
     var holder = tag.closest ? tag.closest("[data-top]") : null, top = Math.max(2, holder ? +holder.getAttribute("data-top") : topN());
     var share = n <= top ? 1 - 0.6 * (n - 1) / (top - 1) : 0.35;
-    var bg = main.map(function (v, i) { return Math.round(v * share + sheet[i] * (1 - share)); }), L = lumOf(bg);
-    // the number in white or in near-black, whichever reads better on that shade
-    tag.style.background = "rgb(" + bg.join(",") + ")";
-    tag.style.color = 1.05 / (L + 0.05) >= (L + 0.05) / (lumOf([15, 29, 51]) + 0.05) ? "#fff" : "#0f1d33";
+    var bg = main.map(function (v, i) { return Math.round(v * share + sheet[i] * (1 - share)); });
+    tag.style.background = "rgb(" + bg.join(",") + ")";       // the number itself is always dark with a white outline (styles)
   }
   function shadeAll(root) { if (!root || root.nodeType !== 1) return; shadeRank(root); Array.prototype.forEach.call(root.querySelectorAll(".rk"), shadeRank); }
   if (window.MutationObserver) new MutationObserver(function (list) {
