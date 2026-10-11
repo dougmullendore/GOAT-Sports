@@ -50,7 +50,7 @@
     volleyball: '<circle cx="12" cy="12" r="10"/><path d="M11.1 7.1a16.55 16.55 0 0 1 10.9 4"/><path d="M12 12a12.6 12.6 0 0 1-8.7 5"/><path d="M16.8 13.6a16.55 16.55 0 0 1-9 7.5"/><path d="M20.7 17a12.8 12.8 0 0 0-8.7-5 13.3 13.3 0 0 1 0-10"/><path d="M6.3 3.8a16.55 16.55 0 0 0 1.9 11.5"/>',
     football: '<path d="M3.6 20.4c-1.2-5.600 1.100-11.600 6.200-14.700 3.100-1.900 7.100-2.500 10.600-2.100.400 3.500-.200 7.500-2.100 10.600-3.100 5.100-9.100 7.400-14.700 6.200z"/><path d="M9.200 14.800l5.600-5.600"/><path d="M10.300 11.300l2.400 2.400"/><path d="M12.300 9.300l2.400 2.400"/>',
     basketball: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3v18"/><path d="M5.6 5.6c2.6 1.9 2.6 10.9 0 12.8"/><path d="M18.4 5.6c-2.6 1.9-2.6 10.9 0 12.8"/>',
-    baseball: '<path d="M5.2 19.3l6.3-6.2c2-2 4-2.8 5.4-4.2l3.4-3a1.5 1.5 0 0 0-2.2-2.2l-3 3.4c-1.4 1.4-2.2 3.4-4.2 5.4l-6.2 6.3z" fill="currentColor" stroke-width="1"/><path d="M3.6 18.2l2.2 2.2"/>'
+    baseball: '<g style="fill:var(--c);stroke:var(--c)" stroke-linejoin="round" stroke-linecap="round"><path d="M5.2 19.3l6.3-6.2c2-2 4-2.8 5.4-4.2l3.4-3a1.5 1.5 0 0 0-2.2-2.200l-3 3.400c-1.4 1.4-2.2 3.4-4.2 5.400l-6.2 6.300z" stroke-width=".8" transform="translate(0 -2.2)"/><path d="M5.2 19.3l6.3-6.2c2-2 4-2.8 5.4-4.2l3.4-3a1.5 1.5 0 0 0-2.2-2.200l-3 3.400c-1.4 1.4-2.2 3.4-4.2 5.400l-6.2 6.300z" stroke-width=".8" transform="translate(24 -2.2) scale(-1 1)"/><path d="M3.6 16l2.2 2.200M20.4 16l-2.2 2.2" stroke-width="1.5"/><circle cx="12" cy="20.2" r="2.5" stroke="none"/></g>'
   };
   // what each sport's door says, and the pages behind it
   var DOORS = {
