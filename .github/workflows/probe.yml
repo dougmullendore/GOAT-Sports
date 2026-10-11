@@ -1,0 +1,27 @@
+name: Probe
+on:
+  push:
+    branches: [probe-src]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      REPO_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: python probe.py out 2>&1 | tee out.log; mv out.log out/log.txt
+      - if: always()
+        run: |
+          cd out
+          git init -q -b probe
+          git config user.name "probe-bot"
+          git config user.email "probe-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Probe $(date -u +%FT%TZ)"
+          git push -q -f "$REPO_URL" probe

@@ -1,0 +1,33 @@
+OK rankings.json 554,920 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings
+OK teams_fbs.json 1,055,157 bytes cors=None https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?groups=80&limit=400
+OK groups.json 359,470 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/groups
+OK scoreboard_day.json 873,625 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20261003&groups=80&limit=400
+OK scoreboard_today.json 857,530 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=400
+OK scoreboard_week6.json 858,121 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=2026&seasontype=2&week=6&groups=80&limit=400
+OK scoreboard_week7.json 811,635 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=2026&seasontype=2&week=7&groups=80&limit=400
+FAIL scoreboard_range.json RuntimeError("https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20261001-20261031&groups=80&limit=1000: <HTTPError 400: 'Bad Request'>")
+OK scoreboard_post2025.json 789,595 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=2025&seasontype=3&week=1&groups=80&limit=400
+OK scoreboard_fcs_day.json 733,438 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20261003&groups=81&limit=400
+OK calendar.json 2,080 bytes cors=None https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/seasons/2026/types/2/weeks?limit=50
+OK team_194.json 54,701 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/194
+OK roster_194.json 441,176 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/194/roster
+OK roster_251.json 440,524 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/251/roster
+OK team_schedule_194.json 356,067 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/194/schedule?season=2026
+OK team_stats_194.json 75,480 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/194/statistics
+OK standings.json 2,587,123 bytes cors=* https://site.api.espn.com/apis/v2/sports/football/college-football/standings?season=2026&group=80
+states {'in': 20, 'post': 138, 'pre': 74}
+OK summary_in_0.json 306,365 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401860902
+OK summary_in_1.json 205,233 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401856715
+OK summary_post_0.json 514,890 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401856717
+OK summary_post_1.json 448,451 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401858257
+OK summary_pre_0.json 141,589 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401856712
+OK summary_pre_1.json 105,972 bytes cors=* https://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=401856827
+athlete 4870906
+OK athlete_stats.json 13,050 bytes cors=None https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4870906/stats
+OK athlete_gamelog.json 42,512 bytes cors=None https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4870906/gamelog
+OK athlete_overview.json 295,294 bytes cors=None https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4870906/overview
+OK athlete.json 391,224 bytes cors=None https://site.web.api.espn.com/apis/common/v3/sports/football/college-football/athletes/4870906
+OK athlete_core_stats.json 27,705 bytes cors=None https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/athletes/4870906/statistics
+OK athlete_core_statlog.json 2,779 bytes cors=None https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/athletes/4870906/statisticslog
+history rows 7052
+[((2019, 2), 849), ((2019, 3), 40), ((2020, 2), 661), ((2020, 3), 42), ((2021, 2), 850), ((2021, 3), 43), ((2022, 2), 858), ((2022, 3), 42), ((2023, 2), 868), ((2023, 3), 43), ((2024, 2), 874), ((2024, 3), 46), ((2025, 2), 888), ((2025, 3), 46), ((2026, 2), 902)]
