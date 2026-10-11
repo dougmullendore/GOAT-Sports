@@ -66,10 +66,10 @@
     var t = g.start ? new Date(g.start * 1000) : null;
     var note = g.state === "other" ? (g.note ? g.note.charAt(0).toUpperCase() + g.note.slice(1) : "Not played") : "";
     var when = fin ? "Final" : live ? "" : note ? note : t && !isNaN(t) ? t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "Time not set";
-    function team(side, s, lost) {
+    function team(side, s, lost, won) {
       var kids = [logo(lg, s[0], s[1]), el("span", { "class": "name", text: s[1] }), s[2] ? el("span", { "class": "rk", text: String(s[2]) }) : null];
       if (side === "home") kids.reverse();
-      return el("span", { "class": "team " + side + (lost ? " lost" : "") }, kids);
+      return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
     var mid = scored
       ? el("span", { "class": "mid" }, [el("span", { "class": homeWon ? "l" : "", text: String(as) }), el("span", { "class": "dash", text: "–" }), el("span", { "class": awayWon ? "l" : "", text: String(hs) })])
@@ -79,7 +79,7 @@
     var label = g.away[1] + " at " + g.home[1] + (scored ? ", " + as + " to " + hs + (fin ? ", final" : ", in progress") : "");
     return el("li", { "class": "game" + (live ? " on" : "") }, [el("a", { "class": "row", href: lg.game + g.id, "aria-label": label }, [
       el("span", { "class": "when" }, live ? [el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), "Live"])] : [when]),
-      team("away", g.away, homeWon), mid, team("home", g.home, awayWon),
+      team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more", text: fin ? "Box score" : live ? "Live score" : (g.tv || []).join(", ") })])]);
   }
 

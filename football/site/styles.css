@@ -1,5 +1,5 @@
 /* GOAT Football. One main colour (leather brown), used for the logo mark, the rank tags and
-   every accent; green for a win and red for a loss. One column, left aligned. */
+   every accent; a green W for a win and a red L for a loss. One column, left aligned. */
 :root {
   --floor: #eef2f8;
   --sheet: #ffffff;
@@ -13,7 +13,7 @@
   --ball-home: #5e3212; /* a darker shade: the home team's rank before a match */
   --win: #15803d;       /* green, for a match's winner and for "Beat" */
   --win-ink: #ffffff;
-  --loss: #b3261e;      /* red, for "Lost to" and for the rank of a match's loser */
+  --loss: #b3261e;      /* red, for "Lost to" and the L beside a loser */
   --loss-ink: #ffffff;
   --lost: #7a8699;
   color-scheme: light;
@@ -153,8 +153,6 @@ h2 { font: 700 1.375rem/1.2 "Barlow Condensed", sans-serif; margin: 0; }
 .team.away { justify-content: flex-end; text-align: right; }
 .team .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .team.lost { color: var(--lost); font-weight: 400; }
-.team.lost .rk { background: var(--loss); color: var(--loss-ink); }   /* the loser's rank (or NR) in red */
-.team.won .rk { background: var(--win); color: var(--win-ink); }      /* the winner's in blue */
 /* before a match, the home team's rank (or NR) is a slightly darker blue */
 .game.ahead .team.home .rk, .game.on .team.home .rk { background: var(--ball-home); }
 .mid { text-align: center; font: 700 1.125rem/1 "Barlow Condensed", sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -383,8 +381,6 @@ a.opp:hover .n { color: var(--teal); }
 .gc-team:last-child .gc-name { justify-content: flex-end; }
 .gc-sets { font: 700 3rem/1 "Barlow Condensed", sans-serif; font-variant-numeric: tabular-nums; }
 .gc-team.lost .gc-sets, .gc-team.lost .gc-name { color: var(--lost); }
-.gc-team.won .rk { background: var(--win); color: var(--win-ink); }
-.gc-team.lost .rk { background: var(--loss); color: var(--loss-ink); }
 .gc-mid { text-align: center; color: var(--ink-2); font-weight: 600; text-transform: uppercase; font-size: .8125rem; letter-spacing: .05em; }
 .gcard .msets { margin-top: 16px; }
 .gc-odds { margin-top: 18px; }
@@ -483,3 +479,11 @@ a.opp:hover .n { color: var(--teal); }
 .ptable.stand tr.cut td { border-top: 2px dashed var(--ink-2); }
 .ptable.stand .tcell a { font-weight: 600; }
 .ptable.stand td:first-child, .ptable.stand th:first-child { width: 2.5rem; }
+
+/* ---- who won: a W or an L beside the team. Its rank keeps the usual colour. ---- */
+.team.won::before, .team.won::after, .team.lost::before, .team.lost::after,
+.gc-team.won .gc-name::after, .gc-team.lost .gc-name::after { font: 700 .8125rem/1 Barlow, sans-serif; flex: none; }
+.team.away.won::after, .team.home.won::before, .gc-team.won .gc-name::after { content: "W"; color: var(--win); }
+.team.away.lost::after, .team.home.lost::before, .gc-team.lost .gc-name::after { content: "L"; color: var(--loss); }
+/* on a phone the two teams are stacked, so the letter follows the team's name on both lines */
+@media (max-width: 640px) { .team.away::after { order: -1; } .team.home::before { order: 1; } }

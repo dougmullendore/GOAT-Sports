@@ -121,3 +121,10 @@ h2.sec { margin: 44px 0 12px; padding-bottom: 10px; border-bottom: 2px solid var
 
 .foot { margin-top: 48px; padding-top: 16px; padding-bottom: 40px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: .8125rem; }
 .foot p { margin: 0 0 8px; max-width: 80ch; }
+
+/* ---- who won: a W or an L beside the team. Its rank keeps the usual colour. ---- */
+.team.won::before, .team.won::after, .team.lost::before, .team.lost::after { font: 700 .8125rem/1 Barlow, sans-serif; flex: none; }
+.team.away.won::after, .team.home.won::before { content: "W"; color: var(--win); }
+.team.away.lost::after, .team.home.lost::before { content: "L"; color: var(--loss); }
+/* on a phone the two teams are stacked, so the letter follows the team's name on both lines */
+@media (max-width: 640px) { .team.away::after { order: -1; } .team.home::before { order: 1; } }
