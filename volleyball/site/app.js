@@ -163,7 +163,7 @@
     if (PRO()) return null;                // the pro leagues show the standings without Beat and Lost to
     function box(label, rows, cls) {
       var opps = rows.map(function (r) {
-        return el("a", { "class": "opp", href: "#/team/" + encodeURIComponent(r[3]), title: r[1] }, [el("span", { "class": "n", text: String(r[0]) }), logo(r[3], "sm", r[1]), r[2] > 1 ? el("span", { "class": "x", text: "x" + r[2] }) : null]);
+        return el("a", { "class": "opp", href: "#/team/" + encodeURIComponent(r[3]), title: r[1] }, [r[0] == null ? null : el("span", { "class": "n", text: String(r[0]) }), logo(r[3], "sm", r[1]), r[2] > 1 ? el("span", { "class": "x", text: "x" + r[2] }) : null]);
       });
       return el("span", { "class": "vsbox " + cls }, [el("b", { text: label }),
         el("span", { "class": "opps" }, opps.length ? opps : [el("span", { "class": "nil", text: W("rankings.none_yet") })])]);

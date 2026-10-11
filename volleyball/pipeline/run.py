@@ -500,12 +500,14 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         won = sum(v[0] for (a, _), v in results.items() if a == x["id"])
         lost = sum(v[1] for (a, _), v in results.items() if a == x["id"])
         x["record"], x["beat"], x["lost"] = f"{won}-{lost}", [], []
-        for other in sorted(in_goat, key=in_goat.get):
-            wins, losses, _ = results.get((x["id"], other), (0, 0, []))
+        # every team it has played, best first by GOAT place; a school from outside Division I has no place and comes last
+        played = sorted((b for (a, b) in results if a == x["id"]), key=lambda b: (place.get(b) is None, place.get(b) or 0, sel["names"].get(b, b)))
+        for other in played:
+            wins, losses, _ = results[(x["id"], other)]
             if wins:
-                x["beat"].append([in_goat[other], sel["names"][other], wins, other])
+                x["beat"].append([place.get(other), sel["names"].get(other, other), wins, other])
             if losses:
-                x["lost"].append([in_goat[other], sel["names"][other], losses, other])
+                x["lost"].append([place.get(other), sel["names"].get(other, other), losses, other])
     goat_info = {"top": goat_top, "weight": config.GOAT_HEAD_TO_HEAD, "weights": config.GOAT_WEIGHTS,
                  # among the poll's own 25 teams: results each order has the wrong way round
                  "poll_wrong": goat.contradictions(polled, sel["all_games"], set(polled)),

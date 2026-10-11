@@ -51,7 +51,7 @@ rankings.none_yet = None yet
 rankings.show_all = Show all {n} teams
 rankings.show_top = Show the top 25 only
 rankings.note = Record and change are from the poll, which is checked for a new one every Monday. Choose a team to see its page; the GOAT Ranking lists who each team has beaten and lost to.
-rankings.note_goat = Beside each team are its results this season against the GOAT top 25, with their GOAT places. The AVCA column is the team's place in the coaches poll; a dash means it is not ranked there. Redone every night.
+rankings.note_goat = Beside each team is every team it has beaten and lost to this season, with their GOAT places (a school from outside Division I has none). The AVCA column is the team's place in the coaches poll; a dash means it is not ranked there. Redone every night.
 
 # ---- Teams page ----
 teams.title = Top 25 Team Stats
