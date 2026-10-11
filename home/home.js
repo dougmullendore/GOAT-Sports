@@ -118,7 +118,7 @@
     return el("li", { "class": "game" + (live ? " on" : "") }, [el("a", { "class": "row", href: lg.game + g.id, "aria-label": label }, [
       el("span", { "class": "when" }, live ? [el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), "Live"])] : [when]),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
-      el("span", { "class": "more", text: fin ? "Box score" : live ? "Live score" : (g.tv || []).join(", ") })])]);
+      el("span", { "class": "more", text: fin ? "" : (g.tv || []).join(", ") })])]);
   }
 
   function draw() {
