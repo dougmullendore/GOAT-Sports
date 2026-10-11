@@ -3,7 +3,7 @@
    orange for basketball, blue for baseball). */
 :root {
   --floor: #eef2f8; --sheet: #ffffff; --ink: #0f1d33; --ink-2: #4f5d73; --line: #cfd8e6;
-  --teal: #1d4ed8; --teal-soft: #e2e9fb; --ball: #f5b83d; --ball-ink: #0f1d33;
+  --teal: #1d4ed8; --teal-soft: #e2e9fb; --ball: #0f1d33; --ball-ink: #ffffff;
   --win: #15803d; --loss: #b3261e; --loss-ink: #ffffff; --lost: #7a8699;
   --hockey: #047857; --volleyball: #6d28d9; --football: #8a4b1c; --basketball: #c2410c; --baseball: #1e40af;
   color-scheme: light;
@@ -11,7 +11,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-    --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #f5b83d; --ball-ink: #0f1d33;
+    --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #ffffff; --ball-ink: #0f1d33;
     --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
     --hockey: #34d399; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #8fb4f0;
     color-scheme: dark;
@@ -19,7 +19,7 @@
 }
 :root[data-theme="dark"] {
   --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-  --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #f5b83d; --ball-ink: #0f1d33;
+  --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #ffffff; --ball-ink: #0f1d33;
   --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
   --hockey: #34d399; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #8fb4f0;
   color-scheme: dark;
@@ -131,3 +131,6 @@ h2.sec { margin: 44px 0 12px; padding-bottom: 10px; border-bottom: 2px solid var
 
 /* ---- the number in a rank tag: always dark, with a white outline so it reads on every shade ---- */
 .rk:not(.nr) { color: #0f1d33; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }
+
+/* the front page's own mark and lines are white on the dark bar and in dark mode, dark navy on a white header */
+.sports a[aria-current="page"].sports-home, .sports .sports-home[aria-current="page"] { border-bottom-color: #fff; }

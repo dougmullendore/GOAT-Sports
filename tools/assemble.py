@@ -27,25 +27,17 @@ HOME_SRC = ROOT / "home"
 # one for college and one for the NFL, basketball one for college and one for the NBA). `home`
 # is the page the sport's tab opens: the pro league, where a sport has a college one too.
 SPORTS = [
-    {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
-    {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "football", "name": "Football", "pages": ["", "nfl/"], "home": "nfl/"},
     {"key": "basketball", "name": "Basketball", "pages": ["", "nba/"], "home": "nba/"},
+    {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "baseball", "name": "Baseball", "pages": [""]},
+    {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
 ]
 # The front page's lists: one for each league, in the order shown (a sport's pro league before its
-# college one, except volleyball). `score` is the name the
+# college one, except volleyball, which comes last). `score` is the name the
 # league's games give a team's score; `game` is the address of a game's own page; `ranked_only`
 # keeps a long college day down to the games with a ranked team.
 LEAGUES = [
-    {"key": "wvb", "sport": "volleyball", "folder": "volleyball/", "name": "College volleyball", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": True, "unit": "matches"},
-    {"key": "lovb", "sport": "volleyball", "folder": "volleyball/lovb/", "name": "LOVB", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": False, "unit": "matches"},
-    {"key": "mlv", "sport": "volleyball", "folder": "volleyball/mlv/", "name": "MLV", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": False, "unit": "matches"},
-    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
-     "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "nfl", "sport": "football", "folder": "football/nfl/", "name": "NFL", "label": "Football", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "cfb", "sport": "football", "folder": "football/", "name": "College football", "label": "Football", "score": "score",
@@ -54,8 +46,16 @@ LEAGUES = [
      "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "cbb", "sport": "basketball", "folder": "basketball/", "name": "College basketball", "label": "Basketball", "score": "score",
      "game": "#/game/", "ranked_only": True, "unit": "games"},
+    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "mlb", "sport": "baseball", "folder": "baseball/", "name": "MLB", "label": "Baseball", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "wvb", "sport": "volleyball", "folder": "volleyball/", "name": "College volleyball", "label": "Volleyball", "score": "sets",
+     "game": "#/match/", "ranked_only": True, "unit": "matches"},
+    {"key": "lovb", "sport": "volleyball", "folder": "volleyball/lovb/", "name": "LOVB", "label": "Volleyball", "score": "sets",
+     "game": "#/match/", "ranked_only": False, "unit": "matches"},
+    {"key": "mlv", "sport": "volleyball", "folder": "volleyball/mlv/", "name": "MLV", "label": "Volleyball", "score": "sets",
+     "game": "#/match/", "ranked_only": False, "unit": "matches"},
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"
@@ -115,6 +115,7 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
         entry.update(ready=True, updated=data.get("updated"), logo=data.get("logo") or None, logos=data.get("logos") or None,
                      abbr=data.get("abbr") or None, poll=(data.get("poll") or {}).get("name"))
         games = data.get("games") or []
+        beyond = data.get("nr") or {}                 # {team: its GOAT number}, for the teams a poll leaves out
         numbered = data.get("numbered", True)         # False before a season's first poll or first game: no numbers to show
         if lg["ranked_only"] and data.get("no_poll"):
             entry["ranked_only"] = False              # no top 25 yet, so nothing to narrow the day down to
@@ -128,7 +129,8 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
                 continue
 
             def side(s):
-                return [s.get("id"), s.get("name"), s.get("rank") if numbered else None, s.get(lg["score"])]
+                # a team outside the poll shows its number in the sport's GOAT ranking (26 and up), as on the sport's own pages
+                return [s.get("id"), s.get("name"), (s.get("rank") or beyond.get(str(s.get("id")))) if numbered else None, s.get(lg["score"])]
 
             entry["games"].append({"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
                                    "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),

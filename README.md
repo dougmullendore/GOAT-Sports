@@ -1,8 +1,8 @@
 # GOAT Sports
 
-Five sports sites in one: women's volleyball (college, LOVB and MLV), NHL
-hockey, football (college and the NFL), basketball (men's college and the NBA)
-and MLB baseball. One front page lists the day's games in every league, and a
+Five sports sites in one: football (the NFL and college), basketball (the NBA
+and men's college), NHL hockey, MLB baseball and women's volleyball (college,
+LOVB and MLV). One front page lists the day's games in every league, and a
 bar across the top of every page switches between the sports, in that order.
 
 You do not need to run anything. GitHub does it all on a schedule.
@@ -67,11 +67,13 @@ not touch the other sports' pages.
 
 `home/` is the page at the top of the site. It reads `home.json`, which
 `tools/assemble.py` writes on every run from each sport's own data: the games
-from two days back to ten days ahead, for college volleyball (matches with a
-team in the AVCA top 25), LOVB, MLV, the NHL, college football (games with a
-team in the AP top 25), the NFL, college basketball (the same; every game
-until the season's first poll is out), the NBA and MLB, in that order (`LEAGUES` in
-`tools/assemble.py`; the order of the bar is `SPORTS` there). Scores there are as of the last update; each sport's own
+from two days back to ten days ahead, for the NFL, college football (games with
+a team in the AP top 25), the NBA, college basketball (the same; every game
+until the season's first poll is out), the NHL, MLB, college volleyball (matches
+with a team in the AVCA top 25), LOVB and MLV, in that order (`LEAGUES` in
+`tools/assemble.py`; the order of the bar is `SPORTS` there). A college team
+outside the poll carries its number in that sport's GOAT ranking, as on the
+sport's own pages. Scores there are as of the last update; each sport's own
 pages have the live scores.
 
 ## Adding a sport
