@@ -386,12 +386,13 @@
     function group(key) { var seen = [], by = {}; rows.forEach(function (t) { if (!by[t[key]]) { by[t[key]] = []; seen.push(t[key]); } by[t[key]].push(t); }); return seen.sort().map(function (k) { return [k, by[k]]; }); }
     if (standView === "goat" && G.top) {
       var thead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", ""], ["Standings", "", "Place in the league standings"],
-        ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+        ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
+        ["Strength", "", "How good it is, by this site's rating of its results and margins: 100 is the best in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
       var body = el("tbody", {}, G.top.map(function (t) {
         var st = rows.filter(function (x) { return x.id === t.id; })[0] || {};
         return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
           el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, (st.place ? st.place + " " : "") + t.name)])]),
-          el("td", { text: t.record || "" }), el("td", { text: t.poll == null || !data.numbered ? "–" : String(t.poll) }), el("td", { text: String(Math.round(100 * t.factors[0])) })]);
+          el("td", { text: t.record || "" }), el("td", { text: t.poll == null || !data.numbered ? "–" : String(t.poll) }), el("td", { text: String(Math.round(100 * t.factors[0])) }), el("td", { text: String(Math.round(100 * (t.factors[3] || 0))) })]);
       }));
       holder.appendChild(el("div", { "class": "tablewrap standwrap", tabindex: "0", role: "region", "aria-label": "GOAT ranking, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [thead, body])]));
     } else if (standView === "league") {
@@ -448,8 +449,8 @@
     function nice(d) { return day(d).toLocaleDateString(undefined, { month: "long", day: "numeric" }); }
     $("rank-lede").textContent = NOPOLL() ? W("rankings.lede_nopoll") : goatView ? W("rankings.lede_goat") : other ? W("rankings.lede_other", { poll: other.name, date: nice(other.date) }) : W("rankings.lede", { poll: data.poll.name, date: nice(data.poll.date) });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : other ? W("rankings.note_other") : W("rankings.note");
-    $("goat-note").textContent = !goatView ? "" : "Every " + ALL() + " team is ranked on four things, most important first: head to head, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), its record, and its place in the AP poll. " +
-      "A team is ranked above one it has beaten unless the other three say the gap is wide. Before anyone has played, the order is last season's ratings. " +
+    $("goat-note").textContent = !goatView ? "" : "Every " + ALL() + " team is ranked on five things, most important first: head to head, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), its record, and its place in the AP poll. " +
+      "A team is ranked above one it has beaten unless the rest say the gap is wide. Before anyone has played, the order is last season's ratings. " +
       (NOPOLL() ? "" : "Elsewhere on the site, teams outside the poll are numbered from 26 in this order. Among the poll's 25 teams, the poll ranks a team below one it has beaten " + G.poll_wrong + " times; the GOAT ranking does " + G.goat_wrong + " times.");
     var out = $("goat-out");
     out.textContent = "";

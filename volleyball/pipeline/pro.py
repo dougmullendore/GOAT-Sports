@@ -19,7 +19,7 @@ import json
 import re
 from pathlib import Path
 
-from . import box, cards, config, odds, players, teams, web
+from . import box, cards, config, goat, odds, players, teams, web
 
 LEAGUES = {
     # site folder: (volleydata name, league name, standings name)
@@ -303,6 +303,17 @@ def build(state: Path, out: Path, site: str, now: dt.datetime, words: dict, writ
         elif g["id"] in pregame:
             g["p0"] = round(pregame[g["id"]], 3)
 
+    # The GOAT ranking of the league's teams, by the same formula as every other GOAT site: head to head,
+    # then who it beat, how good it is, record and its place in the standings (see pipeline/goat.py).
+    ranking = goat.rank(games, rating, {t["id"] for t in table}, rank if finals else {})
+    results = goat.head_to_head(games)
+    goat_top = []
+    for i, t in enumerate(ranking["order"]):
+        won = sum(v[0] for (a, _), v in results.items() if a == t)
+        lost = sum(v[1] for (a, _), v in results.items() if a == t)
+        goat_top.append({"rank": i + 1, "id": t, "name": names.get(t, t), "avca": rank.get(t), "record": f"{won}-{lost}",
+                         "factors": ranking["factors"][t]})
+
     lines = {}                      # every player's matches, for her card
     rated = players.compute(table, games, boxes, lines)
     rated["through"] = max((g["date"] for g in finals), default=None)
@@ -342,7 +353,7 @@ def build(state: Path, out: Path, site: str, now: dt.datetime, words: dict, writ
         "updated": now.isoformat(timespec="seconds"), "season": s["season"],
         "poll": {"name": poll_name, "through": through, "teams": table, "polls_seen": []},
         "game_page": None, "live_feed": None, "live_seconds": config.LIVE_SECONDS, "logo": None,
-        "odds_tested": None, "goat": {},
+        "odds_tested": None, "goat": {"top": goat_top, "weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD},
         "nr": {}, "words": words, "logos": logos,
         "abbr": {t: [((media.get("teams") or {}).get(t) or {}).get("abbr") or s["abbr"].get(t) or names[t][:3].upper(),
                      ((media.get("teams") or {}).get(t) or {}).get("color") or COLORS[i % len(COLORS)]] for i, t in enumerate(sorted(names))}, "d1": [[t["id"], t["name"]] for t in table], "games": games})

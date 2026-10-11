@@ -68,7 +68,7 @@ PLAYOFF_TESTED = {"seasons": "2022-23 to 2025-26", "checks": 896,       # 32 tea
 
 # The GOAT ranking (pipeline/goat.py) of the 32 teams: head to head first, then a score
 # made of these three things, weighted like this. The same on every GOAT site.
-GOAT_WEIGHTS = (0.6, 0.15, 0.25)   # who it beat, standings, record (head to head comes first, see goat.py)
+GOAT_WEIGHTS = (0.4, 0.3, 0.2, 0.1)   # who it beat, how good it is, record, standings (head to head comes first, see goat.py)
 GOAT_CURVE = 2            # how much more a win over a top team counts than one over a middling team (1: in step with the team's standing)
 GOAT_LOSS = 0.25          # the least any loss costs, even to the best team (a win over the best team is worth 1)
 GOAT_HEAD_TO_HEAD = 0.15  # a head-to-head lead outweighs a score gap up to this size (scores run 0 to 1)

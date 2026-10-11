@@ -1,6 +1,6 @@
 """The GOAT ranking: the site's own order of every team in the league (every MLB team).
 
-Four things decide it, in this order of importance:
+Five things decide it, in this order of importance:
   1. head to head: a team that has beaten another is ranked above it where
      that can be done without contradicting more results than it honors;
   2. who it beat: every win adds the quality of the team beaten, raised to
@@ -12,11 +12,14 @@ Four things decide it, in this order of importance:
      a weak one, a loss to a weak team costs far more than a loss to a top
      one, and no loss is free. The totals are stretched to run from 0 (the
      lowest) to 1 (the highest);
-  3. record: its share of games won;
-  4. the standings: a team gets credit for its place in them (where a college
+  3. how good it is: its own rating (the one behind the odds, which follows the
+     margins it wins and loses by and who they came against), stretched to run
+     from 0 for the lowest-rated team to 1 for the highest;
+  4. record: its share of games won;
+  5. the standings: a team gets credit for its place in them (where a college
      site uses the AP poll).
-Parts 2 to 4 make a score, weighted by GOAT_WEIGHTS (who it beat, the poll,
-record). The poll credit is (26 - rank) / 25 for a ranked team and 0 otherwise.
+Parts 2 to 5 make a score, weighted by GOAT_WEIGHTS (who it beat, how good it
+is, record, the poll). The poll credit is (26 - rank) / 25 for a ranked team and 0 otherwise.
 The same formula is used on every GOAT site.
 
 The order starts from that score. Then every pair of teams has a price for
@@ -61,7 +64,7 @@ def _percentile(values: dict) -> dict:
 def rank(games: list[dict], rating: dict, teams: set, in_poll: dict) -> dict:
     """Rank `teams` (ids). `in_poll` is {id: poll rank} for the ranked teams.
     Returns {"order": [ids, best first], "base": {id: place by score alone},
-    "score": {id: score}, "factors": {id: [who it beat, poll, record]}}."""
+    "score": {id: score}, "factors": {id: [who it beat, poll, record, how good it is]}}."""
     finals = [g for g in games if g["state"] == "final" and g["home"].get("score") is not None
               and g["away"].get("score") is not None and g["home"]["score"] != g["away"]["score"]]
     floor = min(rating.values()) if rating else 0.0
@@ -85,8 +88,12 @@ def rank(games: list[dict], rating: dict, teams: set, in_poll: dict) -> dict:
     rec = {t: won.get(t, 0) / played[t] if played.get(t) else 0.0 for t in teams}
     size = max(in_poll.values(), default=25)        # 25 for a poll; the number of teams in a league numbered by its standings
     poll = {t: (size + 1 - in_poll[t]) / size if t in in_poll else 0.0 for t in teams}
-    wb, wp, wr = config.GOAT_WEIGHTS
-    score = {t: wb * beat[t] + wp * poll[t] + wr * rec[t] for t in teams}
+    # how good it is: its own rating (which follows the margins it wins and loses by, and who against),
+    # stretched to run from 0 for the lowest-rated team to 1 for the highest
+    low, high = min((rating.get(t, floor) for t in teams), default=0.0), max((rating.get(t, floor) for t in teams), default=0.0)
+    power = {t: (rating.get(t, floor) - low) / (high - low) if high > low else 0.0 for t in teams}
+    wb, wg, wr, wp = config.GOAT_WEIGHTS
+    score = {t: wb * beat[t] + wg * power[t] + wr * rec[t] + wp * poll[t] for t in teams}
     # before anyone has played, every score is level: the ratings carried over from last season decide
     order = sorted(teams, key=lambda t: (-score[t], -rating.get(t, floor), t))
     base = {t: i + 1 for i, t in enumerate(order)}
@@ -122,7 +129,7 @@ def rank(games: list[dict], rating: dict, teams: set, in_poll: dict) -> dict:
     # themselves; every other team follows from 26, in its order here.
     order = [t for t in order if t in in_poll] + [t for t in order if t not in in_poll]
     return {"order": order, "base": base, "score": score,
-            "factors": {t: [round(beat[t], 3), round(poll[t], 3), round(rec[t], 3)] for t in teams}}
+            "factors": {t: [round(beat[t], 3), round(poll[t], 3), round(rec[t], 3), round(power[t], 3)] for t in teams}}
 
 
 def contradictions(order: list, games: list[dict], among: set) -> int:

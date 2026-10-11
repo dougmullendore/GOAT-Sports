@@ -37,7 +37,7 @@ games.live_note = Live scores from ESPN, refreshed every {seconds} seconds.
 # ---- Standings page ----
 standings.title = NHL Standings
 standings.lede = The league's own standings, as of {date}.
-standings.lede_goat = This site's own ranking of the 32 teams: head to head first, then who each team has beaten and lost to, its record and its place in the standings.
+standings.lede_goat = This site's own ranking of the 32 teams: head to head first, then who each team has beaten and lost to, how good it is, its record and its place in the standings.
 standings.button_division = Division
 standings.button_wildcard = Wild Card
 standings.button_conference = Conference
@@ -45,8 +45,8 @@ standings.button_league = League
 standings.button_goat = GOAT Ranking
 standings.note = Two points for a win, one for a loss in overtime or a shootout. Teams level on points are separated the league's way: fewer games played, then regulation wins. Hold or hover over a column heading for what it means; choose a team to see its page.
 standings.note_line = The line marks the playoff places: the top three in each division, and the two best of the rest in each conference as wild cards.
-standings.note_goat = The same columns as the standings, in this site's order. League is the team's place in the standings; Beat scores who it has beaten and lost to (100 is the best in the league); SOS ranks the 32 by how strong the teams they have played are (1 is the hardest); xG% is the team's share of the expected goals in its games and G% its share of the actual goals.
-standings.note_goat_how = A team is ranked above one it has the better of head to head unless the rest say the gap is wide. Behind that: who it beat (60%), where a win counts for more the better the team beaten and a loss costs more the weaker the team lost to; its record (25%); and its place in the standings (15%).
+standings.note_goat = The same columns as the standings, in this site's order. League is the team's place in the standings; Beat scores who it has beaten and lost to and Str how good it is by this site's rating (100 is the best in the league); SOS ranks the 32 by how strong the teams they have played are (1 is the hardest); xG% is the team's share of the expected goals in its games and G% its share of the actual goals.
+standings.note_goat_how = A team is ranked above one it has the better of head to head unless the rest say the gap is wide. Behind that: who it beat (40%), where a win counts for more the better the team beaten and a loss costs more the weaker the team lost to; how good it is (30%), by this site's rating of its goals for and against; its record (20%); and its place in the standings (10%).
 
 # ---- Teams page ----
 teams.title = NHL Team Stats

@@ -39,7 +39,7 @@ matches.home = Home
 # ---- Rankings page ----
 rankings.title = Top 25 Rankings
 rankings.lede = The {poll}, through matches of {date}.
-rankings.lede_goat = This site's own ranking of every Division I team. The top 25 are the same 25 teams as the AVCA poll, put in order by head to head first, then who each team has beaten and lost to, its record and the poll; every other team follows from 26 the same way.
+rankings.lede_goat = This site's own ranking of every Division I team. The top 25 are the same 25 teams as the AVCA poll, put in order by head to head first, then who each team has beaten and lost to, how good it is, its record and the poll; every other team follows from 26 the same way.
 rankings.button_poll = AVCA Poll
 rankings.button_goat = GOAT Ranking
 rankings.button_conf = Conference
@@ -97,6 +97,8 @@ pro.matches_later = Later
 pro.rankings_title = {league} Standings
 pro.rankings_lede = The {league} standings, through matches of {date}.
 pro.rankings_button_poll = Standings
+pro.rankings_lede_goat = This site's own ranking of the {league} teams: head to head first, then who each team has beaten and lost to, how good it is, its record and its place in the standings.
+pro.rankings_note_goat = Beat scores who a team has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. Strength is this site's rating of its results, set by set. 100 is the best in the league. Playoff matches count.
 pro.rankings_note = LOVB teams are placed by wins; MLV teams by points (3 for a win in three or four sets, 2 for a win in five, 1 for a loss in five), as in the league's own table. Ties go to share of matches won, then sets won to sets lost; play-off matches do not count. Choose a team to see its page.
 pro.teams_title = {league} Team Stats
 pro.teams_lede = How each {league} team attacks, serves, blocks and defends, per set, and what its opponents manage against it.

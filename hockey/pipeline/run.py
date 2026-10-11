@@ -518,6 +518,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         t["xg_pct"] = round(100 * ranking["xg_pct"][tid], 1) if sum(chances[tid]) else None
         t["g_pct"] = round(100 * ranking["goal_pct"][tid], 1)
         t["beat_score"] = round(100 * ranking["factors"][tid][0])       # who it beat: 100 is the best set of results in the league
+        t["strength"] = round(100 * ranking["factors"][tid][3])         # how good it is, by its rating: 100 is the best in the league
     goat_info = {"weights": config.GOAT_WEIGHTS, "weight": config.GOAT_HEAD_TO_HEAD}
 
     words = read_words()                       # checked before anything is written

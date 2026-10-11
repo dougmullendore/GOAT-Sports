@@ -91,21 +91,24 @@ games, the favorite won 74.2%; home court is worth 3 points.
 
 ## GOAT ranking
 
-`pipeline/goat.py`, for every Division I team and for the NBA. Four things
+`pipeline/goat.py`, for every Division I team and for the NBA. Five things
 decide it, most important first:
 
 1. **Head to head.** A team is ranked above one it has beaten, unless the
    rest say the gap between them is wide (`GOAT_HEAD_TO_HEAD`). Results that
    form a circle cannot all be honored; the ranking keeps as many as it can.
-2. **Who it beat (60%).** Every win adds the quality of the team beaten,
+2. **Who it beat (40%).** Every win adds the quality of the team beaten,
    squared; every loss takes away a quarter, plus three quarters of how weak
    the team lost to was, squared. Quality is a team's place among all the
    teams by the ratings behind the odds, from 0 (weakest) to 1 (strongest).
    So a win over a top team is worth far more than a win over a weak one, a
    loss to a weak team costs far more than a loss to a top one, and no loss
    is free. The totals are stretched to run from 0 to 1.
-3. **Record (25%):** its share of games won.
-4. **The AP poll, or the NBA standings (15%):** credit for its place in it.
+3. **How good it is (30%):** its own rating, the one behind the odds, which
+   follows the margins it wins and loses by and who they came against,
+   stretched to run from 0 to 1.
+4. **Record (20%):** its share of games won.
+5. **The AP poll, or the NBA standings (10%):** credit for its place in it.
 
 The settings are `GOAT_WEIGHTS`, `GOAT_CURVE` and `GOAT_LOSS` in
 `pipeline/config.py`. Every GOAT site uses this formula.

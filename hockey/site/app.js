@@ -165,6 +165,7 @@
       holder.appendChild(standTable(teams.sort(by("goat")), "Team", function (t) { return t.goat; }, null, [
         ["League", "Place in the league standings", function (t) { return t.rank; }],
         ["Beat", "Who it beat: every win counts for more the better the team beaten, every loss costs more the weaker the team lost to. 100 is the best in the league", function (t) { return t.beat_score == null ? "–" : t.beat_score; }],
+        ["Str", "Strength: how good it is, by this site's rating of its goals for and against and who they came against. 100 is the best in the league", function (t) { return t.strength == null ? "–" : t.strength; }],
         ["SOS", "Strength of schedule: 1 is the hardest, by the average rating of the teams played", function (t) { return t.sos_rank; }],
         ["xG%", "Expected-goal share: of the expected goals in its games, the share that were its own", function (t) { return t.xg_pct == null ? "–" : t.xg_pct.toFixed(1); }],
         ["G%", "Goal share: of the goals in its games, the share it scored (shootouts aside)", function (t) { return t.g_pct == null ? "–" : t.g_pct.toFixed(1); }]],

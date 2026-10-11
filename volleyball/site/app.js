@@ -218,7 +218,7 @@
     var was = $("conf-standings"), confs = !PRO() && hasConferences(data.d1);
     if (was) was.parentNode.removeChild(was);
     if (rankView === "conf" && !confs) rankView = "avca";
-    if (!PRO()) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).forEach(function (o) {
+    if (!PRO() || G.top) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
     if (rankView === "conf") return drawConferences(data.d1);
@@ -233,6 +233,21 @@
     if (proBox) proBox.parentNode.removeChild(proBox);
     if (PRO()) {             // a pro league: a full standings table in place of the poll's list
       ol.hidden = true; head.hidden = true;
+      if (goatView) {        // the site's own order of the league's teams, as a table like the standings
+        var gHead = el("thead", {}, [el("tr", {}, [["GOAT", "", "Place in this site's GOAT ranking"], ["Team", "l", ""], ["Record", "", "Matches won and lost, playoffs included"], ["Standings", "", "Place in the league standings"],
+          ["Beat", "", "Who it has beaten and lost to: a win counts for more the better the team beaten, a loss costs more the weaker the team lost to. 100 is the best in the league"],
+          ["Strength", "", "How good it is, by this site's rating of its results set by set: 100 is the best in the league"]].map(function (c) { return el("th", { scope: "col", "class": c[1], title: c[2] || null, text: c[0] }); }))]);
+        var gBody = el("tbody", {}, G.top.map(function (t) {
+          return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(t.rank) })]),
+            el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, t.name)])]),
+            el("td", { text: t.record || "" }), el("td", { text: t.avca == null ? "–" : String(t.avca) }),
+            el("td", { text: String(Math.round(100 * t.factors[0])) }), el("td", { text: String(Math.round(100 * (t.factors[3] || 0))) })]);
+        }));
+        ol.parentNode.insertBefore(el("div", { "class": "tablewrap", id: "pro-standings", tabindex: "0", role: "region", "aria-label": "GOAT ranking, scrolls sideways" }, [el("table", { "class": "ptable stand" }, [gHead, gBody])]), ol);
+        $("rank-lede").textContent = W("rankings.lede_goat");
+        $("rank-note").textContent = W("rankings.note_goat"); $("goat-note").textContent = ""; $("goat-out").textContent = "";
+        return;
+      }
       var mlv = data.league === "mlv";
       var cols = [["#", ""], ["Team", "l"], ["W", ""], ["L", ""]].concat(mlv ? [["Pts", "", "3 for a win in three or four sets, 2 for a win in five, 1 for a loss in five"]] : [])
         .concat([["Sets", "", "Sets won and lost"], ["Points", "", "Rally points won and lost"], ["Home", ""], ["Away", ""], ["Last 5", "", "Most recent on the right"], ["Streak", ""], ["Change", "", "Places moved in the last week"]]);
@@ -272,8 +287,8 @@
     var through = day(data.poll.through).toLocaleDateString(undefined, { month: "long", day: "numeric" });
     $("rank-lede").textContent = goatView ? W("rankings.lede_goat") : W("rankings.lede", { poll: data.poll.name, date: through });
     $("rank-note").textContent = goatView ? W("rankings.note_goat") : W("rankings.note");
-    $("goat-note").textContent = !goatView ? "" : "Every Division I team is ranked on four things, most important first: head to head, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), its record, and its place in the AVCA poll. " +
-      "A team is ranked above one it has beaten unless the other three say the gap is wide. Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +
+    $("goat-note").textContent = !goatView ? "" : "Every Division I team is ranked on five things, most important first: head to head, who it has beaten and lost to (a win counts for more the better the team beaten, a loss costs more the weaker the team lost to), how good it is (its rating, which follows the margins it wins and loses by and who they came against), its record, and its place in the AVCA poll. " +
+      "A team is ranked above one it has beaten unless the rest say the gap is wide. Elsewhere on the site, teams outside the poll are numbered from 26 in this order. " +
       "Among the poll's 25 teams, the poll ranks a team below one it has beaten " + G.poll_wrong + " times; the GOAT ranking does " + G.goat_wrong + " times.";
     var out = $("goat-out");
     out.textContent = "";
