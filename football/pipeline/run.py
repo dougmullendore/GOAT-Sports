@@ -238,11 +238,12 @@ def update_careers(state: Path, now: dt.datetime) -> dict:
     for g in sel["all_games"]:
         if g["state"] == "final":
             for s in (g["away"], g["home"]):
-                latest[s["id"]] = max(latest.get(s["id"], ""), g["date"])
+                kickoff = g.get("start") or int(dt.datetime.fromisoformat(g["date"] + "T20:00:00+00:00").timestamp())
+                latest[s["id"]] = max(latest.get(s["id"], 0), kickoff)
     order = sorted(rated["players"], key=lambda p: (p["team_rank"] is None, not p["regular"], p["rank"] or 10**6))
-    wanted = [(p["id"], latest.get(p["team_id"], "")) for p in order]
+    wanted = [(p["id"], latest.get(p["team_id"], 0)) for p in order]
     stored = read_json(state / "careers.json", {})
-    res = careers.update(stored, wanted, now.date().isoformat(), log)
+    res = careers.update(stored, wanted, int(now.timestamp()), log)
     write_json(state / "careers.json", stored)
     return res
 

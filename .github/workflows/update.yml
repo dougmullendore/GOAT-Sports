@@ -143,6 +143,7 @@ jobs:
             echo "The repository could not be reached, so the site was not published."; exit 1
           fi
           mkdir -p dist
+          if [ "$BY_HAND" = 1 ]; then python -m tools.test_assemble; fi
           python -m tools.assemble dist pub
           cd pub
           git config user.name "goat-sports-bot"

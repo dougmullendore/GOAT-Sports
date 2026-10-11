@@ -206,6 +206,24 @@ def test_players_are_rated_against_their_position():
     assert [t["w"] for t in stats["teams"]] == [0, 1] and stats["through"] == "2026-10-10"
 
 
+def test_a_career_is_read_again_after_the_next_game():
+    from pipeline import careers
+    seen = []
+    real = web.get_many
+    web.get_many = lambda urls, tries=None: [(u, {"categories": []}, seen.append(u)) for u in urls]
+    try:
+        stored, kickoff = {}, 1_000_000
+        quiet = lambda msg: None
+        careers.update(stored, [("1", kickoff)], kickoff + 2 * 3600, quiet)          # read during the game
+        careers.update(stored, [("1", kickoff)], kickoff + 9 * 3600, quiet)          # so read again once it is over
+        careers.update(stored, [("1", kickoff)], kickoff + 30 * 3600, quiet)         # and then left alone
+        assert len(seen) == 2 and stored["players"]["1"]["t"] == kickoff + 9 * 3600
+        careers.update(stored, [("2", kickoff)], kickoff + 40 * 3600, quiet)         # a player no longer wanted is dropped
+        assert list(stored["players"]) == ["2"]
+    finally:
+        web.get_many = real
+
+
 def test_the_wording_file_is_complete():
     words = run.read_words()
     assert words["nav.games"] == "Games" and "{poll}" in words["games.lede"]
