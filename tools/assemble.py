@@ -29,8 +29,8 @@ HOME_SRC = ROOT / "home"
 SPORTS = [
     {"key": "football", "name": "Football", "pages": ["", "nfl/"], "home": "nfl/"},
     {"key": "basketball", "name": "Basketball", "pages": ["", "nba/"], "home": "nba/"},
-    {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "baseball", "name": "Baseball", "pages": [""]},
+    {"key": "hockey", "name": "Hockey", "pages": [""]},
     {"key": "volleyball", "name": "Volleyball", "pages": ["", "lovb/", "mlv/"]},
 ]
 # The front page's lists: one for each league, in the order shown (a sport's pro league before its
@@ -46,9 +46,9 @@ LEAGUES = [
      "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "cbb", "sport": "basketball", "folder": "basketball/", "name": "College basketball", "label": "Basketball", "score": "score",
      "game": "#/game/", "ranked_only": True, "unit": "games"},
-    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
-     "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "mlb", "sport": "baseball", "folder": "baseball/", "name": "MLB", "label": "Baseball", "score": "score",
+     "game": "#/game/", "ranked_only": False, "unit": "games"},
+    {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "wvb", "sport": "volleyball", "folder": "volleyball/", "name": "College volleyball", "label": "Volleyball", "score": "sets",
      "game": "#/match/", "ranked_only": True, "unit": "matches"},

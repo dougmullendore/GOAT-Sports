@@ -52,8 +52,8 @@ def main() -> int:
         assert 'aria-current="page">Football' in (site / "football" / "index.html").read_text()
         later = {l["key"]: l for l in json.loads((site / "home.json").read_text())["leagues"]}
         assert [g["id"] for g in later["cfb"]["games"]] == [9] and not later["nfl"]["ready"]
-        assert [l["sport"] for l in later.values()] == ["football"] * 2 + ["basketball"] * 2 + ["hockey", "baseball"] + ["volleyball"] * 3
-        assert [s["key"] for s in assemble.SPORTS] == ["football", "basketball", "hockey", "baseball", "volleyball"]
+        assert [l["sport"] for l in later.values()] == ["football"] * 2 + ["basketball"] * 2 + ["baseball", "hockey"] + ["volleyball"] * 3
+        assert [s["key"] for s in assemble.SPORTS] == ["football", "basketball", "baseball", "hockey", "volleyball"]
         # basketball before its season: no poll, so the whole day is listed, and nobody has a number
         sport(Path(tmp) / "third" / "basketball", [game(11, today), game(12, today)], {"poll": {"name": "AP Top 25"}, "no_poll": True, "numbered": False})
         sport(Path(tmp) / "third" / "basketball" / "nba", [game(13, today, 4)], {"numbered": False})
@@ -63,7 +63,7 @@ def main() -> int:
         assert [g["id"] for g in third["cbb"]["games"]] == [11, 12] and not third["cbb"]["ranked_only"]
         assert third["nba"]["games"][0]["away"][2] is None and third["mlb"]["games"][0]["away"][2] == 2
         nba = (site / "basketball" / "nba" / "index.html").read_text()
-        assert 'href="../../baseball/"' in nba and nba.index("Football<") < nba.index("Basketball<") < nba.index("Hockey<") < nba.index("Baseball<") < nba.index("Volleyball<")
+        assert 'href="../../baseball/"' in nba and nba.index("Football<") < nba.index("Basketball<") < nba.index("Baseball<") < nba.index("Hockey<") < nba.index("Volleyball<")
         assert 'aria-current="page">Baseball' in (site / "baseball" / "index.html").read_text()
         # the pro league comes first: a sport's tab opens it, and the front page lists it before the college one
         assert 'href="../../basketball/nba/"' in nba and 'href="../basketball/nba/"' in (site / "hockey" / "index.html").read_text()
@@ -71,7 +71,7 @@ def main() -> int:
         final = json.loads((site / "home.json").read_text())
         assert {s["key"]: s["href"] for s in final["sports"]} == {"volleyball": "volleyball/", "hockey": "hockey/", "football": "football/",
                                                                   "basketball": "basketball/nba/", "baseball": "baseball/"}       # football has no NFL pages here
-        assert [l["key"] for l in final["leagues"]] == ["nfl", "cfb", "nba", "cbb", "nhl", "mlb", "wvb", "lovb", "mlv"]
+        assert [l["key"] for l in final["leagues"]] == ["nfl", "cfb", "nba", "cbb", "mlb", "nhl", "wvb", "lovb", "mlv"]
         assert (site / "volleyball" / "data.json").exists()
     print("PASS tools.assemble")
     return 0

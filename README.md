@@ -1,7 +1,7 @@
 # GOAT Sports
 
 Five sports sites in one: football (the NFL and college), basketball (the NBA
-and men's college), NHL hockey, MLB baseball and women's volleyball (college,
+and men's college), MLB baseball, NHL hockey and women's volleyball (college,
 LOVB and MLV). One front page lists the day's games in every league, and a
 bar across the top of every page switches between the sports, in that order.
 
@@ -69,7 +69,7 @@ not touch the other sports' pages.
 `tools/assemble.py` writes on every run from each sport's own data: the games
 from two days back to ten days ahead, for the NFL, college football (games with
 a team in the AP top 25), the NBA, college basketball (the same; every game
-until the season's first poll is out), the NHL, MLB, college volleyball (matches
+until the season's first poll is out), MLB, the NHL, college volleyball (matches
 with a team in the AVCA top 25), LOVB and MLV, in that order (`LEAGUES` in
 `tools/assemble.py`; the order of the bar is `SPORTS` there). A college team
 outside the poll carries its number in that sport's GOAT ranking, as on the
