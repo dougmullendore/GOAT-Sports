@@ -1058,7 +1058,7 @@
     if (d.pro) document.body.classList.add("pro");
     document.body.classList.add("lg-" + (d.league || "college"));
     var tc = document.querySelector('meta[name="theme-color"]');
-    if (tc) tc.setAttribute("content", { lovb: "#1d4ed8", mlv: "#eab308" }[d.league] || "#6d28d9");
+    if (tc) tc.setAttribute("content", "#6d28d9");
     Array.prototype.forEach.call(document.querySelectorAll("[data-w]"), function (n) { var s = W(n.getAttribute("data-w")); if (s) n.textContent = s; });
     $("lede").textContent = W("matches.lede", { poll: d.poll.name });
     var u = new Date(d.updated);

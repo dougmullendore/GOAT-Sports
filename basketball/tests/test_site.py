@@ -272,7 +272,7 @@ def test_the_nba_site_builds_in_season():
         kat = cards["3136195"]
         assert kat["games"] and kat["career"] and kat["highs"]
         page = (out / "index.html").read_text()
-        assert "#1d428a" in page and "#c2410c" not in page
+        assert "#c2410c" in page                             # one colour for the whole sport
         assert "GOAT Basketball: NBA" in (out / "manifest.json").read_text()
     built("nba", check)
 

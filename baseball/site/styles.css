@@ -1,4 +1,4 @@
-/* GOAT Baseball. One main colour (slate), used for the logo mark, the rank tags and
+/* GOAT Baseball. One main colour (blue), used for the logo mark, the rank tags and
    every accent; green for a win and red for a loss. One column, left aligned. */
 :root {
   --floor: #eef2f8;
@@ -6,11 +6,11 @@
   --ink: #0f1d33;
   --ink-2: #4f5d73;
   --line: #cfd8e6;
-  --teal: #475569;      /* the main colour */
-  --teal-soft: #e8edf3;
-  --ball: #475569;      /* the accent: the same colour as the logo mark */
+  --teal: #1e40af;      /* the main colour */
+  --teal-soft: #dfe8fb;
+  --ball: #1e40af;      /* the accent: the same colour as the logo mark */
   --ball-ink: #ffffff;
-  --ball-home: #2b3644; /* a darker shade: the home team's rank before a match */
+  --ball-home: #172f7a; /* a darker shade: the home team's rank before a match */
   --win: #15803d;       /* green, for a match's winner and for "Beat" */
   --win-ink: #ffffff;
   --loss: #b3261e;      /* red, for "Lost to" and for the rank of a match's loser */
@@ -21,13 +21,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-    --teal: #a8b5c8; --teal-soft: #1f2937; --ball: #a8b5c8; --ball-ink: #0b1220; --ball-home: #7f8ea6; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
+    --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-  --teal: #a8b5c8; --teal-soft: #1f2937; --ball: #a8b5c8; --ball-ink: #0b1220; --ball-home: #7f8ea6; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
+  --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
   color-scheme: dark;
 }
 
@@ -451,6 +451,8 @@ a.opp:hover .n { color: var(--teal); }
 /* ---- a game: the score by period and the box score ---- */
 .mid .w, .mid .l { display: inline-block; min-width: 1.2em; }
 .mid .sa { text-align: right; } .mid .sh { text-align: left; }
+/* on a phone the two scores are stacked at the right edge, so both line up on the right */
+@media (max-width: 640px) { .mid .sa, .mid .sh, .mid.odds .sa, .mid.odds .sh { text-align: right; min-width: 0; } }
 .more .bowl { display: block; color: var(--ink); font-weight: 600; }
 .more .line { display: block; }
 .gc-line { margin-top: 10px; font-size: .8125rem; color: var(--ink-2); }

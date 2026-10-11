@@ -499,8 +499,8 @@ def build_pro(state: Path, out: Path, now: dt.datetime) -> dict:
         dest.mkdir(parents=True)
         for name in ("index.html", "app.js", "styles.css"):
             shutil.copy(out / name, dest / name)
-        # the league's own icon (blue for LOVB, yellow for MLV) for browser tabs and phone home screens
-        colour = {"lovb": "#1d4ed8", "mlv": "#eab308"}[site]
+        # the league's own icon files (the same purple mark as college's) for browser tabs and phone home screens
+        colour = "#6d28d9"
         for name in ("icon.svg", "icon-32.png", "icon-180.png", "icon-192.png", "icon-512.png"):
             shutil.copy(out / name.replace("icon", f"icon-{site}", 1), dest / name)
         (dest / "manifest.json").write_text((out / "manifest.json").read_text().replace("#6d28d9", colour))

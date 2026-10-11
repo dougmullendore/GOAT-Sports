@@ -171,7 +171,7 @@ def test_the_site_is_built():
         assert g["box"] == 1 and g["away"]["rank"] and g["home"]["rank"]
         assert all("beat" not in t for t in nfl["goat"]["top"]) and len(nfl["goat"]["top"]) == 32
         assert (out / "nfl" / "players_fbs.json").exists() and not (out / "nfl" / "players.json").exists()
-        assert 'content="#013369"' in (out / "nfl" / "index.html").read_text() and 'content="#8a4b1c"' in page
+        assert 'content="#8a4b1c"' in (out / "nfl" / "index.html").read_text() and 'content="#8a4b1c"' in page      # one colour for the whole sport
         assert (out / "nfl" / "icon.svg").read_text() == (out / "icon-nfl.svg").read_text()
         assert (state / "nfl" / "box.json").exists() and not (state / "nfl" / "polls.json").exists()
         assert {"NFL schedule", "NFL standings", "NFL site"} <= set(status["stages"]) and "NFL rankings" not in status["stages"]

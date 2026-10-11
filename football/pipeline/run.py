@@ -429,8 +429,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         page = page.replace(f'"{name}"', f'"{name}?v={stamp}"')
     if config.LEAGUE != "college":
         # the league's own colour and icon for browser tabs and phone home screens
-        page = page.replace('content="#8a4b1c"', 'content="#013369"')
-        (out / "manifest.json").write_text((out / "manifest.json").read_text().replace("#8a4b1c", "#013369").replace("GOAT Football", "GOAT Football: NFL"))
+        (out / "manifest.json").write_text((out / "manifest.json").read_text().replace("GOAT Football", "GOAT Football: NFL"))
         for name in ("icon.svg", "icon-32.png", "icon-180.png", "icon-192.png", "icon-512.png"):
             shutil.copy(out / name.replace("icon", f"icon-{config.LEAGUE}", 1), out / name)
     (out / "index.html").write_text(page)

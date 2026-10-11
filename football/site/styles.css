@@ -449,6 +449,8 @@ a.opp:hover .n { color: var(--teal); }
 /* ---- football: the score by quarter, the scoring plays and the box score's parts ---- */
 .mid .w, .mid .l { display: inline-block; min-width: 1.2em; }
 .mid .sa { text-align: right; } .mid .sh { text-align: left; }
+/* on a phone the two scores are stacked at the right edge, so both line up on the right */
+@media (max-width: 640px) { .mid .sa, .mid .sh, .mid.odds .sa, .mid.odds .sh { text-align: right; min-width: 0; } }
 .more .bowl { display: block; color: var(--ink); font-weight: 600; }
 .more .line { display: block; }
 .gc-line { margin-top: 10px; font-size: .8125rem; color: var(--ink-2); }
@@ -470,12 +472,7 @@ a.opp:hover .n { color: var(--teal); }
 .statline { color: var(--ink-2); white-space: normal; min-width: 12rem; }
 .tsub b { color: var(--ink); }
 
-/* ---- the NFL's copy of the site: its own colour, and standings tables in place of a poll ---- */
-body.lg-nfl { --teal: #013369; --teal-soft: #dfe8f5; --ball: #013369; --ball-ink: #ffffff; --ball-home: #001a3a; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.lg-nfl { --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; }
-}
-:root[data-theme="dark"] body.lg-nfl { --teal: #8fb4f0; --teal-soft: #17284a; --ball: #8fb4f0; --ball-ink: #071226; --ball-home: #5d8bd6; }
+/* ---- standings tables, in place of a poll, on the pro league's copy of the site ---- */
 .standwrap { margin-top: 14px; }
 /* every division's table has the same column widths, so the numbers line up down the page */
 #pro-standings .ptable.stand { table-layout: fixed; min-width: 860px; }

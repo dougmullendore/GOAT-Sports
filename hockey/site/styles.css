@@ -1,4 +1,4 @@
-/* GOAT Hockey. One main colour (ice teal), used for the logo mark, the rank tags and
+/* GOAT Hockey. One main colour (green), used for the logo mark, the rank tags and
    every accent; green for a win and red for a loss. One column, left aligned. */
 :root {
   --floor: #eef2f8;
@@ -6,11 +6,11 @@
   --ink: #0f1d33;
   --ink-2: #4f5d73;
   --line: #cfd8e6;
-  --teal: #0e7490;      /* the main colour */
-  --teal-soft: #d9f0f5;
-  --ball: #0e7490;      /* the accent: the same colour as the logo mark */
+  --teal: #047857;      /* the main colour */
+  --teal-soft: #d6f1e5;
+  --ball: #047857;      /* the accent: the same colour as the logo mark */
   --ball-ink: #ffffff;
-  --ball-home: #164e63; /* a darker shade: the home team's rank before a game */
+  --ball-home: #064e3b; /* a darker shade: the home team's rank before a game */
   --win: #15803d;       /* green, for a match's winner and for "Beat" */
   --win-ink: #ffffff;
   --loss: #b3261e;      /* red, for "Lost to" and for the rank of a match's loser */
@@ -21,13 +21,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-    --teal: #67d3ea; --teal-soft: #12323b; --ball: #67d3ea; --ball-ink: #06222a; --ball-home: #22a3c0; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
+    --teal: #34d399; --teal-soft: #0f3328; --ball: #34d399; --ball-ink: #04261a; --ball-home: #10b981; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-  --teal: #67d3ea; --teal-soft: #12323b; --ball: #67d3ea; --ball-ink: #06222a; --ball-home: #22a3c0; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
+  --teal: #34d399; --teal-soft: #0f3328; --ball: #34d399; --ball-ink: #04261a; --ball-home: #10b981; --win: #4ade80; --win-ink: #052e16; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
   color-scheme: dark;
 }
 

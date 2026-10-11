@@ -1,4 +1,4 @@
-/* GOAT Volleyball. One main colour per league (purple, blue, yellow), used for the logo mark, the rank tags and
+/* GOAT Volleyball. One main colour (purple) for every league, used for the logo mark, the rank tags and
    every accent; green for a win and red for a loss. One column, left aligned. */
 :root {
   --floor: #eef2f8;
@@ -6,7 +6,7 @@
   --ink: #0f1d33;
   --ink-2: #4f5d73;
   --line: #cfd8e6;
-  --teal: #6d28d9;      /* the main colour: purple for college, blue for LOVB, yellow for MLV (below) */
+  --teal: #6d28d9;      /* the main colour, for college, LOVB and MLV alike */
   --teal-soft: #ece4fc;
   --ball: #6d28d9;      /* the accent: the same colour as the logo mark */
   --ball-ink: #ffffff;
@@ -31,15 +31,6 @@
   color-scheme: dark;
 }
 
-/* each league's own colour */
-body.lg-lovb { --teal: #1d4ed8; --teal-soft: #dbe5fb; --ball: #1d4ed8; --ball-ink: #ffffff; --ball-home: #12318f; }
-body.lg-mlv { --teal: #a16207; --teal-soft: #fdf3c4; --ball: #eab308; --ball-ink: #1f1600; --ball-home: #a16207; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.lg-lovb { --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #7aa7ff; --ball-ink: #0b1220; --ball-home: #4c78d6; }
-  :root:not([data-theme="light"]) body.lg-mlv { --teal: #facc15; --teal-soft: #3a3110; --ball: #facc15; --ball-ink: #1f1600; --ball-home: #ca8a04; }
-}
-:root[data-theme="dark"] body.lg-lovb { --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #7aa7ff; --ball-ink: #0b1220; --ball-home: #4c78d6; }
-:root[data-theme="dark"] body.lg-mlv { --teal: #facc15; --teal-soft: #3a3110; --ball: #facc15; --ball-ink: #1f1600; --ball-home: #ca8a04; }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }

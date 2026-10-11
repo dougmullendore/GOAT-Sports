@@ -7,7 +7,7 @@ ALL_NAME = "MLB"          # what "every team" is called
 STATE_FOLDER = ""         # the league's folder inside this sport's stored data
 SITE_FOLDER = ""          # and inside the site
 LEAGUE_TABS = [["", "MLB"]]                          # one league, so no tabs are shown
-COLOURS = ("#475569", "#475569")
+COLOURS = ("#1e40af", "#1e40af")
 SEASON_SPANS_YEARS = False                           # a season is named by its one year
 
 # There is no poll: every team is numbered by its place in the league standings.
