@@ -51,11 +51,11 @@ LEAGUES = [
     {"key": "nhl", "sport": "hockey", "folder": "hockey/", "name": "NHL", "label": "Hockey", "score": "score",
      "game": "#/game/", "ranked_only": False, "unit": "games"},
     {"key": "wvb", "sport": "volleyball", "folder": "volleyball/", "name": "College volleyball", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": True, "unit": "matches"},
+     "game": "#/match/", "ranked_only": True, "unit": "games"},
     {"key": "lovb", "sport": "volleyball", "folder": "volleyball/lovb/", "name": "LOVB", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": False, "unit": "matches"},
+     "game": "#/match/", "ranked_only": False, "unit": "games"},
     {"key": "mlv", "sport": "volleyball", "folder": "volleyball/mlv/", "name": "MLV", "label": "Volleyball", "score": "sets",
-     "game": "#/match/", "ranked_only": False, "unit": "matches"},
+     "game": "#/match/", "ranked_only": False, "unit": "games"},
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"

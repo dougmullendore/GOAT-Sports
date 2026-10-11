@@ -72,8 +72,8 @@
   var DOORS = {
     hockey: ["NHL", "Every game with each team's chance of winning, standings, expected goals, line combinations and playoff odds.",
       [["Games", "#/"], ["Standings", "#/standings"], ["Teams", "#/teams"], ["Players", "#/players"], ["Lines", "#/lines"], ["Odds", "#/odds"]]],
-    volleyball: ["Women's college, LOVB and MLV", "The top 25's matches day by day, the AVCA poll and the GOAT ranking, and a card for every Division I player.",
-      [["Matches", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["LOVB", "lovb/"], ["MLV", "mlv/"]]],
+    volleyball: ["Women's college, LOVB and MLV", "The top 25's games day by day, the AVCA poll and the GOAT ranking, and a card for every Division I player.",
+      [["Games", "#/"], ["Rankings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["LOVB", "lovb/"], ["MLV", "mlv/"]]],
     football: ["The NFL and college", "Games week by week with each team's chance of winning, NFL standings, the AP poll, the GOAT rankings, team stats and a card for every player.",
       [["Games", "#/"], ["Standings", "#/rankings"], ["Teams", "#/teams"], ["Players", "#/players"], ["College", "../"]]],
     basketball: ["The NBA and men's college", "Games day by day with each team's chance of winning, NBA standings, the AP poll, the GOAT rankings, team stats and a card for every player.",
@@ -150,10 +150,9 @@
           el("h2", {}, [el("a", { href: lg.href, text: lg.name }), el("span", { "class": "kind", text: lg.label })]),
           el("a", { "class": "all", href: lg.href, text: "All " + lg.name + " " + lg.unit + " →" })]),
         el("ol", { "class": "games" }, games.map(function (g) { return row(lg, g); }))]);
-      if (lg.ranked_only) sec.appendChild(el("p", { "class": "note", text: games.length + " " + (games.length === 1 ? ONE[lg.unit] : lg.unit) + " with a team in the " + (lg.poll || "top 25") + ". Numbers are this week's rankings." }));
       holder.appendChild(sec);
     });
-    $("lede").textContent = total ? long(shown) + ". The visiting team is on the left; percentages are each team's chance of winning. Choose a game for its own page." : long(shown) + ".";
+    $("lede").textContent = long(shown);
     if (!total) holder.appendChild(el("p", { "class": "empty", text: "No games are listed for this day. Try an earlier or later day." }));
     quiet.forEach(function (lg) {
       if (!lg.ready) return;

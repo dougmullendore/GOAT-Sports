@@ -529,7 +529,7 @@ def test_team_stats_add_up_from_box_scores():
 def test_every_word_the_site_uses_is_in_the_word_list():
     from pipeline import run
     words = run.read_words()
-    assert words["nav.matches"] == "Matches" and "{poll}" in words["matches.lede"]
+    assert words["nav.matches"] == "Games" and "{poll}" in words["matches.lede"]
 
 
 def test_a_broken_word_list_stops_the_update(tmp_path=None):

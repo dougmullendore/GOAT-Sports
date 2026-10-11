@@ -1011,7 +1011,7 @@
       else if (doc) periodTable(sets, g, doc.line);
     }
     box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
-    box.appendChild(el("p", { "class": "note" }, [W("game.note") + " ", data.game_page ? el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.nhl_link") }) : null, data.game_page ? "." : null]));
+    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.nhl_link") })]));
     top();
     liveHooks.push(function (x) { if (x === g) top(); });
     function readBox() {
@@ -1068,7 +1068,7 @@
     if (next.length) { m.appendChild(el("h3", { "class": "day", text: W("team.coming_up") })); m.appendChild(el("ol", { "class": "games" }, next.map(function (g) { return row(g, true); }))); }
     if (done.length) { m.appendChild(el("h3", { "class": "day", text: W("team.latest_results") })); m.appendChild(el("ol", { "class": "games" }, done.slice().reverse().map(function (g) { return row(g, true); }))); }
     if (!mine.length) m.appendChild(el("p", { "class": "empty", text: "No games are listed for " + t.name + "." }));
-    if (mine.length) m.appendChild(el("p", { "class": "note" }, [el("a", { href: "#/", onclick: function () { state.team = id; }, text: "All " + t.short + " games this season" }),
+    if (mine.length) m.appendChild(el("p", { "class": "note keep" }, [el("a", { href: "#/", onclick: function () { state.team = id; }, text: "All " + t.short + " games this season" }),
       " · ", el("a", { href: "#/lines/" + id, text: t.short + " line combinations" })]));
     box.appendChild(m);
 
@@ -1089,7 +1089,7 @@
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Rating" }), el("b", { text: row1.power ? ordinal(row1.power) : "–" }), el("span", { "class": "plc", text: "in the NHL, by this site's rating" })]));
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Schedule strength" }), el("b", { text: row1.sos_rank ? ordinal(row1.sos_rank) : "–" }), el("span", { "class": "plc", text: "hardest of " + d.teams.length })]));
       stats.appendChild(el("div", { "class": "tiles" }, tiles));
-      stats.appendChild(el("p", { "class": "note", text: "Regular season. Per-game stats from " + row1.games + " box scores; places are among the " + d.teams.length + " NHL teams. " }));
+      stats.appendChild(el("p", { "class": "note keep", text: "Regular season. Per-game stats from " + row1.games + " box scores; places are among the " + d.teams.length + " NHL teams. " }));
       stats.lastChild.appendChild(el("a", { href: "#/teams", text: "All team stats" }));
     }).catch(function () {});
     loadRoster().then(function () {
@@ -1235,7 +1235,7 @@
         var stats = el("section", { "class": "tsec" }, [el("h2", { text: W("lines.stats_title") }), el("p", { "class": "tsub", text: W("lines.stats_lede") })]);
         if (all.f.length) { stats.appendChild(el("h3", { "class": "day", text: W("lines.stats_forwards") })); stats.appendChild(statTable(all.f, "Line", { sort: "toi", dir: -1 })); }
         if (all.d.length) { stats.appendChild(el("h3", { "class": "day", text: W("lines.stats_pairs") })); stats.appendChild(statTable(all.d, "Pair", { sort: "toi", dir: -1 })); }
-        stats.appendChild(el("p", { "class": "note", text: W("lines.stats_note") }));
+        stats.appendChild(el("p", { "class": "note keep", text: W("lines.stats_note") }));
         body.appendChild(stats);
       }
     }).catch(function () {

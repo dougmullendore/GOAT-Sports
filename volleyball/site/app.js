@@ -941,8 +941,7 @@
     var cmp = el("div", { "class": "gc-cmp" });
     var card = el("section", { "class": "gcard", "aria-label": "Match summary" }, [status, scoreLine(g), sets, oddsLine(g), cmp]);
     box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
-    box.appendChild(el("p", { "class": "note" }, data.game_page ? [W("match.note") + " ",
-      el("a", { href: data.game_page + g.id, rel: "noopener", text: W("match.ncaa_link") }), "."] : [W("match.note")]));
+    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("match.ncaa_link") })]));
 
     function setTable(a, h, label) {        // [points per set] for each side
       var n = Math.max(a.length, h.length), head = el("tr", {}, [el("th", { scope: "col", "class": "l", text: label })]);
@@ -1044,7 +1043,7 @@
     if (next.length) { m.appendChild(el("h3", { "class": "day", text: W("team.coming_up") })); m.appendChild(el("ol", { "class": "games" }, next.map(row))); }
     if (done.length) { m.appendChild(el("h3", { "class": "day", text: W("team.latest_results") })); m.appendChild(el("ol", { "class": "games" }, done.slice().reverse().map(row))); }
     if (!mine.length) m.appendChild(el("p", { "class": "empty", text: "No matches are listed for " + name + "." }));
-    if (mine.length) m.appendChild(el("p", { "class": "note" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("d1"); state.team = id; }, text: "All of " + name + "'s matches this season" })]));
+    if (mine.length) m.appendChild(el("p", { "class": "note keep" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("d1"); state.team = id; }, text: "All of " + name + "'s matches this season" })]));
     box.appendChild(m);
 
     var stats = el("section", { "class": "tsec" }, [el("h2", { text: W("team.stats") }), el("p", { "class": "empty", text: "Loading…" })]);
@@ -1064,7 +1063,7 @@
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Rating" }), el("b", { text: row1.power ? ordinal(row1.power) : "–" }), el("span", { "class": "plc", text: (PRO() ? "in " + data.league_name : "in Division I") + ", by this site's rating" })]));
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Schedule strength" }), el("b", { text: row1.sos_rank ? ordinal(row1.sos_rank) : "–" }), el("span", { "class": "plc", text: "hardest of " + d.teams.length })]));
       stats.appendChild(el("div", { "class": "tiles" }, tiles));
-      stats.appendChild(el("p", { "class": "note", text: row1.w + "-" + row1.l + " in matches, " + row1.sw + "-" + row1.sl + " in sets. Per-set stats from " + row1.matches + " box scores; places are among " + (PRO() ? "the " + d.teams.length + " " + data.league_name + " teams" : which === "d1" ? "all " + d.teams.length + " Division I teams" : "the 25 ranked teams") + ". " }));
+      stats.appendChild(el("p", { "class": "note keep", text: row1.w + "-" + row1.l + " in matches, " + row1.sw + "-" + row1.sl + " in sets. Per-set stats from " + row1.matches + " box scores; places are among " + (PRO() ? "the " + d.teams.length + " " + data.league_name + " teams" : which === "d1" ? "all " + d.teams.length + " Division I teams" : "the 25 ranked teams") + ". " }));
       stats.lastChild.appendChild(el("a", { href: "#/teams", text: "All team stats" }));
     }).catch(function () {});
     loadRoster(which).then(function () {

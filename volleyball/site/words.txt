@@ -9,7 +9,7 @@
 # the update stops, the old site stays up, and GitHub emails you.
 
 # ---- the tabs at the top ----
-nav.matches = Matches
+nav.matches = Games
 nav.rankings = Rankings
 nav.teams = Teams
 nav.players = Players
@@ -18,17 +18,17 @@ nav.players = Players
 scope.top25 = Top 25
 scope.d1 = All D1
 
-# ---- Matches page ----
-matches.title = Ranked Matches
+# ---- Games page (the names on the left still say 'matches'; only the words shown changed) ----
+matches.title = Ranked Games
 matches.lede = Every match played by a team in the {poll}: today's, tomorrow's and yesterday's.
-matches.title_d1 = Division I Matches
+matches.title_d1 = Division I Games
 matches.lede_d1 = Every Division I match: today's, tomorrow's and yesterday's.
 matches.all_teams = All 25 teams
 matches.all_teams_d1 = All Division I teams
-matches.earlier = Earlier days
+matches.earlier = Earlier
 matches.today = Today
 matches.three_days = Today, tomorrow and yesterday
-matches.later = Later days
+matches.later = Later
 matches.no_broadcast = No broadcast listed
 matches.box_score = Box score
 matches.live_box_score = Live box score
@@ -59,7 +59,7 @@ teams.note = Per-set numbers count every set in matches with an official box sco
 teams.note_d1 = Per-set numbers count every set in matches with an official box score. Rating is where this site's rating of results places the team among all Division I teams; SOS ranks every team by how strong its opponents have been. Choose a column heading to sort; hold or hover over a heading for what it means.
 
 # ---- a team's own page ----
-team.matches = Matches
+team.matches = Games
 team.coming_up = Coming up
 team.latest_results = Latest results
 team.stats = Team Stats
@@ -80,7 +80,7 @@ players.career_wait = Only this season so far: her earlier seasons at this schoo
 
 
 # ---- a match's own page ----
-match.back = All Matches
+match.back = All Games
 match.note = Set scores come from ESPN and update every 15 seconds during a match. Player stats come from the NCAA's box score; during a match they are refreshed about every 5 minutes.
 match.ncaa_link = Official box score on NCAA.com
 
@@ -91,12 +91,12 @@ footer.about = Match times are shown in your own time zone. Scores and schedules
 pro.players_career_note = Each season's line is added up from the league's own match statistics. A player who changed teams has a line for each.
 # These replace the lines above on the pro league pages. {league} is LOVB or MLV.
 pro.nav_rankings = Standings
-pro.matches_title = {league} Matches
+pro.matches_title = {league} Games
 pro.matches_lede = Every {league} match, week by week.
 pro.matches_all_teams = All teams
-pro.matches_earlier = Earlier week
+pro.matches_earlier = Earlier
 pro.matches_this_week = This week
-pro.matches_later = Later week
+pro.matches_later = Later
 pro.rankings_title = {league} Standings
 pro.rankings_lede = The {league} standings, through matches of {date}.
 pro.rankings_button_poll = Standings

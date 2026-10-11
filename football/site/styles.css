@@ -497,3 +497,21 @@ a.opp:hover .n { color: var(--teal); }
 .game[data-go] { cursor: pointer; }
 .game[data-go]:hover { background: color-mix(in srgb, var(--teal) 7%, transparent); }
 .game[data-go]:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; }
+
+/* ---- no small print: the explanatory notes under lists and tables are not shown. A note that
+   holds a link or a button (marked "keep") still is. ---- */
+.note:not(.keep), .livenote { display: none !important; }
+
+/* ---- the Games page of every sport reads the same: the title, then the days and the controls ---- */
+#lede, #page-games > .lede, #page-matches > .lede { display: none; }
+
+/* ---- a game's row is laid out the same in every sport. On a phone: the time, the two teams with
+   their scores at the right, then the channel and the event's name on a line of their own. ---- */
+.game .more { margin: 0; }
+.game .more:empty { display: none; }
+@media (max-width: 640px) {
+  .game { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "when when" "away as" "home hs" "more more"; gap: 3px 12px; padding: 8px 12px; }
+  .game .when { grid-area: when; }
+  .game .more { grid-area: more; text-align: left; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 2px 0 0; }
+  .game .more > * { display: inline; }
+}

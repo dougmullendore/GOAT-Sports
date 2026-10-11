@@ -1010,8 +1010,7 @@
     liveHooks.push(function (x) { if (x === g) head(); });
     var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [status, top, periods, oddsLine(g), cmp]);
     box.appendChild(title); box.appendChild(card); box.appendChild(extra); box.appendChild(boxes);
-    box.appendChild(el("p", { "class": "note" }, data.game_page ? [W("game.note") + " ",
-      el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.espn_link") }), "."] : [W("game.note")]));
+    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.espn_link") })]));
 
     function readBox() {
       var s = gameState(g);
@@ -1064,7 +1063,7 @@
     if (next.length) { m.appendChild(el("h3", { "class": "day", text: W("team.coming_up") })); m.appendChild(el("ol", { "class": "games" }, next.map(function (g) { return row(g, true); }))); }
     if (done.length) { m.appendChild(el("h3", { "class": "day", text: W("team.latest_results") })); m.appendChild(el("ol", { "class": "games" }, done.slice().reverse().map(function (g) { return row(g, true); }))); }
     if (!mine.length) m.appendChild(el("p", { "class": "empty", text: "No games are listed for " + name + "." }));
-    if (mine.length && info) m.appendChild(el("p", { "class": "note" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("fbs"); state.team = id; }, text: PRO() ? "All " + name + " games this season" : "All of " + name + "'s games this season" })]));
+    if (mine.length && info) m.appendChild(el("p", { "class": "note keep" }, [el("a", { href: "#/", onclick: function () { if (!t) setScope("fbs"); state.team = id; }, text: PRO() ? "All " + name + " games this season" : "All of " + name + "'s games this season" })]));
     box.appendChild(m);
     if (!info && !t) return;
 
@@ -1085,7 +1084,7 @@
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Rating" }), el("b", { text: row1.power ? ordinal(row1.power) : "–" }), el("span", { "class": "plc", text: "in " + ALL() + ", by this site's rating" })]));
       tiles.push(el("div", { "class": "tile" }, [el("span", { "class": "lab", text: "Schedule strength" }), el("b", { text: row1.sos_rank ? ordinal(row1.sos_rank) : "–" }), el("span", { "class": "plc", text: "hardest of " + d.teams.length })]));
       stats.appendChild(el("div", { "class": "tiles" }, tiles));
-      stats.appendChild(el("p", { "class": "note", text: row1.w + "-" + row1.l + (row1.t ? "-" + row1.t : "") + ". Stats from " + row1.games + (row1.games === 1 ? " box score" : " box scores") + "; places are among " + (PRO() ? "the " + d.teams.length + " " + data.league_name + " teams" : which === "fbs" || NOPOLL() ? "all " + d.teams.length + " " + ALL() + " teams" : "the 25 ranked teams") + ". " }));
+      stats.appendChild(el("p", { "class": "note keep", text: row1.w + "-" + row1.l + (row1.t ? "-" + row1.t : "") + ". Stats from " + row1.games + (row1.games === 1 ? " box score" : " box scores") + "; places are among " + (PRO() ? "the " + d.teams.length + " " + data.league_name + " teams" : which === "fbs" || NOPOLL() ? "all " + d.teams.length + " " + ALL() + " teams" : "the 25 ranked teams") + ". " }));
       stats.lastChild.appendChild(el("a", { href: "#/teams", text: "All team stats" }));
     }).catch(function () {});
     loadRoster(which).then(function () {
