@@ -365,7 +365,8 @@ def update_boxes(state: Path, now: dt.datetime, live_only: bool = False) -> dict
     stored = read_json(state / "box.json", {})
     recent = (now.date() - dt.timedelta(days=config.BOX_REFRESH_DAYS)).isoformat()
     t = now.timestamp()
-    listed = {g["id"] for g in sel["all_games"]}
+    boxed = sel["all_games"] + sel["preseason"]          # warm-up games get a box score too, for their pages (never counted)
+    listed = {g["id"] for g in boxed}
     fbs = set(sel["fbs"])
 
     def on_now(g):       # under way, or just over without its final box score
@@ -376,7 +377,7 @@ def update_boxes(state: Path, now: dt.datetime, live_only: bool = False) -> dict
         have = stored.get(str(g["id"]))
         return g["state"] == "final" and (have is None or have.get("status") != "F" or g["date"] >= recent)
 
-    want = [g for g in sel["all_games"] if on_now(g) or (not live_only and wanted(g))]
+    want = [g for g in boxed if on_now(g) or (not live_only and wanted(g))]
     want.sort(key=lambda g: (g["date"], g["start"] or 0), reverse=True)
     left = max(0, len(want) - config.BOXES_PER_RUN)
     want = want[:config.BOXES_PER_RUN]
@@ -455,7 +456,7 @@ def live_now(state: Path, now: dt.datetime) -> list[str]:
     boxes = read_json(state / "box.json", {})
     t = now.timestamp()
     days = set()
-    for g in sel["all_games"]:
+    for g in sel["all_games"] + sel["preseason"]:
         if not g.get("start") or not (t - config.LIVE_HOURS * 3600 <= g["start"] <= t + 20 * 60):
             continue
         done = g["state"] == "final" and (boxes.get(str(g["id"])) or {}).get("status") == "F"
@@ -631,7 +632,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     rated = players.compute(ranked, listed, boxes, rosters) if has_poll else rated_fbs
     for r, games in ((rated, listed), (rated_fbs, every)):
         r["through"] = max((g["date"] for g in games if g["state"] == "final"), default=None)
-    with_box = game_files(out, every, boxes, rated_fbs)
+    with_box = game_files(out, every + sel["preseason"], boxes, rated_fbs)
     extras = cards.build(rated_fbs, lines, careers.by_player(read_json(state / "careers.json", {})), set(in_poll) if has_poll else set())
     (out / "cards").mkdir(parents=True, exist_ok=True)
     for team, doc in extras.items():
