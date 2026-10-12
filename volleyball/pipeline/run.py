@@ -250,11 +250,12 @@ def ranked_matches(state: Path) -> dict:
     rank = {t["id"]: t["rank"] for t in ranked if t["id"]}
     # The NCAA's start time for a match is sometimes hours out. Where ESPN lists the same match (both
     # teams) at a different time, ESPN's is used until the match is over: it is the time on the TV schedule.
+    # (While it is being played too: the page follows a match's score for some hours after its start time.)
     listed_at = read_json(state / "watch.json", {})
     for g in games.values():
         w = listed_at.get(str(g["id"]))
         t = w.get("t") if isinstance(w, dict) else None
-        if t and g["state"] == "upcoming" and g.get("start") and abs(t - g["start"]) >= 30 * 60:
+        if t and g["state"] in ("upcoming", "live") and g.get("start") and abs(t - g["start"]) >= 30 * 60:
             g["start"] = int(t)
     every = sorted(games.values(), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
     for g in every:

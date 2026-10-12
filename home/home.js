@@ -185,7 +185,7 @@
   var LIVE_MS = 20 * 1000, LIST_MS = 60 * 1000, liveTimer = null, listTimer = null, seen = {};
   function key(lg, g) { return lg.key + " " + g.id; }
   function due(lg, g, t) {
-    return g.f != null && g.start && g.state !== "final" && g.state !== "other" && !g.over && t >= g.start - 900 && t <= g.start + (lg.live_hours || 5) * 3600;
+    return g.f != null && g.start && g.state !== "final" && g.state !== "other" && !g.over && (g.state === "live" || (t >= g.start - 900 && t <= g.start + (lg.live_hours || 5) * 3600));
   }
   function espnSide(x) { return x.score === "" || x.score == null ? null : +x.score; }
   function readEvent(lg, e) {

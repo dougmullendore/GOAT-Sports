@@ -357,7 +357,8 @@
   function ymd(g) { return g.date.replace(/-/g, ""); }
   function dueGames(now) {       // matches that could be under way: from 15 minutes before the start until 5 hours after
     return data.games.filter(function (g) {
-      return g.espn && g.start && g.state !== "final" && !(g.live && g.live.state === "post") && now >= g.start - 900 && now <= g.start + 5 * 3600;
+      // (a match the last update found under way is followed whatever its listed start time says)
+      return g.espn && g.start && g.state !== "final" && !(g.live && g.live.state === "post") && (g.state === "live" || (now >= g.start - 900 && now <= g.start + 5 * 3600));
     });
   }
   function readLive(e) {
