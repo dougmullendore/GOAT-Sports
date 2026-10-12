@@ -500,3 +500,18 @@ def test_last_season_is_shown_until_the_new_one_begins(tmp_path=None):
     finally:
         web.get_json, web.get_many, espn.parse_season, espn.parse_event = real
 
+# --------------------------------------------------------- NBA warm-up games --
+def test_nba_preseason_games_are_listed_but_never_counted():
+    e = {"id": "77", "date": "2026-10-12T23:00Z", "season": {"type": 1}, "status": {"type": {"state": "post", "completed": True, "name": "STATUS_FINAL"}},
+         "competitions": [{"timeValid": True, "competitors": [{"homeAway": "home", "score": "101", "team": {"id": "1", "location": "Atlanta", "abbreviation": "ATL"}},
+                                                              {"homeAway": "away", "score": "99", "team": {"id": "2", "location": "Boston", "abbreviation": "BOS"}}]}]}
+    try:
+        league("nba")
+        g = espn.parse_event(e, "20261012")
+        assert g and g["kind"] == 1 and g["state"] == "final"
+        assert run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))       # the NBA's season begins with its warm-ups
+    finally:
+        league("college")
+    assert espn.parse_event(e, "20261012") is None                                                    # college lists none
+    assert not run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))
+

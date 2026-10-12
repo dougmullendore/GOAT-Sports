@@ -485,3 +485,5 @@ a.opp:hover .n { color: var(--teal); }
 #conf-standings .ptable.stand .rec { width: 4.75rem; }
 #rank-sort select { margin-left: auto; }
 
+/* ---- a game's card: the second team reads from the right, its rank at the far right ---- */
+.gc-team:last-child .gc-name { flex-direction: row-reverse; justify-content: flex-start; }

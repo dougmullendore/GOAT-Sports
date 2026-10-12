@@ -96,14 +96,16 @@ NEXT_SEASON = "scoreboard_next.json"       # the coming season's schedule, kept 
 
 def season_started(store: dict, today: dt.date) -> bool:
     """Whether a game that counts (not a warm-up) has reached its day."""
-    return any(g.get("kind") in (2, 3) and g.get("date") and g["date"] <= today.isoformat()
+    kinds = (1, 2, 3) if config.PRESEASON_GAMES else (2, 3)        # the NBA's season begins with its warm-up games
+    return any(g.get("kind") in kinds and g.get("date") and g["date"] <= today.isoformat()
                for d in (store.get("days") or {}).values() for g in d["games"])
 
 
 def read_days(store: dict, season: int, first: str, last: str, today: dt.date) -> tuple[dict, list[str], list[str]]:
     """Bring one season's stored schedule up to date: (the schedule, the days that were due, those that could not be read)."""
-    if store.get("season") != season:
-        store = {"season": season, "days": {}}
+    if store.get("season") != season or store.get("preseason", False) != config.PRESEASON_GAMES:
+        store = {"season": season, "days": {}}       # (a change in whether warm-up games are listed: every day is read again)
+    store["preseason"] = config.PRESEASON_GAMES
     store["first"], store["last"] = first, last
     days = each_day(first, last)
     store["days"] = {d: v for d, v in store["days"].items() if d in set(days)}
@@ -294,7 +296,11 @@ def selection(state: Path) -> dict:
                 if g["id"] not in games and g["state"] != "final":
                     games[g["id"]] = dict(g, next=1)
                     next_first = min(next_first or g["date"], g["date"])
+    # warm-up games are listed but never counted
+    preseason = sorted((g for g in games.values() if g.get("kind") == 1), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
+    games = {i: g for i, g in games.items() if g.get("kind") != 1}
     if not config.POLL_TYPE:
+        preseason = [g for g in preseason if g["home"]["id"] in fbs and g["away"]["id"] in fbs]
         # only games between the league's own teams (no all-star game)
         games = {i: g for i, g in games.items() if g["home"]["id"] in fbs and g["away"]["id"] in fbs}
     names = {}
@@ -332,7 +338,7 @@ def selection(state: Path) -> dict:
         numbered = any(x.get("w", 0) + x.get("l", 0) for x in fbs.values())
     rank = {t["id"]: t["rank"] for t in ranked}
     every = sorted(games.values(), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
-    for g in every:
+    for g in every + preseason:
         for s in (g["away"], g["home"]):
             s["rank"] = rank.get(s["id"])
     listed = [g for g in every if g["away"]["id"] in rank or g["home"]["id"] in rank]
@@ -347,7 +353,7 @@ def selection(state: Path) -> dict:
                             "teams": [dict(r, name=names.get(r["id"], r["name"])) for r in p["rows"][:config.POLL_SIZE]]}
     return {"through": through, "poll_date": poll_date, "poll_week": poll_week, "polls_seen": len(main), "numbered": numbered,
             "season": board["season"], "first": board.get("first"), "last": (coming.get("last") if last_season else None) or board.get("last"),
-            "last_season": last_season, "next_first": next_first, "teams": ranked, "games": listed,
+            "last_season": last_season, "next_first": next_first, "preseason": preseason, "teams": ranked, "games": listed,
             "all_games": every, "fbs_teams": all_fbs, "fbs": fbs, "names": names, "others": others}
 
 
@@ -647,7 +653,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "logo": config.LOGO_URL, "photo": config.PHOTO_URL if config.SHOW_PHOTOS else "", "odds_tested": config.ODDS_TESTED,
         "goat": goat_info, "nr": shown, "words": words,
         "fbs": [[t["id"], t["name"], (fbs.get(t["id"]) or {}).get("conf") or "", (fbs.get(t["id"]) or {}).get("rec") or {}] for t in fbs_teams],
-        "games": every})
+        "games": sorted(every + [dict(g, round="Preseason") for g in sel["preseason"]], key=lambda g: (g["date"], g["start"] or 0, g["id"]))})
     for r in (rated, rated_fbs):
         social.add(state, r["players"])          # links to a player's own pages, where they are known
     write_json(out / "players_fbs.json", rated_fbs)

@@ -522,3 +522,6 @@ a.opp:hover .n { color: var(--teal); }
   .game .more { grid-area: more; text-align: left; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 2px 0 0; }
   .game .more > * { display: inline; }
 }
+
+/* ---- a game's card: the second team reads from the right, its rank at the far right ---- */
+.gc-team:last-child .gc-name { flex-direction: row-reverse; justify-content: flex-start; }

@@ -484,7 +484,7 @@
       more.push(g.tv && g.tv.length ? el("span", { "class": "watch" }, [el("span", { "class": "sr", text: "Watch on " }), g.tv.join(", ")])
         : g.start ? el("span", { "class": "watch none", text: W("games.no_broadcast") }) : null);
     }
-    var go = note && !fin && !live ? null : "#/game/" + g.id;       // the row itself opens the game: its preview, or its box score once it has started
+    var go = (note && !fin && !live) || g.kind === 1 ? null : "#/game/" + g.id;      // (a warm-up game has no page)       // the row itself opens the game: its preview, or its box score once it has started
     if (dated === true && !live) when = short(g.date) + (when === "Time not set" ? "" : " · " + when);
     var unplayed = !fin && !live && !note;
     return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null, "data-go": go, role: go ? "link" : null, tabindex: go ? "0" : null }, [

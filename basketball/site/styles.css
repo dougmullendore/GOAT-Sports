@@ -520,3 +520,6 @@ a.opp:hover .n { color: var(--teal); }
 
 /* ---- last season on show until the new one begins ---- */
 .seasonnote { margin: 14px 0 0; padding: 9px 12px; border-left: 4px solid var(--ball); background: var(--sheet); border-radius: 0 4px 4px 0; font-size: .9375rem; color: var(--ink); }
+
+/* ---- a game's card: the second team reads from the right, its rank at the far right ---- */
+.gc-team:last-child .gc-name { flex-direction: row-reverse; justify-content: flex-start; }

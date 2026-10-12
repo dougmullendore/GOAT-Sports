@@ -55,8 +55,8 @@ def parse_event(e: dict, day: str) -> dict | None:
     sides = {c.get("homeAway"): c for c in comp.get("competitors") or []}
     home, away = sides.get("home"), sides.get("away")
     kind = _int((e.get("season") or {}).get("type"), 2)
-    if kind not in (2, 3):
-        return None                     # preseason, all-star weekend
+    if kind not in (2, 3) and not (kind == 1 and config.PRESEASON_GAMES):
+        return None                     # preseason (unless listed), all-star weekend
     if not home or not away or not e.get("id") or not real_team(home.get("team") or {}) or not real_team(away.get("team") or {}):
         return None
     try:
