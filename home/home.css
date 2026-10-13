@@ -440,3 +440,7 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 
 /* on a phone, more room between one league's list and the next */
 @media (max-width: 760px) { .lg { margin-top: 56px; } .lg:first-child { margin-top: 32px; } }
+
+/* on a phone, each team's logo leads its name, so the logos line up in one column */
+@media (max-width: 760px) { .game a.row .team.away, .game a.row .team.home { justify-content: flex-start; text-align: left; } .game .team .logo { order: -1; } .game .team .name { order: 0; } .game .team .rk { order: 1; } }
+@media (max-width: 760px) { .game a.row .team.away { flex-direction: row; } .game a.row .team.away::after, .game a.row .team.home::before { order: 2; } }

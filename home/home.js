@@ -181,7 +181,8 @@
   // A team's number: its place in the poll or in the standings. A college team outside the poll carries
   // its place in the GOAT ranking instead (26 and up), and its tag is outlined rather than filled.
   function rankOf(lg, n) {
-    if (!n) return null;
+    // only a poll's numbers are shown on the front page; a pro league's places in its standings are left to its own pages
+    if (!n || !lg.poll || /standings$/i.test(lg.poll)) return null;
     var goat = !!lg.poll && n > 25;
     return { n: n, goat: goat, words: goat ? n + " in the GOAT ranking" : lg.poll ? "ranked " + n + " in the " + lg.poll : ordinal(n) + " in the standings" };
   }
@@ -223,7 +224,7 @@
     var mid = scored
       ? el("span", { "class": "mid" }, [el("span", { "class": homeWon ? "l" : "", text: String(as) }), el("span", { "class": "dash", text: "–" }), el("span", { "class": awayWon ? "l" : "", text: String(hs) })])
       : g.line && g.line[0] && !fin
-        ? el("span", { "class": "mid line" }, [el("span", { "class": "ln", text: g.line[0] }), g.line[1] != null ? el("span", { "class": "ou", text: "O/U " + g.line[1] }) : null])
+        ? el("span", { "class": "mid line" }, [el("span", { "class": "ln", text: g.line[0] })])
       : g.p != null && !fin && lg.sport === "volleyball"
         ? el("span", { "class": "mid odds" }, [el("span", { "class": g.p > 0.5 ? "l" : "", text: pct(g.p)[0] }), el("span", { "class": "dash", text: "at" }), el("span", { "class": g.p < 0.5 ? "l" : "", text: pct(g.p)[1] })])
         : el("span", { "class": "mid at", text: "at" });
@@ -233,7 +234,7 @@
         : g.line && g.line[0] && !fin ? "Betting line: " + g.line[0] + (g.line[1] != null ? ", over/under " + g.line[1] : "")
         : g.p != null && !fin && lg.sport === "volleyball" ? "This site's chance of winning: " + g.away[1] + " " + pct(g.p)[0] + ", " + g.home[1] + " " + pct(g.p)[1] : "",
       !fin && !note && tv.length ? "Watch on " + tv.join(", ") : ""].filter(Boolean).join(". ");
-    var more = fin || note ? "" : tv.length ? tv.join(", ") : "No broadcast listed";
+    var more = fin || note ? "" : tv.join(", ");
     return el("li", { "class": "game" + (live ? " on" : "") + (flipped[key(lg, g)] ? " flip" : ""), "data-k": key(lg, g) }, [el("a", { "class": "row", href: lg.game + g.id, "aria-label": label }, [
       el("span", { "class": "when" }, live ? [el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), "Live"])] : [when]),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
@@ -323,14 +324,12 @@
       var top = lg.ranked_only ? 25 : Math.max.apply(null, [25].concat(lg.games.map(function (g) { return Math.max(g.away[2] || 0, g.home[2] || 0); })));
       var long_ = games.length > SHORT && !opened[lg.key], first = long_ ? games.slice(0, SHORT) : games;
       var list = el("ol", { "class": "games" }, first.map(function (g) { return row(lg, g); }));
-      var cols_ = el("div", { "class": "colhead", "aria-hidden": "true" }, [el("span", { text: "Time" }), el("span", { "class": "r", text: "Away" }),
-        el("span", { "class": "c", text: games.some(function (g) { return g.line && g.line[0] && g.state !== "final"; }) ? "Line" : lg.sport === "volleyball" && games.some(function (g) { return g.p != null && g.state !== "final"; }) ? "Our chance" : "" }), el("span", { text: "Home" }), el("span", { "class": "r", text: "Watch" })]);
       var key = keyOf(lg, games);
       var sec = el("section", { "class": "lg s-" + lg.sport, id: "lg-" + lg.key, "data-top": top, "aria-labelledby": "h-" + lg.key }, [
         el("div", { "class": "lg-head" }, [leagueMark(lg),
           el("h2", { id: "h-" + lg.key }, [el("a", { href: lg.href, text: lg.name }), el("span", { "class": "kind", text: lg.label })]),
           el("a", { "class": "all", href: lg.href }, ["All " + lg.name + " " + lg.unit, arrow()])]),
-        key ? el("p", { "class": "lg-key", text: key }) : null, cols_, list]);
+        key ? el("p", { "class": "lg-key", text: key }) : null, list]);
       if (long_) {
         var more = el("button", { type: "button", "class": "morebtn", text: "Show all " + games.length + " " + lg.name + " " + lg.unit, onclick: function () {
           opened[lg.key] = 1;
