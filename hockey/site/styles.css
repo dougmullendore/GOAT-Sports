@@ -929,3 +929,27 @@ thead th button[aria-sort], .ptable th button:hover { text-decoration-color: var
 .ptable.power { width: 100%; }
 .ptable.power td:first-child, .ptable.power th:first-child { width: 3rem; }
 .ptable.power th:nth-child(3), .ptable.power td:nth-child(3), .ptable.power th:nth-child(4), .ptable.power td:nth-child(4) { width: 7rem; }
+
+/* a probable starter (a baseball pitcher, a hockey goalie) under the team's name, before the game */
+.tstack { display: inline-flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+.team.away .tstack { align-items: flex-end; text-align: right; }
+.team.home .tstack { align-items: flex-start; text-align: left; }
+.tstack .starter { margin-top: 3px; font-size: .6875rem; font-weight: 400; letter-spacing: .03em; text-transform: none; white-space: nowrap; }
+.game[data-go]:hover .starter, .game.on .starter { color: inherit; }
+/* the round and the series, in two short lines in the right-hand column */
+.more .bowl { display: block; font-weight: 600; }
+.more .series { display: block; font-size: .75rem; }
+@media (max-width: 760px) {
+  .game .team .tstack { order: 0 !important; align-items: flex-start !important; text-align: left !important; }
+  .tstack .starter { margin-top: 1px; }
+}
+
+/* when the list shows starters, the Away and Home labels say what the names under the teams are */
+#list:has(.starter) > .hahead .ha::after { content: "Starting goalie"; display: block; margin-top: 2px; font-size: .5625rem; letter-spacing: .1em; font-weight: 400; -webkit-text-stroke: 0; }
+@media (max-width: 760px) {
+  #list:has(.starter) > .hahead { flex-wrap: wrap; }
+  #list:has(.starter) > .hahead .ha::after { display: inline; margin: 0; font-size: inherit; letter-spacing: 0; font-weight: inherit; }
+  #list:has(.starter) > .hahead .away::after { content: " on top,"; }
+  #list:has(.starter) > .hahead .home::after { content: " below"; }
+  #list:has(.starter) > .hahead::after { content: "Under each team: its starting goalie"; flex-basis: 100%; font-weight: 400; -webkit-text-stroke: 0; text-transform: none; }
+}

@@ -613,7 +613,9 @@
     var note = !g.live && g.state === "other" ? (g.note ? g.note.charAt(0).toUpperCase() + g.note.slice(1) : "Not played") : "";
     var when = fin ? "Final" + overtime(s.lines) : live ? s.detail || "In progress" : note ? note : t && !isNaN(t) ? t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "Time not set";
     function team(side, x, lost, won) {
-      var kids = [rankTag(x.rank, x.id), teamA(x.id, x.name, "name"), logo(x.id)];       // logos in the middle, then the names, the rankings outermost
+      // the probable starter, before the game, sits under his team's name
+      var sp = !fin && !live && x.sp ? el("small", { "class": "starter", title: "Starting pitcher" }, [el("span", { "class": "sr", text: "Starting pitcher: " }), x.sp[1]]) : null;
+      var kids = [rankTag(x.rank, x.id), el("span", { "class": "tstack" }, [teamA(x.id, x.name, "name"), sp]), logo(x.id)];       // logos in the middle, then the names, the rankings outermost
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -628,8 +630,9 @@
         : el("span", { "class": "mid at", text: g.neutral ? "vs" : "at" });
     if (LINES && g.line && g.line[0] && (mid.classList.contains("at") || mid.classList.contains("odds"))) mid = lineMid(g);
     var more = [];
-    if (g.round || g.series) more.push(el("span", { "class": "bowl", text: [g.round, g.series].filter(Boolean).join(": ") }));
-    if (pitchNote(g)) more.push(el("span", { "class": "pitch", text: pitchNote(g) }));
+    if (g.round) more.push(el("span", { "class": "bowl", text: g.round.replace(/\s+-\s+/, " · ") }));
+    if (g.series) more.push(el("span", { "class": "series", text: g.series.replace(/ series /, " ") }));
+    if (fin && pitchNote(g)) more.push(el("span", { "class": "pitch", text: pitchNote(g) }));       // the winning and losing pitchers
     if (!fin && !note) {
       more.push(g.tv && g.tv.length ? el("span", { "class": "watch" }, [el("span", { "class": "sr", text: "Watch on " }), g.tv.join(", ")])
         : g.start ? el("span", { "class": "watch none", text: W("games.no_broadcast") }) : null);

@@ -426,7 +426,9 @@
     var note = !g.live && g.state === "other" ? (g.note || "Not played") : "";
     var when = fin ? finalWord(s.end) : live ? s.detail : note ? note : t && !isNaN(t) ? clockTime(t) : "Time not set";
     function team(side, x, lost, won) {
-      var kids = [rankTag(x.rank), teamA(x.id, x.name, "name"), logo(x.id)];       // logos in the middle, then the names, the rankings outermost
+      // the probable starting goalie, before the game, sits under the team's name
+      var sg = !fin && !live && x.sg ? el("small", { "class": "starter", title: "Starting goalie" }, [el("span", { "class": "sr", text: "Starting goalie: " }), x.sg]) : null;
+      var kids = [rankTag(x.rank), el("span", { "class": "tstack" }, [teamA(x.id, x.name, "name"), sg]), logo(x.id)];
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }

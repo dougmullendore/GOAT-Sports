@@ -88,6 +88,18 @@ def test_betting_lines_are_read():
     assert run.read_betting_lines({}, "2026-10-13") == {}
 
 
+def test_probable_goalies_are_read():
+    def side(where, abbr, goalie):
+        c = {"homeAway": where, "team": {"abbreviation": abbr}}
+        if goalie:
+            c["probables"] = [{"name": "probableStartingGoalie", "athlete": {"shortName": goalie, "displayName": "x"}}]
+        return c
+    doc = {"events": [{"competitions": [{"competitors": [side("home", "DET", "J. Gibson"), side("away", "NJ", "J. Allen")]}]},
+                      {"competitions": [{"competitors": [side("home", "TB", None), side("away", "BOS", None)]}]}]}
+    # ESPN's short names become the NHL's; a game with neither goalie named is left out
+    assert run.read_probable_goalies(doc, "2026-10-13") == {"2026-10-13 NJD@DET": ["J. Allen", "J. Gibson"]}
+
+
 def test_channels_national_first_and_this_country_first():
     assert nhl.parse_game(sched(), "2026-10-08")["tv"] == ["ESPN+", "NESN", "Utah16", "ABTV"]      # at most four, names trimmed
     assert nhl.watch([{"market": "H", "countryCode": "CA", "network": "TSN2"}, {"market": "N", "countryCode": "CA", "network": "SN"}]) == ["SN", "TSN2"]

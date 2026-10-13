@@ -402,20 +402,41 @@ def read_betting_lines(doc: dict, day: str) -> dict:
     return out
 
 
+def read_probable_goalies(doc: dict, day: str) -> dict:
+    """The probable starting goalie on each side of each game on one day of ESPN's scoreboard:
+    {"YYYY-MM-DD AWAY@HOME": [away goalie, home goalie]} (a short name such as "J. Allen", or None)."""
+    out = {}
+    for e in (doc or {}).get("events") or []:
+        comp = (e.get("competitions") or [{}])[0]
+        side, goalie = {}, {}
+        for c in comp.get("competitors") or []:
+            a = (c.get("team") or {}).get("abbreviation") or ""
+            side[c.get("homeAway")] = config.ESPN_ABBR.get(a, a)
+            p = next((p for p in c.get("probables") or [] if p.get("name") == "probableStartingGoalie"), None)
+            who = (p or {}).get("athlete") or {}
+            goalie[c.get("homeAway")] = who.get("shortName") or who.get("displayName")
+        if side.get("away") and side.get("home") and (goalie.get("away") or goalie.get("home")):
+            out[f"{day} {side['away']}@{side['home']}"] = [goalie.get("away"), goalie.get("home")]
+    return out
+
+
 def update_betting_lines(state: Path, now: dt.datetime) -> dict:
     """The sportsbook's betting lines for the coming week's games, read from ESPN's public scoreboard.
     A day that cannot be read keeps the lines it had."""
-    kept = read_json(state / "betting_lines.json", {}).get("lines") or {}
+    stored = read_json(state / "betting_lines.json", {})
+    kept, kept_goalies = stored.get("lines") or {}, stored.get("goalies") or {}
     days = [(now.date() + dt.timedelta(days=i)).isoformat() for i in range(config.LINES_DAYS)]
-    fresh, read = {}, 0
+    fresh, goalies, read = {}, {}, 0
     for (url, doc, err), day in zip(web.get_urls([config.ESPN_SCOREBOARD + d.replace("-", "") for d in days]), days):
         if doc is None:
             fresh.update({k: v for k, v in kept.items() if k.startswith(day + " ")})
+            goalies.update({k: v for k, v in kept_goalies.items() if k.startswith(day + " ")})
             continue
         read += 1
         fresh.update(read_betting_lines(doc, day))
-    write_json(state / "betting_lines.json", {"read": now.isoformat(timespec="seconds"), "lines": fresh})
-    return {"days_read": read, "lines": len(fresh)}
+        goalies.update(read_probable_goalies(doc, day))
+    write_json(state / "betting_lines.json", {"read": now.isoformat(timespec="seconds"), "lines": fresh, "goalies": goalies})
+    return {"days_read": read, "lines": len(fresh), "goalies": len(goalies)}
 
 
 def update_live_boxes(state: Path, now: dt.datetime) -> dict:
@@ -523,11 +544,20 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         elif g["id"] in pregame:
             g["p0"] = round(pregame[g["id"]], 3)      # what the home team's chance was before a finished game
     # The sportsbook's betting line for each game still to come, where ESPN has one
-    bet = read_json(state / "betting_lines.json", {}).get("lines") or {}
+    stored = read_json(state / "betting_lines.json", {})
+    bet, starters = stored.get("lines") or {}, stored.get("goalies") or {}
     for g in games:
-        line = bet.get(f'{g["date"]} {g["away"]["id"]}@{g["home"]["id"]}')
+        key = f'{g["date"]} {g["away"]["id"]}@{g["home"]["id"]}'
+        line = bet.get(key)
         if line and g["state"] in ("upcoming", "live"):
             g["line"] = line
+        # the probable starting goalies, from ESPN, for a game not yet begun
+        sg = starters.get(key)
+        if sg and g["state"] == "upcoming":
+            if sg[0]:
+                g["away"]["sg"] = sg[0]
+            if sg[1]:
+                g["home"]["sg"] = sg[1]
 
     # Playoff odds: the rest of the season and the playoffs played out many times
     # (see pipeline/playoffs.py). Worked out again only when a result, the
