@@ -97,7 +97,6 @@ players.career_wait = His earlier seasons have not been read yet. A few thousand
 
 # ---- a game's own page ----
 game.back = All Games
-game.espn_link = This game on ESPN
 
 # ---- bottom of every page ----
 

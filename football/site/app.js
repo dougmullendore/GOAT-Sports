@@ -1153,7 +1153,6 @@
     liveHooks.push(function (x) { if (x === g) head(); });
     var card = el("section", { "class": "gcard", "aria-label": "Game summary" }, [status, top, quarters, oddsLine(g), cmp]);
     box.appendChild(title); box.appendChild(card); box.appendChild(scoring); box.appendChild(boxes);
-    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.espn_link") })]));
 
     function readBox() {
       var s = gameState(g);
