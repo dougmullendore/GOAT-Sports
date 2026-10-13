@@ -446,3 +446,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 
 /* the leagues with no games on the day stand clear of the last list of games */
 .lg + .quiet { margin-top: 80px; border-top: 1px solid var(--lumin); }
+
+/* NHL logos come in a wide 3:2 frame with empty room either side: filled to the square's height, they use the tile */
+img[src*="assets.nhle.com/logos"] { object-fit: cover; }

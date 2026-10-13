@@ -47,12 +47,9 @@
     li.insertBefore(el("a", { "class": "go", href: go, "aria-label": words.filter(Boolean).join(". ") }), li.firstChild);
     return li;
   }
-  // ---- the explanations under lists and tables are not shown; a note that holds a link or a button
-  // (marked "keep") stays ----
-  function explain(p) {
-    if (!p.classList || !p.classList.contains("note") || p.classList.contains("keep") || !p.parentNode) return;
-    p.parentNode.removeChild(p);
-  }
+  // ---- the explanations under lists and tables are not shown: the stylesheet hides every note but one that holds
+  // a link or a button (marked "keep"). They stay in the page, because the page writes into some of them. ----
+  function explain() {}
   function explainAll(root) {
     if (!root || root.nodeType !== 1) return;
     explain(root);

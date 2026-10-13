@@ -771,3 +771,6 @@ main > section > h1, main h1 { margin: 56px 0 20px; }
   .cal { margin: 14px 0 24px; }
   .calday { flex-basis: 92px; padding: 8px 10px; }
 }
+
+/* the explanations under lists and tables are not shown (a note that holds a link or a button stays) */
+p.note:not(.keep) { display: none !important; }

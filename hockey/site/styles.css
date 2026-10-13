@@ -766,3 +766,9 @@ main > section > h1, main h1 { margin: 56px 0 20px; }
   .cal { margin: 14px 0 24px; }
   .calday { flex-basis: 92px; padding: 8px 10px; }
 }
+
+/* NHL logos come in a wide 3:2 frame with empty room either side: filled to the square's height, they use the tile */
+img[src*="assets.nhle.com/logos"] { object-fit: cover; }
+
+/* the explanations under lists and tables are not shown (a note that holds a link or a button stays) */
+p.note:not(.keep) { display: none !important; }
