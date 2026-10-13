@@ -181,9 +181,7 @@
       ? "; an outlined number is a place in this site's GOAT ranking, for a team the poll leaves out." : ".") : "Numbers are places in the league standings.");
     var ahead = games.filter(function (g) { return g.state === "upcoming"; });
     if (lg.sport === "volleyball" && ahead.length && !ahead.some(function (g) { return g.p != null; })) bits.push("No chances of winning are worked out for these " + lg.unit + ".");
-    var lined = games.filter(function (g) { return g.line && g.line[0] && g.state !== "final"; });
-    if (lined.length) bits.push("Betting lines from " + (lined[0].line[2] || "a sportsbook") + ", read from ESPN; they move, so check the sportsbook before you bet.");
-    else if (lg.sport === "volleyball" && games.some(function (g) { return g.p != null && g.state !== "final"; })) bits.push("No sportsbook offers lines on these matches; the percentages are this site's own chance of winning.");
+    if (lg.sport === "volleyball" && games.some(function (g) { return g.p != null && g.state !== "final"; })) bits.push("No sportsbook offers lines on these matches; the percentages are this site's own chance of winning.");
     return bits.join(" ");
   }
 

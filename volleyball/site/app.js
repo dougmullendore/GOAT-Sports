@@ -148,10 +148,8 @@
       el("div", { "class": "gc-linebig" }, [el("span", { text: l[0] }), l[1] != null ? el("span", { text: "Over/under " + l[1] }) : null]),
       linesNote([g])]);
   }
-  function linesNote(games) {
-    var from = (games.filter(function (g) { return g.line && g.line[2]; })[0] || {}).line;
-    return el("p", { "class": "keyline", text: "Betting lines from " + (from ? from[2] : "a sportsbook") + ", read from ESPN. Lines move: check the sportsbook before you bet. " +
-      "If you or someone you know has a gambling problem, call 1-800-GAMBLER." });
+  function linesNote() {
+    return el("p", { "class": "keyline", text: "If you or someone you know has a gambling problem, call 1-800-GAMBLER." });
   }
   // this sport shows the sportsbook's betting lines in place of the site's own chances of winning
   // (volleyball has no betting lines, so it keeps the site's own chances)
