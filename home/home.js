@@ -341,8 +341,6 @@
     if (!ready_) return;
     if (!total) holder.appendChild(el("p", { "class": "empty", text: off ? "No games on this day in the leagues you chose. " + off + (off === 1 ? " game is" : " games are") + " in leagues you have left off; choose leagues above to show them."
       : "No games are listed for this day. Try an earlier or later day." }));
-    if (out.some(function (x) { return x[1].some(function (g) { return g.line && g.line[0] && g.state !== "final"; }); }))
-      holder.appendChild(el("p", { "class": "keyline", text: "If you or someone you know has a gambling problem, call 1-800-GAMBLER." }));
     quiet.forEach(function (lg) {
       if (!lg.ready) return;
       var coming = nextFor(lg, shown);

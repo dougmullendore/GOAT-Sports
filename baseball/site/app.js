@@ -146,11 +146,7 @@
     var l = g.line;
     return el("div", { "class": "gc-odds gc-lines" }, [
       el("span", { "class": "gc-lab", text: "Betting line" + (l[2] ? ", " + l[2] : "") }),
-      el("div", { "class": "gc-linebig" }, [el("span", { text: l[0] }), l[1] != null ? el("span", { text: "Over/under " + l[1] }) : null]),
-      linesNote([g])]);
-  }
-  function linesNote() {
-    return el("p", { "class": "keyline", text: "If you or someone you know has a gambling problem, call 1-800-GAMBLER." });
+      el("div", { "class": "gc-linebig" }, [el("span", { text: l[0] }), l[1] != null ? el("span", { text: "Over/under " + l[1] }) : null])]);
   }
   // this sport shows the sportsbook's betting lines in place of the site's own chances of winning
   // (volleyball has no betting lines, so it keeps the site's own chances)
@@ -743,7 +739,6 @@
     if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day. The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are places in the league standings." : "") + " Choose a team to see its whole season." }));
     else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
       ". The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are this week's AP rankings, also for earlier weeks; a team outside the poll is numbered from 26 by the GOAT ranking." : "") + " Choose a team to see its whole season." }));
-    if (LINES && games.some(function (g) { return g.line && g.line[0] && g.state !== "final"; })) holder.appendChild(linesNote(games));
     if (games.some(function (g) { return g.p != null && g.state !== "final"; })) { var said = holder.lastElementChild; holder.insertBefore(keyline(), said && said.classList.contains("note") ? said : null); holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() })); }
   }
 
