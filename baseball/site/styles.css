@@ -549,14 +549,14 @@ a.opp:hover .n { color: var(--teal); }
    one monospace face; 1px rules; inversion (a white block with black type) is the only emphasis.
    The light theme is the same page inverted. These rules come last and win over the ones above. ==== */
 :root:not(#x), :root[data-theme="dark"]:not(#x) {
-  --void: #000; --lumin: #fff;
+  --void: #0a1224; --lumin: #fff;
   --floor: var(--void); --sheet: var(--void); --ink: var(--lumin); --ink-2: var(--lumin); --line: var(--lumin);
   --teal: var(--lumin); --teal-soft: var(--void); --ball: var(--lumin); --ball-ink: var(--void); --ball-home: var(--lumin);
   --win: var(--lumin); --win-ink: var(--void); --loss: var(--lumin); --loss-ink: var(--void); --lost: var(--lumin);
   color-scheme: dark;
 }
-:root[data-theme="light"]:not(#x) { --void: #fff; --lumin: #000; color-scheme: light; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]):not(#x) { --void: #fff; --lumin: #000; color-scheme: light; } }
+:root[data-theme="light"]:not(#x) { --void: #fff; --lumin: #0a1224; color-scheme: light; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]):not(#x) { --void: #fff; --lumin: #0a1224; color-scheme: light; } }
 
 body { font-family: "Martian Mono", ui-monospace, "Cascadia Mono", Menlo, monospace; font-stretch: 75%; font-size: .875rem; font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased; }
@@ -601,9 +601,9 @@ h2 { font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-si
 .games, .tablewrap, .ranks, .goals, .stars, .empty, .tile, .teamgrid a, .ltile, .vsbox { background: transparent; }
 .game[data-go]:hover, .game.on { background: var(--lumin); color: var(--void); }
 /* inside an inverted row the two inks swap, so everything in it (numbers, W and L, logos) inverts with it */
-.game[data-go]:hover *, .game.on * { --lumin: #000; --void: #fff; }
-:root[data-theme="light"] .game[data-go]:hover *, :root[data-theme="light"] .game.on * { --lumin: #fff; --void: #000; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game[data-go]:hover *, :root:not([data-theme="dark"]) .game.on * { --lumin: #fff; --void: #000; } }
+.game[data-go]:hover *, .game.on * { --lumin: #0a1224; --void: #fff; }
+:root[data-theme="light"] .game[data-go]:hover *, :root[data-theme="light"] .game.on * { --lumin: #fff; --void: #0a1224; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game[data-go]:hover *, :root:not([data-theme="dark"]) .game.on * { --lumin: #fff; --void: #0a1224; } }
 .game.both { box-shadow: inset 4px 0 0 var(--lumin); }
 .ptable .sorted, .cartable tbody tr.now td, .cartable tbody tr.now th { background: transparent; }
 .ptable th[aria-sort] button { text-decoration: underline; text-underline-offset: 4px; }
@@ -712,7 +712,7 @@ h2 { font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-si
 .logo img, :root[data-theme="light"] .logo img, .game[data-go]:hover .logo img, .game.on .logo img,
 :root[data-theme="light"] .game[data-go]:hover .logo img, :root[data-theme="light"] .game.on .logo img { filter: grayscale(1) contrast(1.1) !important; }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: grayscale(1) contrast(1.1) !important; } }
-:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000 !important; }
+:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #0a1224 !important; }
 .logo.badge { background: transparent !important; }
 /* every channel shown in full: a long list wraps to a second line rather than being cut */
 .game .more, .game .more .watch { white-space: normal; overflow: visible; text-overflow: clip; }

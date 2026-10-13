@@ -102,7 +102,7 @@
     var b = $("invert");
     if (b) b.setAttribute("aria-pressed", String(t === "light"));
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", t === "light" ? "#ffffff" : "#000000");
+    if (meta) meta.setAttribute("content", t === "light" ? "#ffffff" : "#0a1224");
   }
   try { var kept = localStorage.getItem(THEME_KEY); if (kept === "light" || kept === "dark") document.documentElement.setAttribute("data-theme", kept); } catch (e) {}
 

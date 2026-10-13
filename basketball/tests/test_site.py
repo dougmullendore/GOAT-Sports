@@ -256,7 +256,7 @@ def test_the_college_site_builds_in_season():
         assert everyone["metrics"][0] == "impact_g" and any(p["team_id"] == ILLINOIS for p in everyone["players"])
         assert (out / "cards" / f"{ILLINOIS}.json").exists()
         page = (out / "index.html").read_text()
-        assert "app.js?v=" in page and 'id="leagues"' in page and "#000000" in page
+        assert "app.js?v=" in page and 'id="leagues"' in page and "#0a1224" in page
     built("college", check)
 
 
@@ -272,7 +272,7 @@ def test_the_nba_site_builds_in_season():
         kat = cards["3136195"]
         assert kat["games"] and kat["career"] and kat["highs"]
         page = (out / "index.html").read_text()
-        assert "#000000" in page                             # one colour for the whole sport
+        assert "#0a1224" in page                             # one colour for the whole sport
         assert "GOAT Basketball: NBA" in (out / "manifest.json").read_text()
     built("nba", check)
 

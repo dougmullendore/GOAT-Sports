@@ -3,12 +3,12 @@
    emphasis is inversion: a white block with black type, for what is live, pressed or won.
    The light theme is the same page inverted (the Invert button, or the device's light setting). */
 :root {
-  --void: #000; --lumin: #fff;
+  --void: #0a1224; --lumin: #fff;
   color-scheme: dark;
 }
-:root[data-theme="light"] { --void: #fff; --lumin: #000; color-scheme: light; }
+:root[data-theme="light"] { --void: #fff; --lumin: #0a1224; color-scheme: light; }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --void: #fff; --lumin: #000; color-scheme: light; }
+  :root:not([data-theme="dark"]) { --void: #fff; --lumin: #0a1224; color-scheme: light; }
 }
 
 * { box-sizing: border-box; }
@@ -293,7 +293,7 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .logo img, :root[data-theme="light"] .logo img, .game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img,
 :root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: grayscale(1) contrast(1.1); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img, :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: grayscale(1) contrast(1.1); } }
-:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000; }
+:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #0a1224; }
 .logo.badge { background: transparent; }
 @media (max-width: 760px) {
   .jump a { padding: 10px 12px; }
@@ -313,9 +313,9 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 /* a mark: a league's own logo, or a sport's drawn icon, on the same white tile as the team logos */
 .mark { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 5px; background: #fff; line-height: 0; }
 .mark img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(1.1); }
-.mark svg { width: 100%; height: 100%; fill: none; stroke: #000; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; --c: #000; }
-:root[data-theme="light"] .mark { box-shadow: inset 0 0 0 1px #000; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .mark, :root:not([data-theme="dark"]) .logo { box-shadow: inset 0 0 0 1px #000; } }
+.mark svg { width: 100%; height: 100%; fill: none; stroke: #0a1224; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; --c: #0a1224; }
+:root[data-theme="light"] .mark { box-shadow: inset 0 0 0 1px #0a1224; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .mark, :root:not([data-theme="dark"]) .logo { box-shadow: inset 0 0 0 1px #0a1224; } }
 .lg-head { align-items: center; }
 .door { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 30rem); }
 .door .mark { width: 64px; height: 64px; padding: 12px; }

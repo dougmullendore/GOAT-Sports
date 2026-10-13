@@ -13,7 +13,7 @@ ALL_NAME = "Division I"   # what "every team" is called
 STATE_FOLDER = ""         # the league's folder inside this sport's stored data
 SITE_FOLDER = ""          # and inside the site
 LEAGUE_TABS = [["nba", "NBA"], ["", "College"]]      # the tabs at the top of every page, the pro league first: folder, label
-COLOURS = ("#000000", "#000000")                     # the browser bar: black, like every page, college and NBA alike
+COLOURS = ("#0a1224", "#0a1224")                     # the browser bar: the very dark blue of every page, college and NBA alike
 SEASON_SPANS_YEARS = True                            # a season is named "2026-27"
 
 # The ranking that decides which teams' games are listed first: the AP Top 25.
