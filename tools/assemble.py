@@ -59,7 +59,7 @@ LEAGUES = [
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"
-# The line at the foot of every page. home/index.html carries the same words; change both together.
+# The line at the foot of every sport's page (the front page has no footer).
 INDEP = ("GOAT Sports is not affiliated with or endorsed by the NFL, the NBA, MLB, the NHL, the NCAA, the AVCA, "
          "LOVB, MLV, ESPN, the Associated Press or any team or school.")
 

@@ -406,3 +406,29 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
   .mast-day .cell, .readouts > div, .readouts > div:first-child { width: 50%; min-width: 0; padding: 0 14px; }
   .mast-day .cell:nth-of-type(1), .readouts > div:first-child { border-left: 0; padding-left: 0; }
 }
+/* no footer on the front page: the list of sports ends it, with room below */
+main.wrap { padding-bottom: 96px; }
+/* the day's leagues sit in the masthead's own row, between the mark and the date: each a short link to its list */
+.mast-row .jump { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 0; border: 0; }
+.mast-row .jump a, .mast-row .jump a:first-child { min-height: 36px; padding: 6px 12px; gap: 8px; border: 1px solid var(--lumin); margin: 0 -1px -1px 0; align-items: center; }
+.mast-row .jump a:first-child:hover, .mast-row .jump a:first-child:focus-visible { padding-left: 12px; }
+.mast-row .jump a > span:first-child { font-size: .75rem; }
+@media (max-width: 760px) { .mast-row .jump { order: 5; width: 100%; } }
+/* the date, with the day's leagues as short links under it, takes the room between the mark and the readouts */
+.mast-when { flex: 1 1 auto; min-width: 0; display: grid; gap: 10px; align-content: center; padding-left: 24px; border-left: 1px solid var(--lumin); }
+.mast-when h1 { margin: 0; font-size: 1.25rem; line-height: 1; font-weight: 400; letter-spacing: .02em; font-stretch: 87.5%; }
+.mast-when .jump { flex: none; }
+.mast-when .jump a, .mast-when .jump a:first-child { min-height: 30px; padding: 4px 10px; }
+.mast-when .jump a:first-child:hover, .mast-when .jump a:first-child:focus-visible { padding-left: 10px; }
+.mast-row > .mast-day { flex: none; }
+.mast-day .cell:first-child { border-left: 1px solid var(--lumin); }
+@media (max-width: 760px) {
+  .mast-when { order: 3; width: 100%; padding: 10px 0 0; border-left: 0; border-top: 1px solid var(--lumin); }
+  .mast-when h1 { font-size: 1.125rem; }
+  .mast-when .jump { order: 0; width: auto; }
+  .mast-row > .mast-day { order: 4; width: 100%; padding-top: 0; border-top: 0; }
+  .mast-day .cell:first-child { border-left: 0; padding-left: 0; }
+  .readouts { order: 5; }
+}
+.mast-when { flex: 1 1 0; }
+@media (max-width: 760px) { .mast-when { flex: 1 1 100%; } }

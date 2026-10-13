@@ -46,7 +46,7 @@ def main() -> int:
         assert hockey.count('class="indep"') == 1 and hockey.index(assemble.INDEP) < hockey.index("</footer>")
         assert 'href="../../hockey/"' in (site / "volleyball" / "lovb" / "index.html").read_text()
         front = (site / "index.html").read_text()
-        assert 'href="football/"' not in front and "home.js?v=" in front and assemble.INDEP in front     # home/index.html carries the same line
+        assert 'href="football/"' not in front and "home.js?v=" in front                                 # the front page has no footer
         # football arrives on a later run that rebuilds nothing else: every page gets its tab, the other sports' pages stay
         (built / "hockey" / "data.json").unlink()
         sport(Path(tmp) / "later" / "football", [game(9, today, 1)], {"poll": {"name": "AP Top 25"}})

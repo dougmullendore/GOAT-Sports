@@ -301,7 +301,7 @@
     $("r-live").textContent = String(liveN);
     // the leagues of the day, each a link to its list
     out.forEach(function (x) {
-      jump.appendChild(el("a", { href: "#lg-" + x[0].key }, [el("span", { text: x[0].name }), el("span", {}, [el("span", { "class": "n", text: x[1].length + (x[1].length === 1 ? " game" : " games") }),
+      jump.appendChild(el("a", { href: "#lg-" + x[0].key }, [el("span", { text: x[0].name }), el("span", {}, [el("span", { "class": "n" }, [String(x[1].length), el("span", { "class": "sr", text: x[1].length === 1 ? " game" : " games" })]),
         x[2] ? el("span", { "class": "on", title: x[2] + " under way" }, [el("span", { "class": "sr", text: ", " + x[2] + " under way" })]) : null])]));
     });
     jump.hidden = !out.length;
@@ -480,7 +480,6 @@
         today = iso(new Date());
         if (shown === was) shown = today;                                   // left open overnight: "today" moves on
         var u = new Date(d.updated);
-        $("foot-updated").textContent = "Updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) + ".";
         $("r-updated").textContent = isNaN(u) ? "–" : u.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
         draw();
         if (!$("cards").firstChild) { cards(); picker(); }       // also after a first load that failed

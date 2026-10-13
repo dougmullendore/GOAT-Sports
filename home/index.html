@@ -23,8 +23,11 @@
 <header class="mast">
   <div class="wrap mast-row">
     <a class="brand" href="./"><svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg><span>GOAT<br>Sports</span></a>
-    <div class="mast-day">
+    <div class="mast-when">
       <h1 id="h-day">Today's games</h1>
+      <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
+    </div>
+    <div class="mast-day">
       <div class="cell"><span class="k">Games</span><span class="v" id="r-games">–</span></div>
       <div class="cell"><span class="k">Leagues</span><span class="v" id="r-leagues">–</span></div>
     </div>
@@ -36,11 +39,6 @@
   </div>
 </header>
 <section class="feed" id="feed" aria-labelledby="feed-h" hidden></section>
-<section class="field">
-  <div class="wrap">
-    <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
-  </div>
-</section>
 <main class="wrap">
   <div class="day">
     <p class="lede" id="lede" role="status">Loading the games…</p>
@@ -56,10 +54,6 @@
   <h2 class="sec">The sports</h2>
   <ul class="doors" id="cards"></ul>
 </main>
-<footer class="wrap foot">
-  <p id="foot-updated"></p>
-  <p class="indep">GOAT Sports is not affiliated with or endorsed by the NFL, the NBA, MLB, the NHL, the NCAA, the AVCA, LOVB, MLV, ESPN, the Associated Press or any team or school.</p>
-</footer>
 <script src="home.js"></script>
 </body>
 </html>
