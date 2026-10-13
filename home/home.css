@@ -437,3 +437,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
   border: 1px solid var(--lumin); min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
 .totop-btn svg { width: 10px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
 .totop-btn:hover { background: var(--lumin); color: var(--void); }
+
+/* on a phone, more room between one league's list and the next */
+@media (max-width: 760px) { .lg { margin-top: 56px; } .lg:first-child { margin-top: 32px; } }

@@ -1101,7 +1101,18 @@
     }))]);
   }
   // ---- before a game starts: the two teams' seasons side by side in the card, and each team's best players under it ----
-  var PREVIEW = { record: function (t) { return t.w + "-" + t.l + "-" + (t.otl || 0); }, skip: function (p) { return p.grp === "G"; }, line: function (p) { var x = p.tot || {}; return (x.g || 0) + " G · " + (x.a || 0) + " A · " + (x.pts || 0) + " PTS in " + p.gp + (p.gp === 1 ? " game" : " games"); } };
+  var PREVIEW = { record: function (t) { return t.w + "-" + t.l + "-" + (t.otl || 0); }, skip: function (p) { return p.grp === "G"; },
+    line: function (p) {
+      var x = p.tot || {};
+      if (p.grp === "G") return "Likely starter · " + (x.sa ? (x.sv / x.sa).toFixed(3).replace(/^0/, "") : ".000") + " save % · " + (x.toi ? (3600 * x.ga / x.toi).toFixed(2) : "0.00") + " GAA · " +
+        (x.gs || 0) + ((x.gs || 0) === 1 ? " start" : " starts");
+      return (x.g || 0) + " G · " + (x.a || 0) + " A · " + (x.pts || 0) + " PTS in " + p.gp + (p.gp === 1 ? " game" : " games");
+    },
+    // the goalie most likely to start: the one with the most starts this season, the better rated first when two are level
+    extra: function (people, id) {
+      return people.filter(function (p) { return String(p.team_id) === String(id) && p.grp === "G" && (p.tot || {}).gs; })
+        .sort(function (a, b) { return (b.tot.gs - a.tot.gs) || ((a.rank || 999) - (b.rank || 999)); }).slice(0, 1);
+    } };
   function preview(cmp, holder, g) {
     holder.innerHTML = "";
     var wait = el("p", { "class": "empty", text: "Loading the season so far…" });
@@ -1137,6 +1148,7 @@
       var lists = [g.away, g.home].map(function (x) {
         var mine = people.filter(function (p) { return String(p.team_id) === String(x.id) && p.rank && !PREVIEW.skip(p); })
           .sort(function (a, b) { return a.rank - b.rank; }).slice(0, 3);
+        if (PREVIEW.extra) mine = mine.concat(PREVIEW.extra(people, x.id));
         return [x, mine];
       }).filter(function (x) { return x[1].length; });
       if (lists.length) {
