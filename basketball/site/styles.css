@@ -749,3 +749,21 @@ h2 { font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-si
 .wname small { font-size: .75rem; letter-spacing: .02em; }
 .mboxes > .watchbox { grid-column: 1 / -1; }
 .watchbox { margin-top: 32px; }
+
+/* ==== room at the top: the league switch, the masthead, the title and the day's controls each get air ==== */
+.leagues { padding-top: 20px; }
+.mast-row { padding-top: 18px; padding-bottom: 20px; }
+main > section > h1, main h1 { margin: 56px 0 20px; }
+.lede { margin-bottom: 48px; line-height: 1.6; }
+.bar { padding-bottom: 16px; row-gap: 16px; }
+.cal { margin: 16px 0 32px; }
+.calday { flex-basis: 108px; gap: 4px 10px; padding: 10px 12px; }
+@media (max-width: 640px) {
+  .leagues { padding-top: 16px; }
+  .mast-row { row-gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+  main > section > h1, main h1 { margin: 36px 0 14px; }
+  .lede { margin-bottom: 32px; }
+  .bar { row-gap: 14px; }
+  .cal { margin: 14px 0 24px; }
+  .calday { flex-basis: 92px; padding: 8px 10px; }
+}
