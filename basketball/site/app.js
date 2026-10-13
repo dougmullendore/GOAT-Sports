@@ -718,7 +718,7 @@
     }
     listInto(holder, games, false, true);
     var both = games.filter(function (g) { return g.away.rank && g.home.rank; }).length;
-    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day. The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are places in the league standings." : "") + " Choose a team to see its whole season." }));
+    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day. The visiting team is on the left, and the channel is on the right." + " Choose a team to see its whole season." }));
     else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
       ". The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are this week's AP rankings, also for earlier weeks; a team outside the poll is numbered from 26 by the GOAT ranking." : "") + " Choose a team to see its whole season." }));
     if (games.some(function (g) { return g.p != null && g.state !== "final"; })) { var said = holder.lastElementChild; holder.insertBefore(keyline(), said && said.classList.contains("note") ? said : null); holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() })); }

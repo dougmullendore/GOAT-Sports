@@ -177,8 +177,9 @@
   // the key under a league's name: what its numbers are, and why a list has no chances of winning
   function keyOf(lg, games) {
     var bits = [], numbered = games.some(function (g) { return g.away[2] || g.home[2]; });
-    if (numbered) bits.push(lg.poll ? "Numbers are places in the " + lg.poll + (games.some(function (g) { return (g.away[2] || 0) > 25 || (g.home[2] || 0) > 25; })
-      ? "; an outlined number is a place in this site's GOAT ranking, for a team the poll leaves out." : ".") : "Numbers are places in the league standings.");
+    // a poll's numbers are explained; a pro league's places in its standings need no note
+    if (numbered && lg.poll && !/standings$/i.test(lg.poll)) bits.push("Numbers are places in the " + lg.poll + (games.some(function (g) { return (g.away[2] || 0) > 25 || (g.home[2] || 0) > 25; })
+      ? "; an outlined number is a place in this site's GOAT ranking, for a team the poll leaves out." : "."));
     var ahead = games.filter(function (g) { return g.state === "upcoming"; });
     if (lg.sport === "volleyball" && ahead.length && !ahead.some(function (g) { return g.p != null; })) bits.push("No chances of winning are worked out for these " + lg.unit + ".");
     if (lg.sport === "volleyball" && games.some(function (g) { return g.p != null && g.state !== "final"; })) bits.push("No sportsbook offers lines on these matches; the percentages are this site's own chance of winning.");
