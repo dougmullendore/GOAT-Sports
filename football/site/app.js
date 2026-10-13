@@ -144,7 +144,7 @@
   function lineCard(g) {
     var l = g.line;
     return el("div", { "class": "gc-odds gc-lines" }, [
-      el("span", { "class": "gc-lab", text: "Betting line" + (l[2] ? ", " + l[2] : "") }),
+      el("span", { "class": "sr", text: "Betting line" }),
       el("div", { "class": "gc-linebig" }, [el("span", { text: l[0] }), l[1] != null ? el("span", { text: "Over/under " + l[1] }) : null])]);
   }
   // this sport shows the sportsbook's betting lines in place of the site's own chances of winning
