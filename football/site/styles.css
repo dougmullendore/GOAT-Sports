@@ -739,3 +739,17 @@ h2 { font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-si
 .ptrack { padding: 2px; border-radius: 0; }
 .ptrack i { min-width: 3px; border-radius: 0; }
 .gc-track span { min-width: 3px; border-radius: 0; }
+
+/* ==== a game before it starts: the seasons side by side, and the players to watch ==== */
+.gc-row.rec .v { font-weight: 500; }
+.gc-row.rec .gc-track { visibility: hidden; }
+.watch { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 0 32px; }
+.watch-team .mteam { margin: 0; padding: 12px 0 10px; border-bottom: 1px solid var(--lumin); }
+.watch-list { list-style: none; margin: 0; padding: 0; }
+.watch-list li a { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--lumin); color: var(--lumin); text-decoration: none; }
+.watch-list li a:hover .wname b { text-decoration: underline; }
+.wname { display: grid; gap: 2px; min-width: 0; }
+.wname b { font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+.wname small { font-size: .75rem; letter-spacing: .02em; }
+.mboxes > .watchbox { grid-column: 1 / -1; }
+.watchbox { margin-top: 32px; }

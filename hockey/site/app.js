@@ -1100,6 +1100,56 @@
       return el("li", {}, [el("span", { "class": "rk", text: String(i + 1) }), el("a", { "class": "starwho", href: "#/player/" + s[0] }, [face({ name: s[2], photo: s[3] }), el("span", { text: s[2] })]), logo(s[1], "sm", (T(s[1]) || {}).name)]);
     }))]);
   }
+  // ---- before a game starts: the two teams' seasons side by side in the card, and each team's best players under it ----
+  var PREVIEW = { record: function (t) { return t.w + "-" + t.l + "-" + (t.otl || 0); }, skip: function (p) { return p.grp === "G"; }, line: function (p) { var x = p.tot || {}; return (x.g || 0) + " G · " + (x.a || 0) + " A · " + (x.pts || 0) + " PTS in " + p.gp + (p.gp === 1 ? " game" : " games"); } };
+  function preview(cmp, holder, g) {
+    holder.innerHTML = "";
+    var wait = el("p", { "class": "empty", text: "Loading the season so far…" });
+    holder.appendChild(wait);
+    Promise.all([loadTeams().catch(function () { return null; }), loadRoster().catch(function () { return null; })]).then(function (both) {
+      var teams = (both[0] && both[0].teams) || [], ros = both[1];
+      function team(id) { return teams.filter(function (t) { return String(t.id) === String(id); })[0]; }
+      var A = team(g.away.id), H = team(g.home.id);
+      holder.innerHTML = "";
+      cmp.innerHTML = "";
+      // the season so far: each team's record, then the stats the team pages lead with
+      var played = A && H && (A.games || A.games || A.gp) && (H.games || H.games || H.gp);
+      if (played) {
+        cmp.appendChild(el("h3", { "class": "gc-h", text: "The season so far" }));
+        cmp.appendChild(el("div", { "class": "gc-row rec" }, [el("span", { "class": "v", text: PREVIEW.record(A) }), el("span", { "class": "gc-track", "aria-hidden": "true" }),
+          el("span", { "class": "v h", text: PREVIEW.record(H) }), el("span", { "class": "l", text: "Record" })]));
+        var shown = 0;
+        TSTATS.forEach(function (c) {
+          var a = A[c[0]], h = H[c[0]];
+          if (shown >= 8 || a == null || h == null || typeof a !== "number" || typeof h !== "number") return;
+          shown++;
+          var lo = Math.min(a, h, 0), sa = a - lo, sh = h - lo, aw = sa + sh ? 100 * sa / (sa + sh) : 50;
+          var aBetter = c[3] ? a > h : a < h, hBetter = c[3] ? h > a : h < a;
+          cmp.appendChild(el("div", { "class": "gc-row" }, [
+            el("span", { "class": "v" + (aBetter ? " best" : ""), text: c[2](a) }),
+            el("div", { "class": "gc-track", "aria-hidden": "true" }, [el("span", { "class": "a" + (aBetter ? " best" : ""), style: "width:" + aw + "%" }), el("span", { "class": "h" + (hBetter ? " best" : ""), style: "width:" + (100 - aw) + "%" })]),
+            el("span", { "class": "v h" + (hBetter ? " best" : ""), text: c[2](h) }),
+            el("span", { "class": "l", text: c[1] })]));
+        });
+      }
+      // the players to watch: each team's three best by this site's rating, with their season in a line
+      var people = ros && ros.players || [];
+      var lists = [g.away, g.home].map(function (x) {
+        var mine = people.filter(function (p) { return String(p.team_id) === String(x.id) && p.rank && !PREVIEW.skip(p); })
+          .sort(function (a, b) { return a.rank - b.rank; }).slice(0, 3);
+        return [x, mine];
+      }).filter(function (x) { return x[1].length; });
+      if (lists.length) {
+        holder.appendChild(el("div", { "class": "watchbox" }, [el("h2", { "class": "msec", text: "Players to watch" }), el("div", { "class": "watch" }, lists.map(function (x) {
+          return el("section", { "class": "watch-team" }, [el("h3", { "class": "mteam" }, [logo(x[0].id), el("span", { text: x[0].name })]),
+            el("ol", { "class": "watch-list" }, x[1].map(function (p) {
+              return el("li", {}, [el("a", { href: "#/player/" + p.id }, [face(p), el("span", { "class": "wname" }, [el("b", { text: p.name }), el("small", { text: [p.pos, PREVIEW.line(p)].filter(Boolean).join(" · ") })])])]);
+            }))]);
+        }))]));
+      }
+      if (!played && !lists.length) holder.appendChild(el("p", { "class": "empty", text: "Neither team has played yet this season. Team and player stats appear here once the game starts." }));
+    }).catch(function () { wait.textContent = "Team and player stats appear here once the game starts."; });
+  }
   function drawGame(id) {
     stopGame();
     var box = $("game"), g = data.games.filter(function (x) { return String(x.id) === String(id); })[0];
@@ -1141,7 +1191,8 @@
         if (d.status !== "F" && (s.live || !s.fin)) gameTimers.push(setTimeout(readBox, 60 * 1000));
       }).catch(function () {
         boxes.innerHTML = "";
-        boxes.appendChild(el("p", { "class": "empty", text: s.live ? "Player stats appear here within a few minutes of the opening faceoff." :
+        if (!s.live && !s.fin) preview(cmp, boxes, g);
+        else boxes.appendChild(el("p", { "class": "empty", text: s.live ? "Player stats appear here within a few minutes of the opening faceoff." :
           s.fin ? "The box score has not come in yet. It usually arrives within a few minutes." : "Player stats appear here once the game starts." }));
         if (s.live || s.fin || couldBeOn(g, Date.now() / 1000)) gameTimers.push(setTimeout(readBox, 60 * 1000));
       });
