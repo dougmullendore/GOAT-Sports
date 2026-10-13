@@ -102,7 +102,7 @@
     var b = $("invert");
     if (b) b.setAttribute("aria-pressed", String(t === "light"));
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", t === "light" ? "#ffffff" : "#0a1224");
+    if (meta) meta.setAttribute("content", t === "light" ? "#ffffff" : "#000000");
   }
   try { var kept = localStorage.getItem(THEME_KEY); if (kept === "light" || kept === "dark") document.documentElement.setAttribute("data-theme", kept); } catch (e) {}
 
@@ -214,7 +214,8 @@
     var tv = g.tv || [];
     function team(side, s, lost, won) {
       var r = rankOf(lg, s[2]);
-      var kids = [logo(lg, s[0], s[1]), el("span", { "class": "name", text: s[1] }), r ? el("span", { "class": "rk" + (r.goat ? " goat" : ""), text: String(r.n) }) : null];
+      // the logos sit in the middle, beside the line; the names on the outside
+      var kids = [r ? el("span", { "class": "rk" + (r.goat ? " goat" : ""), text: String(r.n) }) : null, el("span", { "class": "name", text: s[1] }), logo(lg, s[0], s[1])];
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -274,7 +275,7 @@
     h.appendChild(document.createTextNode(day(shown).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short",
       year: shown.slice(0, 4) !== today.slice(0, 4) ? "numeric" : undefined }).replace(/,/g, "")));
     document.title = label + " | GOAT Sports";
-    $("goto").value = shown;
+    $("goto-val").textContent = day(shown).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     // the calendar: fifteen days with the chosen one in the middle, each with its number of games;
     // the chosen day is inverted and today is marked. The arrows either side move it a week at a time.
     nav.className = "cal";
@@ -327,7 +328,10 @@
         el("div", { "class": "lg-head" }, [leagueMark(lg),
           el("h2", { id: "h-" + lg.key }, [el("a", { href: lg.href, text: lg.name }), el("span", { "class": "kind", text: lg.label })]),
           el("a", { "class": "all", href: lg.href }, ["All " + lg.name + " " + lg.unit, arrow()])]),
-        key ? el("p", { "class": "lg-key", text: key }) : null, list]);
+        key ? el("p", { "class": "lg-key", text: key }) : null,
+        // which side is which, right over the games: over the columns on a wide screen, a note on a phone
+        el("div", { "class": "hahead", "aria-hidden": "true" }, [el("span"), el("span", { "class": "ha away", text: "Away" }), el("span"), el("span", { "class": "ha home", text: "Home" }), el("span")]),
+        list]);
       holder.appendChild(sec);
     });
     var ready_ = known(shown);
@@ -343,7 +347,7 @@
       if (!lg.ready) return;
       var coming = nextFor(lg, shown);
       var what = (lg.ranked_only ? "No ranked " + lg.name.toLowerCase() + " " : "No " + lg.name + " ") + lg.unit;
-      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [what + " on this day" + (coming ? "; the next are on " + long(coming) + ". " : ". "),
+      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [el("span", {}, [what + " on this day" + (coming ? "; the next are on " : ". "), coming ? el("span", { "class": "date", text: long(coming) }) : null, coming ? ". " : null]),
         el("a", { href: lg.href, text: lg.name })]));
     });
   }
@@ -389,6 +393,7 @@
   // ---- the sports, one line each, with the pages behind them ----
   function cards() {
     var holder = $("cards");
+    if (!holder) return;                                      // (the front page no longer lists the sports at its foot)
     holder.innerHTML = "";
     data.sports.forEach(function (s) {
       var d = DOORS[s.key];
@@ -477,9 +482,9 @@
         today = iso(new Date());
         if (shown === was) shown = today;                                   // left open overnight: "today" moves on
         var u = new Date(d.updated);
-        $("r-updated").textContent = isNaN(u) ? "–" : u.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        if ($("r-updated")) $("r-updated").textContent = isNaN(u) ? "–" : u.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
         draw();
-        if (!$("cards").firstChild) { cards(); picker(); }       // also after a first load that failed
+        if (!$("pick").firstChild) picker();                    // also after a first load that failed
       }
       if (first) pollLive();
     }).catch(function () {
@@ -494,7 +499,70 @@
   document.addEventListener("visibilitychange", function () { if (!document.hidden) { load(!data); pollLive(); } });
   $("back").addEventListener("click", function () { if (data) { shown = addDays(shown || today, -7); draw(); } });
   $("ahead").addEventListener("click", function () { if (data) { shown = addDays(shown || today, 7); draw(); } });
-  $("goto").addEventListener("change", function (ev) { if (data && /^\d{4}-\d{2}-\d{2}$/.test(ev.target.value)) { shown = ev.target.value; draw(); } });
+  // ---- the Date button opens a month of days to jump to: this site's own, the same in every browser ----
+  (function () {
+    var btn = $("goto"), box = $("goto-box"), pop = null, month = null, focusDay = null;
+    function close(back) {
+      if (!pop) return;
+      pop.remove(); pop = null;
+      btn.setAttribute("aria-expanded", "false");
+      document.removeEventListener("mousedown", outside, true);
+      if (back) btn.focus();
+    }
+    function outside(ev) { if (pop && !box.contains(ev.target)) close(false); }
+    function first(m) { return m + "-01"; }
+    function shiftMonth(m, by) { var p = m.split("-"), d = new Date(+p[0], +p[1] - 1 + by, 1, 12); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2); }
+    function pick(d) { close(true); if (data && d !== shown) { shown = d; draw(); } }
+    function render() {
+      pop.innerHTML = "";
+      var start = day(first(month)), title = start.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      function arrow(by, words, d) {
+        var b = el("button", { type: "button", "class": "gp-step", "aria-label": words, onclick: function () { month = shiftMonth(month, by); focusDay = first(month); render(); } });
+        b.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="' + d + '"/></svg>';
+        return b;
+      }
+      pop.appendChild(el("div", { "class": "gp-head" }, [arrow(-1, "Previous month", "M8 1L2 7l6 6"), el("b", { "class": "gp-title", text: title, "aria-live": "polite" }), arrow(1, "Next month", "M2 1l6 6-6 6")]));
+      var grid = el("div", { "class": "gp-grid", role: "grid", "aria-label": title });
+      // the week starts on Sunday
+      for (var w = 0; w < 7; w++) grid.appendChild(el("span", { "class": "gp-wd", "aria-hidden": "true", text: new Date(2023, 0, 1 + w, 12).toLocaleDateString(undefined, { weekday: "narrow" }) }));
+      for (var pad = 0; pad < start.getDay(); pad++) grid.appendChild(el("span", { "class": "gp-pad" }));
+      var d = first(month);
+      while (d.slice(0, 7) === month) {
+        (function (d) {
+          var b = el("button", { type: "button", "class": "gp-day" + (d === today ? " today" : ""), "aria-pressed": String(d === shown), tabindex: d === focusDay ? "0" : "-1",
+            "aria-label": long(d) + (d === today ? ", today" : ""), "data-d": d, onclick: function () { pick(d); } }, [String(day(d).getDate())]);
+          grid.appendChild(b);
+        })(d);
+        d = addDays(d, 1);
+      }
+      pop.appendChild(grid);
+      pop.appendChild(el("div", { "class": "gp-foot" }, [el("button", { type: "button", "class": "gp-today", text: "Today", onclick: function () { pick(today); } })]));
+      var f = grid.querySelector('[data-d="' + focusDay + '"]');
+      if (f) f.focus({ preventScroll: true });
+    }
+    function open() {
+      month = (shown || today).slice(0, 7); focusDay = shown || today;
+      pop = el("div", { "class": "gp", id: "goto-pop", role: "dialog", "aria-label": "Choose a day" });
+      box.appendChild(pop);
+      btn.setAttribute("aria-expanded", "true");
+      document.addEventListener("mousedown", outside, true);
+      render();
+    }
+    btn.addEventListener("click", function () { if (pop) close(true); else open(); });
+    box.addEventListener("keydown", function (ev) {
+      if (!pop) return;
+      if (ev.key === "Escape") { ev.preventDefault(); close(true); return; }
+      var on = document.activeElement && document.activeElement.getAttribute("data-d");
+      if (!on) return;
+      var by = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[ev.key];
+      if (by) {
+        ev.preventDefault();
+        focusDay = addDays(on, by);
+        if (focusDay.slice(0, 7) !== month) month = focusDay.slice(0, 7);
+        render();
+      }
+    });
+  })();
   $("invert").addEventListener("click", function () { setTheme(lightNow() ? "dark" : "light"); });
   $("invert").setAttribute("aria-pressed", String(lightNow()));
   load(true);

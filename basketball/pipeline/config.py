@@ -13,7 +13,7 @@ ALL_NAME = "Division I"   # what "every team" is called
 STATE_FOLDER = ""         # the league's folder inside this sport's stored data
 SITE_FOLDER = ""          # and inside the site
 LEAGUE_TABS = [["nba", "NBA"], ["", "College"]]      # the tabs at the top of every page, the pro league first: folder, label
-COLOURS = ("#0a1224", "#0a1224")                     # the browser bar: the very dark blue of every page, college and NBA alike
+COLOURS = ("#000000", "#000000")                     # the browser bar: black, like every page, college and NBA alike
 SEASON_SPANS_YEARS = True                            # a season is named "2026-27"
 
 # The ranking that decides which teams' games are listed first: the AP Top 25.
@@ -122,7 +122,7 @@ _NBA_API = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/"
 NBA = {
     "LEAGUE": "nba", "LEAGUE_NAME": "NBA", "ALL_NAME": "the NBA", "STATE_FOLDER": "nba", "SITE_FOLDER": "nba",
     "POLL_NAME": "NBA standings", "POLL_TYPE": None, "POLL_SIZE": 30, "MIN_TEAMS": 30, "OTHER_POLLS": {},
-    "SITE_API": _NBA_API, "BACKUP": "nba", "POWER": "nba", "PRESEASON_GAMES": True, "SOCIAL_IDS": "P3685",
+    "SITE_API": _NBA_API, "BACKUP": "nba", "POWER": "nba", "SOCIAL_IDS": "P3685",
     "SCOREBOARD": _NBA_API + "scoreboard?limit=400",
     "DAY": _NBA_API + "scoreboard?dates={day}&limit=400",
     "RANKINGS": None,

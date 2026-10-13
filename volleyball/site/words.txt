@@ -10,7 +10,7 @@
 
 # ---- the tabs at the top ----
 nav.matches = Games
-nav.rankings = Rankings
+nav.rankings = Standings
 nav.teams = Teams
 nav.players = Players
 

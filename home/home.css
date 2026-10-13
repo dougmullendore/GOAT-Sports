@@ -3,12 +3,12 @@
    emphasis is inversion: a white block with black type, for what is live, pressed or won.
    The light theme is the same page inverted (the Invert button, or the device's light setting). */
 :root {
-  --void: #0a1224; --lumin: #fff;
+  --void: #000000; --lumin: #fff;
   color-scheme: dark;
 }
-:root[data-theme="light"] { --void: #fff; --lumin: #0a1224; color-scheme: light; }
+:root[data-theme="light"] { --void: #fff; --lumin: #000000; color-scheme: light; }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --void: #fff; --lumin: #0a1224; color-scheme: light; }
+  :root:not([data-theme="dark"]) { --void: #fff; --lumin: #000000; color-scheme: light; }
 }
 
 * { box-sizing: border-box; }
@@ -293,7 +293,7 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .logo img, :root[data-theme="light"] .logo img, .game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img,
 :root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: grayscale(1) contrast(1.1); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img, :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: grayscale(1) contrast(1.1); } }
-:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #0a1224; }
+:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000000; }
 .logo.badge { background: transparent; }
 @media (max-width: 760px) {
   .jump a { padding: 10px 12px; }
@@ -313,9 +313,9 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 /* a mark: a league's own logo, or a sport's drawn icon, on the same white tile as the team logos */
 .mark { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 5px; background: #fff; line-height: 0; }
 .mark img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(1.1); }
-.mark svg { width: 100%; height: 100%; fill: none; stroke: #0a1224; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; --c: #0a1224; }
-:root[data-theme="light"] .mark { box-shadow: inset 0 0 0 1px #0a1224; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .mark, :root:not([data-theme="dark"]) .logo { box-shadow: inset 0 0 0 1px #0a1224; } }
+.mark svg { width: 100%; height: 100%; fill: none; stroke: #000000; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; --c: #000000; }
+:root[data-theme="light"] .mark { box-shadow: inset 0 0 0 1px #000000; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .mark, :root:not([data-theme="dark"]) .logo { box-shadow: inset 0 0 0 1px #000000; } }
 .lg-head { align-items: center; }
 .door { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 30rem); }
 .door .mark { width: 64px; height: 64px; padding: 12px; }
@@ -449,3 +449,130 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 
 /* NHL logos come in a wide 3:2 frame with empty room either side: filled to the square's height, they use the tile */
 img[src*="assets.nhle.com/logos"] { object-fit: cover; }
+
+/* ==== colour: one accent, green, for what is chosen or happening now; logos in their own colours ==== */
+:root { --accent: #2fd27a; --on-accent: #000000; }
+:root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
+.sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
+.calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
+.livetag { color: var(--accent); }
+.livetag .dot, .jump .on { background: var(--accent); }
+.gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
+.gc-row .v.best { color: var(--accent); }
+.game.on a.row, .tick.on a { background: var(--accent) !important; color: var(--on-accent) !important; }
+.game.on .livetag, .tick.on .livetag { color: var(--on-accent); } .game.on .livetag .dot, .tick.on .livetag .dot { background: var(--on-accent); }
+
+/* ==== more green: hover and focus, links, the betting line, wins, and the marks ==== */
+:focus-visible { outline-color: var(--accent) !important; }
+a { text-decoration-color: var(--accent); }
+.kind { color: var(--accent); font-weight: 700 !important; font-size: .8125rem !important; -webkit-text-stroke: .5px currentColor; }
+.team.away.won::after, .team.home.won::before, .gc-team.won .gc-name::after { background: var(--accent) !important; color: var(--on-accent) !important; }
+.totop-btn:hover, .calday:hover:not([aria-pressed="true"]) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
+.jump a:hover, .jump a:focus-visible, .door-pages a:hover, .step:hover, .invert:hover, .morebtn:hover, .pick > summary:hover, .pick[open] > summary,
+.game a.row:hover, .game a.row:focus-visible, .tick a:hover, .tick a:focus-visible { background: var(--accent) !important; color: var(--on-accent) !important; }
+.brand .goat, .mark.icon svg { color: var(--accent); }
+.mast-when h1 { color: var(--accent); }
+.lg-head h2 a:hover, .all:hover { color: var(--accent); }
+
+/* on a phone, where the two teams stack, each line reads logo, name, number */
+@media (max-width: 760px) { .game .team .logo { order: -1 !important; } .game .team .rk { order: 1 !important; } .game .team .name, .game .team > a { order: 0 !important; } .game .team { justify-content: flex-start !important; flex-direction: row !important; } }
+
+/* the drawn sport marks stand on their own: green line, no tile, no ring */
+.mark.icon { background: none !important; box-shadow: none !important; padding: 0 !important; }
+.mark.icon svg { stroke: var(--accent) !important; --c: var(--accent); }
+
+/* ==== still more green: the headings over each part, table heads, key numbers, and the frames of the controls ==== */
+h2.sec, .msec, .gc-h, .pc-sec h2, .tsec h2, .hahead, thead th { color: var(--accent) !important; }
+.pc-rank b, .readouts dd, .mast-day .v, .jump .n { color: var(--accent); }
+.totop-btn, .invert { border-color: var(--accent) !important; }
+.lg-head { border-bottom: 2px solid var(--accent) !important; }
+
+/* green rules over the leagues with no games and under The sports heading */
+.lg + .quiet, .quiet:first-of-type { border-top: 2px solid var(--accent) !important; }
+h2.sec { border-bottom: 2px solid var(--accent) !important; }
+
+/* no W and L badges beside the teams: the bold score already says who won */
+.team.won::before, .team.won::after, .team.lost::before, .team.lost::after, .gc-team.won .gc-name::after, .gc-team.lost .gc-name::after { content: none !important; display: none !important; }
+
+/* the homepage's rules stay white; the winner of a finished game is green */
+.lg-head { border-bottom-color: var(--lumin) !important; }
+.lg + .quiet, .quiet:first-of-type { border-top-color: var(--lumin) !important; }
+h2.sec { border-bottom-color: var(--lumin) !important; }
+.team.won, .team.won .name, a.row:has(.team.won) .mid > span:not(.l):not(.dash) { color: var(--accent); }
+.game a.row:hover .team.won, .game a.row:hover .team.won .name, .game a.row:hover .mid > span, .game a.row:focus-visible .team.won .name { color: inherit; }
+
+/* the Date box: green when open, and the browser's own calendar takes the green */
+.goto:focus-within { border-color: var(--accent) !important; outline-color: var(--accent); }
+.goto input { accent-color: var(--accent); }
+
+/* Away and Home over each league's games, lined up with the columns */
+.lg .hahead { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) var(--mid-w, 8rem) minmax(0, 1fr) 11rem; gap: 12px; padding: 8px 10px 0; margin-bottom: -2px;
+  font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.lg .hahead .away { text-align: right; }
+@media (max-width: 760px) {
+  .lg .hahead { display: flex; gap: 6px; padding: 8px 0 0; margin-bottom: 0; }
+  .lg .hahead > span:empty { display: none; }
+  .lg .hahead .away::after { content: " on top,"; text-transform: none; letter-spacing: 0; }
+  .lg .hahead .home::after { content: " below"; text-transform: none; letter-spacing: 0; }
+}
+
+/* dates outside the calendar are green */
+.quiet .date { color: var(--accent); }
+
+/* a dropdown being used is outlined green */
+.pick[open] > summary, .goto:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent); }
+
+/* ==== the Date button and its month of days: black, white rules, the chosen day green ==== */
+.goto { position: relative; padding: 0 !important; cursor: default; }
+.goto-btn { height: 100%; display: grid; align-content: center; gap: 4px; padding: 0 16px; min-width: 9.5rem; font: inherit; text-align: left; color: var(--lumin); background: none; border: 0; cursor: pointer; }
+.goto-btn span { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; }
+.goto-btn b { font-weight: 500; font-size: .8125rem; letter-spacing: .02em; }
+.goto-btn:focus-visible { outline: none; }
+.goto:has(.goto-btn[aria-expanded="true"]), .goto:focus-within { border-color: var(--accent) !important; box-shadow: 0 0 0 1px var(--accent); }
+.gp { position: absolute; z-index: 20; top: calc(100% + 6px); right: -1px; width: 19rem; background: var(--void); border: 1px solid var(--accent); box-shadow: 0 0 0 1px var(--accent); padding: 12px; }
+.gp-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.gp-title { font-weight: 500; font-size: .8125rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.gp-step { width: 36px; height: 36px; display: grid; place-items: center; color: var(--lumin); background: var(--void); border: 1px solid var(--lumin); cursor: pointer; padding: 0; }
+.gp-step svg { width: 10px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.gp-step:hover, .gp-step:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--on-accent); outline: none; }
+.gp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.gp-wd { text-align: center; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; padding: 4px 0 6px; color: var(--accent); }
+.gp-day { aspect-ratio: 1; display: grid; place-items: center; font: inherit; font-size: .8125rem; color: var(--lumin); background: var(--void); border: 1px solid transparent; cursor: pointer; padding: 0; }
+.gp-day:hover { border-color: var(--accent); }
+.gp-day:focus-visible { outline: none; border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.gp-day.today { border-color: var(--lumin); }
+.gp-day[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+.gp-foot { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--lumin); }
+.gp-today { font: inherit; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin); background: var(--void); border: 1px solid var(--lumin); padding: 8px 12px; cursor: pointer; }
+.gp-today:hover, .gp-today:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--on-accent); outline: none; }
+@media (max-width: 760px) { .gp { left: -1px; right: auto; width: min(19rem, calc(100vw - 32px)); } .goto-btn { min-height: 52px; } }
+.goto:focus-within, .goto:has(.goto-btn[aria-expanded="true"]) { outline: none !important; box-shadow: none !important; border-color: var(--accent) !important; }
+
+/* Away and Home sit over the line under each league's heading: the line moves down to them */
+.lg > .lg-head { border-bottom: 0 !important; padding-bottom: 4px; }
+.lg > .hahead { border-bottom: 2px solid var(--lumin); padding-bottom: 6px !important; margin-bottom: 0 !important; }
+
+/* the same room under the header as every sport page */
+.day { padding-top: 40px !important; }
+@media (max-width: 760px) { .day { padding-top: 24px !important; } }
+
+/* the Leagues list: green names and green ticks; the Date box shows its day in green */
+.pick label { color: var(--accent); }
+.pick label:hover { background: var(--accent) !important; color: var(--on-accent) !important; }
+.pick input { border-color: var(--accent); }
+.pick input:checked { background: var(--accent); border-color: var(--accent); }
+.pick input:checked::after { background: var(--void); }
+.pick label:hover input { border-color: var(--on-accent); }
+.pick label:hover input:checked { background: var(--on-accent); }
+.pick label:hover input:checked::after { background: var(--accent); }
+.goto-btn b { color: var(--accent); }
+
+/* the Leagues list in white with green ticks; the word Leagues itself green */
+.pick label { color: var(--lumin) !important; }
+.pick > summary { color: var(--accent) !important; }
+.pick[open] > summary, .pick > summary:hover { color: var(--on-accent) !important; }
+/* each league named in green, without its sport beside it */
+.lg-head h2 a { color: var(--accent) !important; }
+.lg-head .kind { display: none !important; }
+/* Away and Home in a heavier weight */
+.lg .hahead { font-weight: 700; -webkit-text-stroke: .4px currentColor; }

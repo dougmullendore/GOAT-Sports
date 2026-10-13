@@ -207,7 +207,7 @@ def test_the_site_builds():
         soto = json.loads((out / "cards" / f"{METS}.json").read_text())["36969"]
         assert soto["games"] and soto["career"] and soto["highs"]
         html = (out / "index.html").read_text()
-        assert "app.js?v=" in html and "#0a1224" in html and "GOAT Baseball" in html
+        assert "app.js?v=" in html and "#000000" in html and "GOAT Baseball" in html
 
 
 def test_a_game_day_run_looks_only_while_a_game_is_on():

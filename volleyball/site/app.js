@@ -84,6 +84,35 @@
   }
 
   var $ = function (id) { return document.getElementById(id); };
+  // the league switch (NFL / College and the like) sits in the masthead's own row beside the sport's name,
+  // so the header is the same height on every page of every sport
+  (function () {
+    var lg = document.getElementById("leagues"), brand = document.querySelector(".mast-row .brand");
+    if (lg && brand) brand.parentNode.insertBefore(lg, brand.nextSibling);
+  })();
+  // ---- the header's two readouts, as on the front page: today's games and how many are under way ----
+  (function () {
+    function put() {
+      if (!data || !data.games) return;
+      var n = 0, on = 0;
+      data.games.forEach(function (g) {
+        if (g.date === today) n++;
+        var L = g.live;
+        if (L ? L.state === "in" : g.state === "live") on++;
+      });
+      var box = document.getElementById("hdr-read");
+      if (!box) {
+        var row = document.querySelector(".mast-row"), pages = row && row.querySelector(".pages");
+        if (!row) return;
+        box = el("dl", { "class": "hdr-read", id: "hdr-read" });
+        row.insertBefore(box, pages);
+      }
+      box.innerHTML = "";
+      [["Games today", n], ["Live now", on]].forEach(function (x) { box.appendChild(el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })])); });
+    }
+    setTimeout(put, 600); setTimeout(put, 2500);
+    setInterval(put, 10000);
+  })();
   // ---- the button at the foot of the page goes back to the top ----
   (function () {
     var b = document.getElementById("totop");
@@ -112,7 +141,14 @@
       var on = bar.querySelector('[aria-pressed="true"]');
       if (on && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - Math.floor(bar.clientWidth / on.offsetWidth / 2) * on.offsetWidth);
     }, 0);
-    return bar;
+    // an arrow either side steps to the day (or week) before or after the one shown
+    var at = items.map(function (it) { return it.key; }).indexOf(chosen), unit = /week/i.test(name || "") ? "week" : "day";
+    function step(by, words, path) {
+      var to = items[at + by], b = el("button", { type: "button", "class": "step", "aria-label": words + " " + unit, disabled: !to, onclick: function () { if (to) pick(to.key); } });
+      b.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="' + path + '"/></svg>';
+      return b;
+    }
+    return el("div", { "class": "calwrap" }, [step(-1, "Previous", "M8 1L2 7l6 6"), bar, step(1, "Next", "M2 1l6 6-6 6")]);
   }
   // one cell for each day that has a game
   function dayItems(games) {
@@ -251,7 +287,7 @@
 
   // ---- the rankings page ----
   // The coaches poll beside the site's own GOAT ranking, which gives head-to-head results more say.
-  var rankView = "avca", goatAll = false;      // the poll is shown; the GOAT ranking only when asked for
+  var rankView = "avca", goatAll = false, goatTabNow = false;      // the poll is shown; the GOAT ranking only when asked for
   // A team's results against the other ranked teams: "Beat 9 Texas, 12 Texas A&M. Lost to 2 Pittsburgh."
   // Two boxes under the team, side by side: "Beat" on the left, "Lost to" on the right.
   function versus(t) {
@@ -315,7 +351,7 @@
     var was = $("conf-standings"), confs = !PRO() && hasConferences(data.d1);
     if (was) was.parentNode.removeChild(was);
     if (rankView === "conf" && !confs) rankView = "avca";
-    if (!PRO() || G.top) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).forEach(function (o) {
+    if (!PRO() || G.top) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).filter(function (o) { return PRO() ? o[0] !== "goat" : goatTabNow ? o[0] !== "conf" : o[0] === "conf"; }).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
     if (rankView === "conf") return drawConferences(data.d1);
@@ -411,7 +447,7 @@
     var note = !L && g.state === "other" ? (g.note ? g.note.charAt(0).toUpperCase() + g.note.slice(1) : "Not played") : "";
     var when = fin ? "Final" : live ? (L && L.detail) || "In progress" : note ? note : t && !isNaN(t) ? t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "Time not set";
     function team(side, s, lost, won) {
-      var kids = [logo(s.id), teamA(s.id, s.name, "name"), rankTag(s.rank, s.id)];
+      var kids = [rankTag(s.rank, s.id), teamA(s.id, s.name, "name"), logo(s.id)];       // logos in the middle, then the names, the rankings outermost
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -548,7 +584,11 @@
     if (newestFirst) order.reverse();
     else if (!asGiven && order.indexOf(today) > 0) { order.splice(order.indexOf(today), 1); order.unshift(today); }   // today's matches first
     order.forEach(function (d) {
-      holder.appendChild(el("h3", { "class": "day" + (d === today ? " today" : ""), text: (d === today ? "Today, " : d === addDays(today, 1) ? "Tomorrow, " : d === addDays(today, -1) ? "Yesterday, " : "") + long(d) }));
+      // a list of one day under the calendar is already named by the heading over the calendar: no second heading
+      if (order.length > 1 || holder.id !== "list") holder.appendChild(el("h3", { "class": "day" + (d === today ? " today" : ""), text: (d === today ? "Today, " : d === addDays(today, 1) ? "Tomorrow, " : d === addDays(today, -1) ? "Yesterday, " : "") + long(d) }));
+      // the Away and Home labels sit on the first day's heading line, right over the games
+      var ha = holder.querySelector(":scope > .hahead");
+      if (ha && !ha.getAttribute("data-placed")) { ha.setAttribute("data-placed", "1"); holder.appendChild(ha); }
       holder.appendChild(el("ol", { "class": "games" }, days[d].map(row)));
     });
   }
@@ -1298,12 +1338,19 @@
 
   function route() {
     var h = location.hash, card = /^#\/?player\/(.+)$/.exec(h), match = /^#\/?match\/(\d+)/.exec(h), tm = /^#\/?team\/(.+)$/.exec(h);
+    // the GOAT ranking has a tab of its own: the rankings page, shown in its GOAT view
+    var goatTab = /^#\/?goat/.test(h);
+    goatTabNow = goatTab;      // (college: the poll and the GOAT ranking are on this tab, the conference standings on Standings)
+    if (goatTab) { h = "#/rankings"; rankView = PRO() ? "goat" : rankView === "conf" ? "avca" : rankView; }
+    else if (/^#\/?rankings/.test(h)) { rankView = PRO() ? (rankView === "goat" ? "avca" : rankView) : "conf"; }
     stopMatch();
     var page = tm ? "team" : match ? "match" : card ? "card" : /^#\/?players/.test(h) ? "players" : /^#\/?rankings/.test(h) ? "rankings" : /^#\/?teams/.test(h) ? "teams" : "matches";
     ["matches", "rankings", "teams", "players", "card", "match", "team"].forEach(function (p) { $("page-" + p).hidden = p !== page; });
     Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) {
       if (a.dataset.page === (page === "card" ? "players" : page === "match" ? "matches" : page === "team" ? "teams" : page)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
+    if (goatTab) Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) { if (a.dataset.page === "goat") a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    $("rank-sort").hidden = PRO() ? goatTab : !goatTab;      // pro: the standings have the view buttons; college: the poll does
     document.title = ({ rankings: W("rankings.title"), teams: W("teams.title"), players: W("players.title"), match: W("matches.box_score"), team: "Team", card: "Player card" }[page] || W("matches.title")) + " | " + data.site;
     if (page === "team") drawTeam(decodeURIComponent(tm[1])); else if (page === "match") drawMatch(match[1]); else if (page === "rankings") drawRanks(); else if (page === "teams") drawTeams(); else if (page === "players") drawPlayers(); else if (page === "card") drawCard(decodeURIComponent(card[1])); else draw();
     window.scrollTo(0, 0);

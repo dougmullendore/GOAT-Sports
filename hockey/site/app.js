@@ -84,6 +84,35 @@
   }
 
   var $ = function (id) { return document.getElementById(id); };
+  // the league switch (NFL / College and the like) sits in the masthead's own row beside the sport's name,
+  // so the header is the same height on every page of every sport
+  (function () {
+    var lg = document.getElementById("leagues"), brand = document.querySelector(".mast-row .brand");
+    if (lg && brand) brand.parentNode.insertBefore(lg, brand.nextSibling);
+  })();
+  // ---- the header's two readouts, as on the front page: today's games and how many are under way ----
+  (function () {
+    function put() {
+      if (!data || !data.games) return;
+      var n = 0, on = 0;
+      data.games.forEach(function (g) {
+        if (g.date === today) n++;
+        var L = g.live;
+        if (L ? L.state === "in" : g.state === "live") on++;
+      });
+      var box = document.getElementById("hdr-read");
+      if (!box) {
+        var row = document.querySelector(".mast-row"), pages = row && row.querySelector(".pages");
+        if (!row) return;
+        box = el("dl", { "class": "hdr-read", id: "hdr-read" });
+        row.insertBefore(box, pages);
+      }
+      box.innerHTML = "";
+      [["Games today", n], ["Live now", on]].forEach(function (x) { box.appendChild(el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })])); });
+    }
+    setTimeout(put, 600); setTimeout(put, 2500);
+    setInterval(put, 10000);
+  })();
   // ---- the button at the foot of the page goes back to the top ----
   (function () {
     var b = document.getElementById("totop");
@@ -112,7 +141,14 @@
       var on = bar.querySelector('[aria-pressed="true"]');
       if (on && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - Math.floor(bar.clientWidth / on.offsetWidth / 2) * on.offsetWidth);
     }, 0);
-    return bar;
+    // an arrow either side steps to the day (or week) before or after the one shown
+    var at = items.map(function (it) { return it.key; }).indexOf(chosen), unit = /week/i.test(name || "") ? "week" : "day";
+    function step(by, words, path) {
+      var to = items[at + by], b = el("button", { type: "button", "class": "step", "aria-label": words + " " + unit, disabled: !to, onclick: function () { if (to) pick(to.key); } });
+      b.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="' + path + '"/></svg>';
+      return b;
+    }
+    return el("div", { "class": "calwrap" }, [step(-1, "Previous", "M8 1L2 7l6 6"), bar, step(1, "Next", "M2 1l6 6-6 6")]);
   }
   // one cell for each day that has a game
   function dayItems(games) {
@@ -251,7 +287,7 @@
     var holder = $("stand"), bar = $("rank-sort");
     holder.innerHTML = ""; bar.innerHTML = "";
     [["division", W("standings.button_division")], ["wildcard", W("standings.button_wildcard")], ["conference", W("standings.button_conference")],
-      ["league", W("standings.button_league")], ["goat", W("standings.button_goat")]].forEach(function (o) {
+      ["league", W("standings.button_league")], ["goat", W("standings.button_goat")]].filter(function (o) { return o[0] !== "goat"; }).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(standView === o[0]), text: o[1], onclick: function () { standView = o[0]; drawStandings(); } }));
     });
     var teams = data.teams.slice(), G = data.goat || {};
@@ -273,24 +309,20 @@
     }
     if (standView === "league") holder.appendChild(standTable(teams.sort(by("rank")), "League"));
     else if (standView === "conference") groups("conf").forEach(function (c) {
-      holder.appendChild(el("h3", { "class": "day", text: c + " Conference" }));
-      holder.appendChild(standTable(teams.filter(function (t) { return t.conf === c; }).sort(by("conf_rank")), c));
+      holder.appendChild(standTable(teams.filter(function (t) { return t.conf === c; }).sort(by("conf_rank")), c + " Conference"));       // the table names its group, as on the other leagues' pages
     });
     else if (standView === "division") groups("conf").forEach(function (c) {
       groups("div").filter(function (d) { return teams.some(function (t) { return t.conf === c && t.div === d; }); }).forEach(function (d) {
-        holder.appendChild(el("h3", { "class": "day", text: d + " Division" }));
-        holder.appendChild(standTable(teams.filter(function (t) { return t.div === d; }).sort(by("div_rank")), d, null, 3));
+        holder.appendChild(standTable(teams.filter(function (t) { return t.div === d; }).sort(by("div_rank")), d + " Division", null, 3));
       });
     });
     else groups("conf").forEach(function (c) {       // the playoff picture: three from each division, then two wild cards
       holder.appendChild(el("h2", { "class": "confhead", text: c + " Conference" }));
       var mine = teams.filter(function (t) { return t.conf === c; });
       groups("div").filter(function (d) { return mine.some(function (t) { return t.div === d; }); }).forEach(function (d) {
-        holder.appendChild(el("h3", { "class": "day", text: d + " Division, top three" }));
-        holder.appendChild(standTable(mine.filter(function (t) { return t.div === d && t.div_rank <= 3; }).sort(by("div_rank")), d));
+        holder.appendChild(standTable(mine.filter(function (t) { return t.div === d && t.div_rank <= 3; }).sort(by("div_rank")), d + " Division"));
       });
       var rest = mine.filter(function (t) { return t.div_rank > 3; }).sort(function (a, b) { return (a.wc || 99) - (b.wc || 99) || a.conf_rank - b.conf_rank; });
-      holder.appendChild(el("h3", { "class": "day", text: "Wild card" }));
       holder.appendChild(standTable(rest, "Wild card", null, 2));
     });
     $("rank-note").textContent = W("standings.note") + (standView === "wildcard" || standView === "division" ? " " + W("standings.note_line") : "");
@@ -355,13 +387,11 @@
     });
     if (oddsView === "league") holder.appendChild(oddsTable(teams, "Team"));
     else if (oddsView === "conference") groups("conf").forEach(function (c) {
-      holder.appendChild(el("h3", { "class": "day", text: c + " Conference" }));
-      holder.appendChild(oddsTable(teams.filter(function (t) { return t.conf === c; }), c));
+      holder.appendChild(oddsTable(teams.filter(function (t) { return t.conf === c; }), c + " Conference"));       // the table names its group
     });
     else groups("conf").forEach(function (c) {
       groups("div").filter(function (d) { return teams.some(function (t) { return t.conf === c && t.div === d; }); }).forEach(function (d) {
-        holder.appendChild(el("h3", { "class": "day", text: d + " Division" }));
-        holder.appendChild(oddsTable(teams.filter(function (t) { return t.div === d; }), d));
+        holder.appendChild(oddsTable(teams.filter(function (t) { return t.div === d; }), d + " Division"));
       });
     });
     function whole(x) { return Math.round(x * 100) + "%"; }
@@ -396,7 +426,7 @@
     var note = !g.live && g.state === "other" ? (g.note || "Not played") : "";
     var when = fin ? finalWord(s.end) : live ? s.detail : note ? note : t && !isNaN(t) ? clockTime(t) : "Time not set";
     function team(side, x, lost, won) {
-      var kids = [logo(x.id), teamA(x.id, x.name, "name"), rankTag(x.rank)];
+      var kids = [rankTag(x.rank), teamA(x.id, x.name, "name"), logo(x.id)];       // logos in the middle, then the names, the rankings outermost
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -493,7 +523,11 @@
     if (newestFirst) order.reverse();
     else if (!asGiven && order.indexOf(today) > 0) { order.splice(order.indexOf(today), 1); order.unshift(today); }   // today's games first
     order.forEach(function (d) {
-      holder.appendChild(el("h3", { "class": "day" + (d === today ? " today" : ""), text: (d === today ? "Today, " : d === addDays(today, 1) ? "Tomorrow, " : d === addDays(today, -1) ? "Yesterday, " : "") + long(d) }));
+      // a list of one day under the calendar is already named by the heading over the calendar: no second heading
+      if (order.length > 1 || holder.id !== "list") holder.appendChild(el("h3", { "class": "day" + (d === today ? " today" : ""), text: (d === today ? "Today, " : d === addDays(today, 1) ? "Tomorrow, " : d === addDays(today, -1) ? "Yesterday, " : "") + long(d) }));
+      // the Away and Home labels sit on the first day's heading line, right over the games
+      var ha = holder.querySelector(":scope > .hahead");
+      if (ha && !ha.getAttribute("data-placed")) { ha.setAttribute("data-placed", "1"); holder.appendChild(ha); }
       holder.appendChild(el("ol", { "class": "games" }, days[d].map(function (g) { return row(g); })));
     });
   }
@@ -1415,12 +1449,18 @@
 
   function route() {
     var h = location.hash, card = /^#\/?player\/(\d+)/.exec(h), game = /^#\/?game\/(\d+)/.exec(h), tm = /^#\/?team\/(.+)$/.exec(h), ln = /^#\/?lines(?:\/(.+))?$/.exec(h);
+    // the GOAT ranking has a tab of its own: the standings page, shown in its GOAT view
+    var goatTab = /^#\/?goat/.test(h);
+    if (goatTab) { h = "#/standings"; standView = "goat"; }
+    else if (/^#\/?standings/.test(h)) { if (standView === "goat") standView = "division"; }
     stopGame();
     var page = tm ? "team" : game ? "game" : card ? "card" : ln ? "lines" : /^#\/?odds/.test(h) ? "odds" : /^#\/?players/.test(h) ? "players" : /^#\/?standings/.test(h) ? "standings" : /^#\/?teams/.test(h) ? "teams" : "games";
     ["games", "standings", "teams", "players", "lines", "odds", "card", "game", "team"].forEach(function (p) { $("page-" + p).hidden = p !== page; });
     Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) {
       if (a.dataset.page === (page === "card" ? "players" : page === "game" ? "games" : page === "team" ? "teams" : page)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
+    if (goatTab) Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) { if (a.dataset.page === "goat") a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    $("rank-sort").hidden = goatTab;          // the GOAT tab has no view buttons; the standings and rankings no GOAT button
     document.title = ({ standings: W("standings.title"), teams: W("teams.title"), players: W("players.title"), lines: W("lines.title"), odds: W("odds.title"), game: W("games.box_score"), team: "Team", card: "Player card" }[page] || W("games.title")) + " | " + data.site;
     if (page === "lines") {
       var remembered = null;
@@ -1428,7 +1468,62 @@
       if (!ln[1] && remembered && T(remembered)) { location.replace("#/lines/" + remembered); return; }
       drawLines(ln[1] ? decodeURIComponent(ln[1]) : null);
     } else if (page === "team") drawTeam(decodeURIComponent(tm[1])); else if (page === "game") drawGame(game[1]); else if (page === "standings") drawStandings(); else if (page === "odds") drawOdds(); else if (page === "teams") drawTeams(); else if (page === "players") drawPlayers(); else if (page === "card") drawCard(card[1]); else draw();
+    if (goatTab) powerTab();
     window.scrollTo(0, 0);
+  }
+
+  // ---- power rankings, on a pro league's Polls & Rankings tab: beside the GOAT ranking, ESPN's (read with
+  // the league's data) and those of CBS Sports, FOX Sports and the league's own site (read by the build into
+  // power/<league>.json). A ranking more than 45 days old is not shown. ----
+  var powerView = "goat", powerSet = null, powerAsked = false, POWER_DAYS = 45;
+  function fresh(stamp) { var t = stamp ? new Date(stamp) : null; return !!t && !isNaN(t) && Date.now() - t < POWER_DAYS * 864e5; }
+  function espnPower() {
+    var G = (data && data.goat) || {}, rows = (G.top && G.top.some(function (t) { return t.power != null; }) ? G.top : data.teams || []).filter(function (t) { return t.power != null; });
+    if (!rows.length || !G.power || !fresh(G.power.published)) return null;
+    return { key: "espn", label: "ESPN", headline: G.power.headline, published: G.power.published,
+      teams: rows.slice().sort(function (a, b) { return a.power - b.power; }).map(function (t) { return [t.power, String(t.id)]; }) };
+  }
+  function powerSources() {
+    var out = [], espn = espnPower();
+    if (espn) out.push(espn);
+    ((powerSet && powerSet.sources) || []).forEach(function (s) { if (fresh(s.published || s.read)) out.push(s); });
+    return out;
+  }
+  function powerTab() {
+    if (!(true)) return;
+    if (!powerAsked) {
+      powerAsked = true;
+      var up = (document.querySelector(".sports-home") || { getAttribute: function () { return "../"; } }).getAttribute("href") || "../";
+      fetch(up + "power/" + String("nhl" || "").toLowerCase() + ".json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { powerSet = d; if (/^#\/?goat/.test(location.hash)) powerTab(); }).catch(function () {});
+    }
+    var bar = $("rank-sort"), list = [["goat", W("standings.button_goat")]].concat(powerSources().map(function (s) { return [s.key, s.label]; }));
+    if (!list.some(function (o) { return o[0] === powerView; })) powerView = "goat";
+    bar.innerHTML = "";
+    bar.hidden = list.length < 2;
+    list.forEach(function (o) {
+      bar.appendChild(el("button", { type: "button", "aria-pressed": String(powerView === o[0]), text: o[1], onclick: function () { powerView = o[0]; drawStandings(); powerTab(); } }));
+    });
+    if (powerView === "goat") return;
+    var src = powerSources().filter(function (s) { return s.key === powerView; })[0], box = $("stand");
+    if (!src || !box) return;
+    var byId = {}, goatOf = {};
+    (data.standings || data.teams || []).forEach(function (t) { byId[String(t.id)] = t; });
+    ((data.goat || {}).top || []).forEach(function (t) { goatOf[String(t.id)] = t.rank; });
+    box.innerHTML = "";
+    var stamp = src.published ? new Date(src.published) : null;
+    box.appendChild(el("p", { "class": "powercap" }, [el("b", { text: src.label }), (stamp && !isNaN(stamp) ? " · " + stamp.toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "") +
+      (src.teams.length < Object.keys(byId).length ? " · the top " + src.teams.length + " only" : "")]));
+    var head = el("tr", {}, [el("th", { scope: "col", text: "#" }), el("th", { scope: "col", "class": "l", text: "Team" }), el("th", { scope: "col", text: "Record" }),
+      el("th", { scope: "col", title: "Place in this site's GOAT ranking", text: "GOAT" })]);
+    var body = el("tbody", {}, src.teams.map(function (x) {
+      var id = String(x[1]), t = byId[id] || {}, name = t.short ? t.name : (t.place ? t.place + " " : "") + (t.name || id);
+      var rec = (t.rec && t.rec.all) || (t.w != null ? t.w + "-" + t.l + (t.otl != null ? "-" + t.otl : t.t ? "-" + t.t : "") : "");
+      var goat = t.goat != null ? t.goat : goatOf[id];
+      return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(x[0]) })]), el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(id), teamA(id, name)])]),
+        el("td", { text: rec }), el("td", { text: goat == null ? "–" : String(goat) })]);
+    }));
+    box.appendChild(el("div", { "class": "tablewrap", tabindex: "0", role: "region", "aria-label": src.label + " power rankings" }, [el("table", { "class": "ptable stand power" }, [el("thead", {}, [head]), body])]));
   }
 
   // ---- a page left open, or come back to later, does not go stale ----

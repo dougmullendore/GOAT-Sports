@@ -20,8 +20,10 @@ else
   echo "The repository could not be reached, so the site was not published."; exit 1
 fi
 mkdir -p dist
-if [ "${BY_HAND:-0}" = 1 ]; then python -m tools.test_assemble; fi
+if [ "${BY_HAND:-0}" = 1 ]; then python -m tools.test_assemble; python -m tools.test_power_rankings; fi
 python -m tools.assemble dist pub
+# the big sites' power rankings for the pro leagues (read at most every few hours; never stops the publish)
+python -m tools.power_rankings pub || true
 cd pub
 git config user.name "goat-sports-bot"
 git config user.email "goat-sports-bot@users.noreply.github.com"
