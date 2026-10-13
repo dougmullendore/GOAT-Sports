@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T07:25:54Z",
+  "title": "Design System: GOAT Sports",
+  "extensions": {
+    "colorMeta": {
+      "void": {
+        "role": "neutral",
+        "displayName": "Void",
+        "canonical": "#000000",
+        "light": "#ffffff",
+        "cssVar": "--void",
+        "tonalRamp": [
+          "#000000"
+        ],
+        "note": "Two-ink system: no tonal ramp by design. Swaps with lumin in the light theme."
+      },
+      "lumin": {
+        "role": "primary",
+        "displayName": "Lumin",
+        "canonical": "#ffffff",
+        "light": "#000000",
+        "cssVar": "--lumin",
+        "tonalRamp": [
+          "#ffffff"
+        ],
+        "note": "Two-ink system: no tonal ramp by design. Swaps with void in the light theme."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The front page's date, a sport page's title; one per page, uppercase, condensed (wdth 75)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "A league's name over its games, beside its bar mark."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section heads on a 1px rule, uppercase."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Calendar dates, scores and readouts; tabular, light."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Rows, team names (500, uppercase) and prose; tabular figures."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Column heads, buttons, tabs, channels, readout labels; uppercase, 0.1em."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "blink",
+        "value": "1s steps(2, start) infinite",
+        "purpose": "The live square in live tags and league links; off under reduced motion."
+      },
+      {
+        "name": "flip",
+        "value": ".9s steps(1) 1",
+        "purpose": "A live row flips to void and back when its score changes; off under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "strip-narrow",
+        "value": "480px"
+      },
+      {
+        "name": "sport-phone",
+        "value": "640px"
+      },
+      {
+        "name": "home-phone",
+        "value": "760px"
+      },
+      {
+        "name": "container",
+        "value": "1240px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Every control: outlined and square; hover and pressed invert it; disabled is dashed.",
+      "html": "<div class=\"ds-btns\"><button class=\"ds-btn\">Show all 16 games</button><button class=\"ds-btn\" aria-pressed=\"true\">Pressed</button><button class=\"ds-btn\" disabled>Disabled</button></div>",
+      "css": ".ds-btns { display: flex; background: var(--void, #000); padding: 16px; } .ds-btn { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin, #fff); background: var(--void, #000); border: 1px solid var(--lumin, #fff); border-radius: 0; padding: 0 16px; min-height: 40px; cursor: pointer; } .ds-btn + .ds-btn { margin-left: -1px; } .ds-btn:hover:not(:disabled), .ds-btn[aria-pressed=\"true\"] { background: var(--lumin, #fff); color: var(--void, #000); } .ds-btn:focus-visible { outline: 2px solid var(--lumin, #fff); outline-offset: 3px; } .ds-btn:disabled { border-style: dashed; text-decoration: line-through; cursor: default; }"
+    },
+    {
+      "name": "Invert Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The theme switch: swaps void and lumin for the whole page.",
+      "html": "<div class=\"ds-wrap-inv\"><button class=\"ds-invert\" aria-pressed=\"false\">Invert</button></div>",
+      "css": ".ds-wrap-inv { background: var(--void, #000); padding: 16px; } .ds-invert { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin, #fff); background: var(--void, #000); border: 1px solid var(--lumin, #fff); border-radius: 0; padding: 0 12px; min-height: 36px; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; } .ds-invert::before { content: \"\"; width: 18px; height: 12px; border: 1px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); } .ds-invert:hover { background: var(--lumin, #fff); color: var(--void, #000); } .ds-invert:focus-visible { outline: 2px solid var(--lumin, #fff); outline-offset: 3px; }"
+    },
+    {
+      "name": "Calendar Strip",
+      "kind": "custom",
+      "refersTo": "calendar-day",
+      "description": "Days (or weeks) with their game counts; selected inverted, today marked by a 4px inset bar.",
+      "html": "<nav class=\"ds-cal\" aria-label=\"Days\"><button class=\"ds-calday\" aria-pressed=\"false\"><span class=\"wd\">Mon</span><span class=\"mo\">Oct</span><span class=\"dn\">12</span><span class=\"gn\">10 games</span></button><button class=\"ds-calday today\" aria-pressed=\"true\"><span class=\"wd\">Today</span><span class=\"mo\"></span><span class=\"dn\">13</span><span class=\"gn\">22 games</span></button><button class=\"ds-calday\" aria-pressed=\"false\"><span class=\"wd\">Wed</span><span class=\"mo\"></span><span class=\"dn\">14</span><span class=\"gn\">10 games</span></button><button class=\"ds-calday\" aria-pressed=\"false\"><span class=\"wd\">Thu</span><span class=\"mo\"></span><span class=\"dn\">15</span><span class=\"gn\">23 games</span></button></nav>",
+      "css": ".ds-cal { display: flex; background: var(--void, #000); padding: 16px; overflow-x: auto; scroll-snap-type: x mandatory; } .ds-calday { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; flex: 0 0 92px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: \"wd mo\" \"dn dn\" \"gn gn\"; align-items: baseline; gap: 2px 6px; min-height: 72px; padding: 8px 12px; color: var(--lumin, #fff); background: var(--void, #000); border: 1px solid var(--lumin, #fff); border-radius: 0; margin-left: -1px; text-align: left; cursor: pointer; scroll-snap-align: start; font-variant-numeric: tabular-nums; } .ds-calday:first-child { margin-left: 0; } .ds-calday .wd, .ds-calday .mo, .ds-calday .gn { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; } .ds-calday .wd { grid-area: wd; } .ds-calday .mo { grid-area: mo; text-align: right; } .ds-calday .gn { grid-area: gn; } .ds-calday .dn { grid-area: dn; font-size: 1.375rem; line-height: 1; font-weight: 300; letter-spacing: -.02em; } .ds-calday.today { box-shadow: inset 0 -4px 0 var(--lumin, #fff); } .ds-calday:hover, .ds-calday[aria-pressed=\"true\"] { background: var(--lumin, #fff); color: var(--void, #000); } .ds-calday[aria-pressed=\"true\"].today { box-shadow: inset 0 -4px 0 var(--void, #000); } .ds-calday:focus-visible { outline: 2px solid var(--lumin, #fff); outline-offset: 3px; }"
+    },
+    {
+      "name": "Game Row",
+      "kind": "custom",
+      "refersTo": "game-row",
+      "description": "One game per ruled row: time, away, the betting line (or score), home, channels. Hover, focus and live invert the row; live blinks a square.",
+      "html": "<ul class=\"ds-games\"><li><a class=\"ds-row\" href=\"#\"><span class=\"ds-when\">5:00 PM</span><span class=\"ds-team away\">Devils <b class=\"ds-rk\">26</b></span><span class=\"ds-mid\"><span>DET -115</span><span class=\"ou\">O/U 6.5</span></span><span class=\"ds-team\"><b class=\"ds-rk\">28</b> Red Wings</span><span class=\"ds-more\">ESPN, SN+</span></a></li><li class=\"on\"><a class=\"ds-row\" href=\"#\"><span class=\"ds-when\"><span class=\"ds-live\"><i></i>Live</span></span><span class=\"ds-team away\">Lightning <b class=\"ds-rk goat\">7</b></span><span class=\"ds-mid\"><span>3 <span class=\"dash\">-</span> <span class=\"l\">1</span></span></span><span class=\"ds-team\"><b class=\"ds-rk goat\">3</b> Rangers</span><span class=\"ds-more\">MSG</span></a></li></ul>",
+      "css": ".ds-games { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; list-style: none; margin: 0; padding: 16px; background: var(--void, #000); color: var(--lumin, #fff); font-size: .875rem; font-variant-numeric: tabular-nums; } .ds-games li { border-bottom: 1px solid var(--lumin, #fff); } .ds-row { display: grid; grid-template-columns: 6.5rem minmax(0,1fr) 8rem minmax(0,1fr) 9rem; align-items: center; gap: 12px; padding: 11px 10px; min-height: 52px; color: inherit; text-decoration: none; } .ds-row:hover, .ds-row:focus-visible, .ds-games li.on .ds-row { background: var(--lumin, #fff); color: var(--void, #000); outline: none; } .ds-when { font-size: .75rem; letter-spacing: .04em; } .ds-team { display: flex; align-items: center; gap: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; } .ds-team.away { justify-content: flex-end; } .ds-mid { display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 600; letter-spacing: .02em; } .ds-mid .ou { font-size: .6875rem; font-weight: 400; letter-spacing: .06em; } .ds-mid .l, .ds-mid .dash { font-weight: 200; } .ds-more { font-size: .6875rem; letter-spacing: .04em; text-transform: uppercase; text-align: right; } .ds-rk { display: inline-grid; place-items: center; min-width: 2.1em; height: 1.6em; padding: 0 .3em; font-size: .75rem; font-weight: 500; background: var(--lumin, #fff); color: var(--void, #000); } .ds-rk.goat { background: transparent; color: inherit; box-shadow: inset 0 0 0 1px currentColor; } .ds-row:hover .ds-rk:not(.goat), .ds-row:focus-visible .ds-rk:not(.goat), .on .ds-rk:not(.goat) { background: var(--void, #000); color: var(--lumin, #fff); } .ds-live { display: inline-flex; align-items: center; gap: 6px; font-size: .6875rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; } .ds-live i { width: 7px; height: 7px; background: currentColor; animation: ds-blink 1s steps(2, start) infinite; } @keyframes ds-blink { to { visibility: hidden; } } @media (prefers-reduced-motion: reduce) { .ds-live i { animation: none; } }"
+    },
+    {
+      "name": "Rank and Result Boxes",
+      "kind": "chip",
+      "refersTo": "rank-standing",
+      "description": "Filled box for a poll or standings place, outlined for a GOAT number; filled W for the winner, outlined L for the loser.",
+      "html": "<div class=\"ds-boxes\"><b class=\"ds-rk2\">3</b><b class=\"ds-rk2 goat\">12</b><b class=\"ds-wl w\">W</b><b class=\"ds-wl l\">L</b></div>",
+      "css": ".ds-boxes { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; display: flex; gap: 12px; align-items: center; padding: 16px; background: var(--void, #000); color: var(--lumin, #fff); font-variant-numeric: tabular-nums; } .ds-rk2 { display: inline-grid; place-items: center; min-width: 2.1em; height: 1.6em; padding: 0 .3em; font-size: .75rem; font-weight: 500; background: var(--lumin, #fff); color: var(--void, #000); } .ds-rk2.goat { background: transparent; color: var(--lumin, #fff); box-shadow: inset 0 0 0 1px var(--lumin, #fff); } .ds-wl { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; font-size: .6875rem; font-weight: 600; } .ds-wl.w { background: var(--lumin, #fff); color: var(--void, #000); } .ds-wl.l { color: var(--lumin, #fff); box-shadow: inset 0 0 0 1px var(--lumin, #fff); }"
+    },
+    {
+      "name": "Sport Bar Marks",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Each sport's identity: its own bar rhythm beside its name, never a colour.",
+      "html": "<ul class=\"ds-marks\"><li><svg class=\"ds-bars\" viewBox=\"0 0 50 30\" preserveAspectRatio=\"none\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"5\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"7\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"11\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"16\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"18\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"22\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"27\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"29\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"33\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"38\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"40\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"44\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"49\" y=\"0\" width=\"1\" height=\"30\"/></svg><span>Football</span></li><li><svg class=\"ds-bars\" viewBox=\"0 0 27 30\" preserveAspectRatio=\"none\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"2\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"4\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"6\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"8\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"10\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"12\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"14\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"16\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"18\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"20\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"22\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"24\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"26\" y=\"0\" width=\"1\" height=\"30\"/></svg><span>Basketball</span></li><li><svg class=\"ds-bars\" viewBox=\"0 0 39 30\" preserveAspectRatio=\"none\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"2\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"4\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"9\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"11\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"13\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"18\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"20\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"22\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"27\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"29\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"31\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"36\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"38\" y=\"0\" width=\"1\" height=\"30\"/></svg><span>Baseball</span></li><li><svg class=\"ds-bars\" viewBox=\"0 0 61 30\" preserveAspectRatio=\"none\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"6\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"9\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"15\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"18\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"24\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"27\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"33\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"36\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"42\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"45\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"51\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"54\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"60\" y=\"0\" width=\"1\" height=\"30\"/></svg><span>Hockey</span></li><li><svg class=\"ds-bars\" viewBox=\"0 0 40 30\" preserveAspectRatio=\"none\" shape-rendering=\"crispEdges\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"0\" y=\"0\" width=\"2\" height=\"30\"/><rect x=\"3\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"5\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"7\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"9\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"16\" y=\"0\" width=\"2\" height=\"30\"/><rect x=\"19\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"21\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"23\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"25\" y=\"0\" width=\"4\" height=\"30\"/><rect x=\"32\" y=\"0\" width=\"2\" height=\"30\"/><rect x=\"35\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"37\" y=\"0\" width=\"1\" height=\"30\"/><rect x=\"39\" y=\"0\" width=\"1\" height=\"30\"/></svg><span>Volleyball</span></li></ul>",
+      "css": ".ds-marks { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; list-style: none; margin: 0; padding: 16px; background: var(--void, #000); color: var(--lumin, #fff); } .ds-marks li { display: flex; align-items: center; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--lumin, #fff); font-weight: 500; font-size: 1.125rem; letter-spacing: .08em; text-transform: uppercase; } .ds-bars { width: 64px; height: 26px; flex: none; }"
+    },
+    {
+      "name": "Sports Strip",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "The strip on every page: the site's name and a tab per sport; the current one inverted.",
+      "html": "<nav class=\"ds-sports\" aria-label=\"Sports\"><a class=\"home\" href=\"#\">GOAT Sports</a><a href=\"#\">Football</a><a href=\"#\">Basketball</a><a href=\"#\">Baseball</a><a href=\"#\" aria-current=\"page\">Hockey</a><a href=\"#\">Volleyball</a></nav>",
+      "css": ".ds-sports { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; display: flex; background: var(--void, #000); color: var(--lumin, #fff); border-bottom: 1px solid var(--lumin, #fff); line-height: 1; } .ds-sports a { color: inherit; text-decoration: none; padding: 12px 14px; white-space: nowrap; } .ds-sports a.home { font-weight: 600; margin-right: 12px; } .ds-sports a:hover, .ds-sports a[aria-current=\"page\"] { background: var(--lumin, #fff); color: var(--void, #000); } .ds-sports a:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }"
+    },
+    {
+      "name": "Explanation and Key Line",
+      "kind": "custom",
+      "refersTo": "",
+      "description": "Notes fold under a 'How to read this' disclosure; the key line names the sportsbook and the helpline as its own ruled row.",
+      "html": "<div class=\"ds-ex\"><details class=\"ds-explain\"><summary>How to read this</summary><p>Numbers are places in the league standings. The middle column is the sportsbook&#39;s line for the favourite, with the over/under under it.</p></details><p class=\"ds-keyline\">Betting lines from DraftKings, read from ESPN. Lines move: check the sportsbook before you bet. If you or someone you know has a gambling problem, call 1-800-GAMBLER.</p></div>",
+      "css": ".ds-ex { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; background: var(--void, #000); color: var(--lumin, #fff); padding: 16px; font-size: .75rem; } .ds-explain > summary { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; list-style: none; } .ds-explain > summary::-webkit-details-marker { display: none; } .ds-explain > summary::before { content: \"\"; width: 6px; height: 6px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(-45deg); } .ds-explain[open] > summary::before { transform: rotate(45deg); } .ds-explain > summary:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-explain > summary:focus-visible { outline: 2px solid var(--lumin, #fff); outline-offset: 3px; } .ds-explain p { margin: 4px 0 10px; max-width: 80ch; } .ds-keyline { margin: 28px 0 0; padding: 12px 0; border-top: 1px solid var(--lumin, #fff); border-bottom: 1px solid var(--lumin, #fff); font-weight: 500; }"
+    },
+    {
+      "name": "Live Module",
+      "kind": "card",
+      "refersTo": "game-row-live",
+      "description": "The front page's one fully inverted panel: what is live now, or the next game up.",
+      "html": "<aside class=\"ds-livenow\"><p class=\"lab\"><span>Next up</span><span>Today</span></p><ol><li><a href=\"#\"><span class=\"tms\">Devils at Red Wings</span><span class=\"sc\">5:00 PM</span><span class=\"st\">NHL &middot; ESPN, SN+</span></a></li></ol></aside>",
+      "css": ".ds-livenow { font-family: 'Martian Mono', ui-monospace, Menlo, monospace; background: var(--lumin, #fff); color: var(--void, #000); padding: 18px 20px 16px; display: grid; gap: 12px; max-width: 380px; font-variant-numeric: tabular-nums; } .ds-livenow .lab { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; margin: 0; display: flex; justify-content: space-between; } .ds-livenow ol { list-style: none; margin: 0; padding: 0; } .ds-livenow a { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 14px; padding: 2px 0 10px; color: var(--void, #000); text-decoration: none; } .ds-livenow a:hover .tms { text-decoration: underline; } .ds-livenow a:focus-visible { outline: 2px solid var(--void, #000); outline-offset: 3px; } .ds-livenow .tms { font-weight: 500; font-size: .875rem; text-transform: uppercase; letter-spacing: .04em; } .ds-livenow .sc { font-size: 1.75rem; line-height: 1; grid-row: span 2; align-self: center; letter-spacing: -.02em; } .ds-livenow .st { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Two-Ink Data Field",
+    "overview": "Every league's day is read off one black-and-white lattice. The page is a field of pure black (#000) crossed by 1px white rules, set in a single monospace face at data density: uppercase labels, tabular figures, numbers that line up down the column. There is no grey, no colour, no gradient tone, no radius and no shadow. Nothing floats; everything sits on the grid and is told apart by position, weight, size and case.\n\nEmphasis has exactly one form: inversion. A white block with black type means live, pressed, selected, hovered, the chosen day, the current page, the winner, a place in the poll. Because it is the only signal, it is never spent on decoration. The light theme is not a second palette; it is the same page with the two inks swapped, chosen by the Invert button or by the device's light setting.\n\nSports are told apart by rhythm, not hue. Each sport owns a fixed barcode pattern of bar widths and gaps, drawn as its mark beside its name and in the front page's list of sports. The system rejects the dark dashboard of rounded cards, one accent colour per section and same-weight grey blocks.",
+    "keyCharacteristics": [
+      "Two inks only: void (#000) and lumin (#fff), swapped wholesale for the light theme.",
+      "One face, Martian Mono, varied by width (75 to 112.5) and weight (200 to 700); tabular figures everywhere.",
+      "1px rules carry all structure; no fills, no cards, no radius, no shadow.",
+      "Inversion is the only emphasis.",
+      "Each sport is identified by its own bar rhythm, never a colour.",
+      "Team logos and player photos appear in greyscale: the only grey on the page, and it is content."
+    ],
+    "rules": [
+      {
+        "name": "The Two Inks Rule",
+        "body": "Only void and lumin are ever set as colour. There is no third value, no tint, no opacity step. A shape is either ground or ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pure Inversion Rule",
+        "body": "The light theme is the dark theme with void and lumin swapped (via `data-theme=\"light\"` or `prefers-color-scheme: light`), nothing else. Inside an inverted row the two inks swap again locally, so numbers, W/L boxes and rank boxes invert with the row.",
+        "section": "colors"
+      },
+      {
+        "name": "The Content Grey Exception",
+        "body": "Team logos are shown as themselves in greyscale (`grayscale(1) contrast(1.1)`) on a small fixed-white tile, and player photos in greyscale inside a 1px ruled square. Grey exists only inside these images, because they are content; it never appears in type, rules or fills.",
+        "section": "colors"
+      },
+      {
+        "name": "The Rhythm Not Colour Rule",
+        "body": "A sport is identified by its bar rhythm, as [bar width, gap] steps repeated: football heavy-light-light (4,1 / 1,1 / 1,3), basketball even (1,1), baseball in threes (1,1 / 1,1 / 1,4), hockey wide and narrow (4,2 / 1,2), volleyball a burst then a rest (2,1 / 1,1 / 1,1 / 1,1 / 4,3). Never give a sport a colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Rule",
+        "body": "Martian Mono is the only family on every page. Contrast comes from width, weight, size and case, never a second face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Weight Means Result Rule",
+        "body": "The losing side of a final and the dimmed part of a score drop to weight 200; the line and live tags rise to 600. Weight, not tone, separates won from lost.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Field Rule",
+        "body": "Nothing casts a shadow or sits above anything else. If a thing needs to stand out, invert it.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use only void and lumin, and build the light theme by swapping them, never by adding values.",
+      "**Do** mark live, pressed, selected, hovered, current and winning by inversion, and only by inversion.",
+      "**Do** draw a new sport's identity as a bar rhythm of [width, gap] steps beside its name.",
+      "**Do** set everything in Martian Mono with tabular figures; labels at 0.6875rem, 0.1em, uppercase.",
+      "**Do** carry structure on 1px rules and overlap neighbouring outlines by 1px so groups read as one strip.",
+      "**Do** show logos and player photos in greyscale, logos on a white tile, so they stay legible in both themes.",
+      "**Do** stop the live blink and the score flip when reduced motion is set."
+    ],
+    "donts": [
+      "**Don't** give a sport, league or state a colour; there is no accent.",
+      "**Don't** introduce grey in type, rules or fills; grey lives only inside logos and photos.",
+      "**Don't** round a corner, cast a shadow, or use a gradient as tone.",
+      "**Don't** wrap content in filled cards; rule it.",
+      "**Don't** add a second typeface.",
+      "**Don't** show the site's own chance of winning where a sportsbook line exists, or show a line without naming the sportsbook and the 1-800-GAMBLER helpline."
+    ]
+  }
+}

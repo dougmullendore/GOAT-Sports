@@ -23,7 +23,7 @@ scope.fbs = All teams
 
 # ---- Games page ----
 games.title = MLB Games
-games.lede = Every MLB game, day by day: each team's chance of winning, the probable starters, where to watch, and the score as it happens.
+games.lede = Every MLB game, day by day: the betting line, the probable starters, where to watch, and the score as it happens.
 games.all_teams = All 30 teams
 games.earlier = Earlier
 games.today = Today
@@ -87,3 +87,8 @@ game.back = All Games
 game.espn_link = This game on ESPN
 
 # ---- bottom of every page ----
+
+# ---- explanations, and the line always shown under this site's own chances of winning ----
+# explain.open is the line that opens an explanation under a list or a table.
+explain.open = How to read this
+games.odds_short = These percentages are this site's own estimate of each team's chance of winning, not betting lines.

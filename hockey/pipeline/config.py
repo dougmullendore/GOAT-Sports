@@ -99,6 +99,10 @@ ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scor
 ESPN_ABBR = {"TB": "TBL", "SJ": "SJS", "LA": "LAK", "NJ": "NJD", "UTAH": "UTA", "VEG": "VGK", "WAS": "WSH", "MON": "MTL",
              "CLB": "CBJ", "NAS": "NSH", "WIN": "WPG", "CAL": "CGY", "FLO": "FLA"}
 
+# The sportsbook's betting lines for the coming games are read from the same ESPN scoreboard,
+# this many days ahead (today included).
+LINES_DAYS = 7
+
 # ESPN's power rankings stand in for a poll (pipeline/power.py).
 POWER = "nhl"
 POWER_ABBR = ESPN_ABBR

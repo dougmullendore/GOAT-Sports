@@ -78,6 +78,16 @@ def test_only_regular_season_and_playoff_games_are_listed():
     assert [g["id"] for g in week] == [2026020056]
 
 
+def test_betting_lines_are_read():
+    doc = {"events": [
+        {"competitions": [{"odds": [{"details": "DET -115", "overUnder": 6.5, "provider": {"name": "DraftKings"}}],
+                           "competitors": [{"homeAway": "home", "team": {"abbreviation": "DET"}}, {"homeAway": "away", "team": {"abbreviation": "NJ"}}]}]},
+        {"competitions": [{"odds": [], "competitors": [{"homeAway": "home", "team": {"abbreviation": "TB"}}]}]}]}
+    # ESPN's short names become the NHL's; a game with no line is left out
+    assert run.read_betting_lines(doc, "2026-10-13") == {"2026-10-13 NJD@DET": ["DET -115", 6.5, "DraftKings"]}
+    assert run.read_betting_lines({}, "2026-10-13") == {}
+
+
 def test_channels_national_first_and_this_country_first():
     assert nhl.parse_game(sched(), "2026-10-08")["tv"] == ["ESPN+", "NESN", "Utah16", "ABTV"]      # at most four, names trimmed
     assert nhl.watch([{"market": "H", "countryCode": "CA", "network": "TSN2"}, {"market": "N", "countryCode": "CA", "network": "SN"}]) == ["SN", "TSN2"]

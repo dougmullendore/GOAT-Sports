@@ -34,7 +34,7 @@ You do not need to run anything. GitHub does it all on a schedule.
 - **Teams** (third page): a sortable table of every team's stats per game.
 - **Players** (fourth page): every regular ranked by Impact per game; each
   name opens a card with his percentiles.
-- **Odds** (sixth page, after Lines): each team's chance of making the
+- **Playoffs** (sixth page, after Lines; its address is still `#/odds`): each team's chance of making the
   playoffs, reaching each round and winning the Stanley Cup.
 
 ## Lines
@@ -252,7 +252,7 @@ in bold. These are the site's own estimate, not a sportsbook's line.
 
 ## Playoff odds
 
-The **Odds** page shows, for every team, the chance of making the playoffs,
+The **Playoffs** page shows, for every team, the chance of making the playoffs,
 of reaching the second round, the conference final and the Cup Final, and of
 winning the Stanley Cup; the points it finishes with on average; and the
 chance of each way in (first, second or third in its division, or either

@@ -14,11 +14,11 @@ nav.standings = Standings
 nav.teams = Teams
 nav.players = Players
 nav.lines = Lines
-nav.odds = Odds
+nav.odds = Playoffs
 
 # ---- Games page ----
 games.title = NHL Games
-games.lede = Today's, tomorrow's and yesterday's NHL games: each team's chance of winning, where to watch, and the score as it happens.
+games.lede = Every NHL game, day by day: the betting line, where to watch, and the score as it happens.
 games.all_teams = All 32 teams
 games.earlier = Earlier
 games.today = Today
@@ -103,5 +103,10 @@ odds.button_league = League
 odds.button_conference = Conference
 odds.button_division = Division
 odds.none = The odds have not been worked out yet. They will be here after the next update.
-odds.note = These are this site's own estimate, not a sportsbook's line. Every coming game is decided by the chance of winning shown on the Games page; the standings, the wild cards and the bracket follow the league's rules, and each series is best of seven. Because nobody knows exactly how good a team is, least of all early in the season, each team's rating is moved up or down by a random amount every time the season is played out. Points is the average finish. Week is how far the chance of the playoffs has moved in seven days. Select a column heading to sort by it.
+odds.note = These are this site's own estimate, not a sportsbook's line. Every coming game is decided by this site's own chance of winning for it; the standings, the wild cards and the bracket follow the league's rules, and each series is best of seven. Because nobody knows exactly how good a team is, least of all early in the season, each team's rating is moved up or down by a random amount every time the season is played out. Points is the average finish. Week is how far the chance of the playoffs has moved in seven days. Select a column heading to sort by it.
 odds.tested = Tested on {seasons}, at seven points in each season: of the teams given {high_range} to make the playoffs, {high} did; of those given {top_range}, {top}; of those given {low_range}, {low}.
+
+# ---- explanations, and the line always shown under this site's own chances of winning ----
+# explain.open is the line that opens an explanation under a list or a table.
+explain.open = How to read this
+games.odds_short = These percentages are this site's own estimate of each team's chance of winning, not betting lines.

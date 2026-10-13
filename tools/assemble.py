@@ -59,6 +59,9 @@ LEAGUES = [
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"
+# The line at the foot of every page. home/index.html carries the same words; change both together.
+INDEP = ("GOAT Sports is not affiliated with or endorsed by the NFL, the NBA, MLB, the NHL, the NCAA, the AVCA, "
+         "LOVB, MLV, ESPN, the Associated Press or any team or school.")
 
 
 def log(msg: str) -> None:
@@ -81,7 +84,8 @@ def bar(current: str, up: str, ready: dict) -> str:
 
 
 def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
-    """Write the bar into one page, in place of the one already there if it has one.
+    """Write the bar into one page, in place of the one already there if it has one, and the
+    independence line into its footer.
     Returns whether the page changed."""
     before = html = page.read_text(encoding="utf-8")
     assert "</head>" in html and "<body>" in html, f"{page} is not a page this step knows how to add the bar to"
@@ -92,6 +96,10 @@ def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
     skip = re.search(r'<a class="skip"[^>]*>.*?</a>\n?', html, re.S)       # keep "Skip to the games" first
     at = skip.end() if skip else html.index("<body>") + len("<body>\n")
     html = html[:at] + bar(current, up, ready) + "\n" + html[at:]
+    # the independence line, last in the page's footer
+    html = re.sub(r'\s*<p class="indep">.*?</p>', "", html, flags=re.S)
+    if "</footer>" in html:
+        html = html.replace("</footer>", f'  <p class="indep">{INDEP}</p>\n</footer>', 1)
     if html != before:
         page.write_text(html, encoding="utf-8")
     return html != before
@@ -113,8 +121,9 @@ def live_address(lg: dict, data: dict, g: dict) -> str | None:
     return None
 
 
-def front_games(site: Path, today: dt.date) -> list[dict]:
-    """Each league's games around today, cut down to what the front page shows."""
+def front_games(site: Path, today: dt.date, months: dict | None = None) -> list[dict]:
+    """Each league's games around today, cut down to what the front page shows. Given `months`, every
+    game of the season goes into it as well, as {"YYYY-MM": {league: [rows]}}, for the calendar to reach any day."""
     lo, hi = (today - dt.timedelta(days=DAYS_BACK)).isoformat(), (today + dt.timedelta(days=DAYS_AHEAD)).isoformat()
     out = []
     for lg in LEAGUES:
@@ -140,9 +149,10 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
         entry["first"], entry["last"] = (dates[0], dates[-1]) if dates else (None, None)
         entry["next"] = next((d for d in dates if d > hi), None)        # when the list is empty: the next day with a game
         for g in games:
-            if not (lo <= g.get("date", "") <= hi):
-                continue
             if entry["ranked_only"] and not (g["away"].get("rank") or g["home"].get("rank")):
+                continue
+            near = lo <= g.get("date", "") <= hi
+            if not near and months is None:
                 continue
 
             def side(s):
@@ -152,6 +162,12 @@ def front_games(site: Path, today: dt.date) -> list[dict]:
             row = {"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
                    "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),
                    "p": g.get("p"), "tv": (g.get("tv") or g.get("watch") or [])[:2]}
+            if g.get("line") and g.get("state") != "final":
+                row["line"] = g["line"]            # the sportsbook's betting line, where the sport has one
+            if months is not None and g.get("date"):
+                months.setdefault(g["date"][:7], {}).setdefault(lg["key"], []).append(dict(row))
+            if not near:
+                continue
             # a game not yet over says where its live score is read: `f` counts into the league's `feeds`
             address = live_address(lg, data, g) if g.get("state") in ("upcoming", "live") else None
             if address:
@@ -201,9 +217,21 @@ def main(built_dir: str, site_dir: str) -> int:
             p = site / s["key"] / sub / "index.html"
             if p.exists():
                 barred += add_bar(p, s["key"], "../" * (1 + sub.count("/")), css, ready)
-    leagues = front_games(site, now.date())
+    months: dict = {}
+    leagues = front_games(site, now.date(), months)
+    # every other day of the seasons, a month to a file, read by the front page's calendar when it gets there
+    sched = site / "schedule"
+    if sched.exists():
+        shutil.rmtree(sched)
+    sched.mkdir()
+    for month, by_league in months.items():
+        for rows in by_league.values():
+            rows.sort(key=lambda g: (g["date"], g["start"] or 0, g["id"]))
+        (sched / f"{month}.json").write_text(json.dumps({"leagues": by_league}, separators=(",", ":")))
     (site / "home.json").write_text(json.dumps({
         "updated": now.isoformat(timespec="seconds"),
+        "window": [(now.date() - dt.timedelta(days=DAYS_BACK)).isoformat(), (now.date() + dt.timedelta(days=DAYS_AHEAD)).isoformat()],
+        "months": sorted(months),
         "sports": [{"key": s["key"], "name": s["name"], "href": ready.get(s["key"], s["key"] + "/"), "ready": (site / s["key"] / "index.html").exists()} for s in SPORTS],
         "leagues": leagues}, separators=(",", ":")))
     (site / ".nojekyll").write_text("")

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from . import assemble
 
-PAGE = '<!doctype html>\n<html>\n<head>\n<title>x</title>\n</head>\n<body>\n<a class="skip" href="#games">Skip to the games</a>\n<main></main>\n</body>\n</html>\n'
+PAGE = '<!doctype html>\n<html>\n<head>\n<title>x</title>\n</head>\n<body>\n<a class="skip" href="#games">Skip to the games</a>\n<main></main>\n<footer class="foot">\n<p id="foot-updated"></p>\n</footer>\n</body>\n</html>\n'
 
 
 def sport(folder: Path, games: list, extra: dict | None = None) -> None:
@@ -33,6 +33,9 @@ def main() -> int:
         home = json.loads((site / "home.json").read_text())
         by = {l["key"]: l for l in home["leagues"]}
         assert [g["id"] for g in by["nhl"]["games"]] == [1]                    # only the days around today
+        old = json.loads((site / "schedule" / "2020-01.json").read_text())["leagues"]       # every other day: a month to a file
+        assert [g["id"] for g in old["nhl"]] == [2] and "2020-01" in home["months"] and home["window"][0] < today < home["window"][1]
+        assert [g["id"] for g in json.loads((site / "schedule" / (today[:7] + ".json")).read_text())["leagues"]["wvb"]] == [3]
         assert [g["id"] for g in by["wvb"]["games"]] == [3]                    # college: only games with a ranked team
         assert by["wvb"]["games"][0]["away"] == ["a", "Away", 5, 1] and by["wvb"]["poll"] == "AVCA coaches poll"
         assert by["wvb"]["games"][0]["home"][2] == 31                         # outside the poll: its GOAT number
@@ -40,15 +43,17 @@ def main() -> int:
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and 'href="../volleyball/"' in hockey and "football" not in hockey
         assert hockey.index("Skip to the games") < hockey.index(assemble.MARK)
+        assert hockey.count('class="indep"') == 1 and hockey.index(assemble.INDEP) < hockey.index("</footer>")
         assert 'href="../../hockey/"' in (site / "volleyball" / "lovb" / "index.html").read_text()
         front = (site / "index.html").read_text()
-        assert 'href="football/"' not in front and "home.js?v=" in front
+        assert 'href="football/"' not in front and "home.js?v=" in front and assemble.INDEP in front     # home/index.html carries the same line
         # football arrives on a later run that rebuilds nothing else: every page gets its tab, the other sports' pages stay
         (built / "hockey" / "data.json").unlink()
         sport(Path(tmp) / "later" / "football", [game(9, today, 1)], {"poll": {"name": "AP Top 25"}})
         assert assemble.main(str(Path(tmp) / "later"), str(site)) == 0
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and hockey.count("sports.css") == 1 and 'href="../football/"' in hockey
+        assert hockey.count('class="indep"') == 1                          # written again, not twice
         assert 'aria-current="page">Football' in (site / "football" / "index.html").read_text()
         later = {l["key"]: l for l in json.loads((site / "home.json").read_text())["leagues"]}
         assert [g["id"] for g in later["cfb"]["games"]] == [9] and not later["nfl"]["ready"]

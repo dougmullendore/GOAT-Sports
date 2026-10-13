@@ -20,9 +20,9 @@ scope.d1 = All D1
 
 # ---- Games page (the names on the left still say 'matches'; only the words shown changed) ----
 matches.title = Ranked Games
-matches.lede = Every match played by a team in the {poll}: today's, tomorrow's and yesterday's.
+matches.lede = Every match played by a team in the {poll}, day by day.
 matches.title_d1 = Division I Games
-matches.lede_d1 = Every Division I match: today's, tomorrow's and yesterday's.
+matches.lede_d1 = Every Division I match, day by day.
 matches.all_teams = All 25 teams
 matches.all_teams_d1 = All Division I teams
 matches.earlier = Earlier
@@ -107,3 +107,8 @@ pro.teams_lede = How each {league} team attacks, serves, blocks and defends, per
 pro.team_players_note = # is her rank by Impact per set among all {league} regulars; part-time players are greyed and not ranked. Choose a name for her card.
 pro.players_title = {league} Players
 pro.players_lede = Every regular in the {league}, ranked by Impact per set: the points she adds per set over an average {league} player at her position.
+
+# ---- explanations, and the line always shown under this site's own chances of winning ----
+# explain.open is the line that opens an explanation under a list or a table.
+explain.open = How to read this
+games.odds_short = These percentages are this site's own estimate of each team's chance of winning, not betting lines.

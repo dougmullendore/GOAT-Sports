@@ -384,6 +384,40 @@ def live_now(state: Path, now: dt.datetime) -> list[dict]:
     return out
 
 
+def read_betting_lines(doc: dict, day: str) -> dict:
+    """The sportsbook's line for each game on one day of ESPN's scoreboard:
+    {"YYYY-MM-DD AWAY@HOME": [line, total, sportsbook]}, teams under the NHL's own short names."""
+    out = {}
+    for e in (doc or {}).get("events") or []:
+        comp = (e.get("competitions") or [{}])[0]
+        line = next((o for o in comp.get("odds") or [] if o and o.get("details")), None)
+        if not line:
+            continue
+        side = {}
+        for c in comp.get("competitors") or []:
+            a = (c.get("team") or {}).get("abbreviation") or ""
+            side[c.get("homeAway")] = config.ESPN_ABBR.get(a, a)
+        if side.get("away") and side.get("home"):
+            out[f"{day} {side['away']}@{side['home']}"] = [line.get("details"), line.get("overUnder"), (line.get("provider") or {}).get("name")]
+    return out
+
+
+def update_betting_lines(state: Path, now: dt.datetime) -> dict:
+    """The sportsbook's betting lines for the coming week's games, read from ESPN's public scoreboard.
+    A day that cannot be read keeps the lines it had."""
+    kept = read_json(state / "betting_lines.json", {}).get("lines") or {}
+    days = [(now.date() + dt.timedelta(days=i)).isoformat() for i in range(config.LINES_DAYS)]
+    fresh, read = {}, 0
+    for (url, doc, err), day in zip(web.get_urls([config.ESPN_SCOREBOARD + d.replace("-", "") for d in days]), days):
+        if doc is None:
+            fresh.update({k: v for k, v in kept.items() if k.startswith(day + " ")})
+            continue
+        read += 1
+        fresh.update(read_betting_lines(doc, day))
+    write_json(state / "betting_lines.json", {"read": now.isoformat(timespec="seconds"), "lines": fresh})
+    return {"days_read": read, "lines": len(fresh)}
+
+
 def update_live_boxes(state: Path, now: dt.datetime) -> dict:
     """Box scores of games under way, or finished in the last five hours
     without a final box score yet."""
@@ -488,6 +522,12 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
             g["p"] = round(odds.game_chance(rating[h], rating[a], bool(g.get("neutral"))), 3)   # the home team's chance
         elif g["id"] in pregame:
             g["p0"] = round(pregame[g["id"]], 3)      # what the home team's chance was before a finished game
+    # The sportsbook's betting line for each game still to come, where ESPN has one
+    bet = read_json(state / "betting_lines.json", {}).get("lines") or {}
+    for g in games:
+        line = bet.get(f'{g["date"]} {g["away"]["id"]}@{g["home"]["id"]}')
+        if line and g["state"] in ("upcoming", "live"):
+            g["line"] = line
 
     # Playoff odds: the rest of the season and the playoffs played out many times
     # (see pipeline/playoffs.py). Worked out again only when a result, the
@@ -631,6 +671,7 @@ def main(state_dir: str, out_dir: str) -> int:
         stage("social links", lambda: social.update(state, now.date(), log))
         stage("power ranking", lambda: power.update(state, now, {t["id"]: [t["id"], t["name"]] for t in read_json(state / "standings.json", {}).get("teams") or []}, log))
         stage("lines", lambda: update_lines(state, now))
+        stage("betting lines", lambda: update_betting_lines(state, now))
     stage("site", lambda: build_site(state, out, now))
     status["finished_utc"] = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     status["ok"] = all(s["ok"] for s in status["stages"].values())

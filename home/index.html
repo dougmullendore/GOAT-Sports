@@ -7,13 +7,13 @@
 <meta name="description" content="NFL and college football, NBA and college basketball, MLB baseball, NHL hockey and women's volleyball in one place: today's games, each team's chance of winning, rankings, team stats and a card for every player.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,200..700&display=swap" rel="stylesheet">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-title" content="GOAT Sports">
-<meta name="theme-color" content="#0f1d33">
+<meta name="theme-color" content="#000000">
 <link rel="stylesheet" href="sports.css">
 <link rel="stylesheet" href="home.css">
 </head>
@@ -22,20 +22,43 @@
 <nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="./" aria-current="page">GOAT Sports</a><a href="football/">Football</a><a href="basketball/">Basketball</a><a href="baseball/">Baseball</a><a href="hockey/">Hockey</a><a href="volleyball/">Volleyball</a></div></nav>
 <header class="mast">
   <div class="wrap mast-row">
-    <a class="brand" href="./"><svg viewBox="0 0 24 24" aria-hidden="true"><g style="fill:var(--ball);stroke:var(--ball)" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle cx="15" cy="11.2" r=".9" style="fill:var(--sheet);stroke:none"/></svg><span>GOAT Sports</span></a>
-    <span class="tag">Football, basketball, baseball, hockey and volleyball</span>
+    <a class="brand" href="./"><svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg><span>GOAT<br>Sports</span></a>
+    <div class="mast-day">
+      <h1 id="h-day">Today's games</h1>
+      <div class="cell"><span class="k">Games</span><span class="v" id="r-games">–</span></div>
+      <div class="cell"><span class="k">Leagues</span><span class="v" id="r-leagues">–</span></div>
+    </div>
+    <dl class="readouts">
+      <div><dt>Live now</dt><dd id="r-live">–</dd></div>
+      <div><dt>Updated</dt><dd id="r-updated">–</dd></div>
+    </dl>
+    <button type="button" class="invert" id="invert" aria-pressed="false">Invert</button>
   </div>
 </header>
+<section class="feed" id="feed" aria-labelledby="feed-h" hidden></section>
+<section class="field">
+  <div class="wrap">
+    <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
+  </div>
+</section>
 <main class="wrap">
-  <h1 id="h-day">Today's games</h1>
-  <p class="lede" id="lede">Loading the games…</p>
-  <div class="nav" id="nav"></div>
+  <div class="day">
+    <p class="lede" id="lede" role="status">Loading the games…</p>
+    <div class="tools">
+      <button type="button" class="step" id="back" aria-label="A week earlier"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M8 1L2 7l6 6"/></svg></button>
+      <nav class="cal" id="nav" aria-label="Days"></nav>
+      <button type="button" class="step" id="ahead" aria-label="A week later"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M2 1l6 6-6 6"/></svg></button>
+      <label class="goto"><span>Date</span><input type="date" id="goto"></label>
+      <details class="pick" id="pick"></details>
+    </div>
+  </div>
   <div id="today" tabindex="-1"></div>
   <h2 class="sec">The sports</h2>
-  <div class="cards" id="cards"></div>
+  <ul class="doors" id="cards"></ul>
 </main>
 <footer class="wrap foot">
   <p id="foot-updated"></p>
+  <p class="indep">GOAT Sports is not affiliated with or endorsed by the NFL, the NBA, MLB, the NHL, the NCAA, the AVCA, LOVB, MLV, ESPN, the Associated Press or any team or school.</p>
 </footer>
 <script src="home.js"></script>
 </body>

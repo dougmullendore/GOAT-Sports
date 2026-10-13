@@ -98,7 +98,7 @@ game.espn_link = This game on ESPN
 # by its place in the league standings, and there is no Top 25 switch.
 nfl.nav_rankings = Standings
 nfl.games_title = NFL Games
-nfl.games_lede = Every NFL game, week by week: each team's chance of winning, where to watch, and the score as it happens.
+nfl.games_lede = Every NFL game, week by week: the betting line, where to watch, and the score as it happens.
 nfl.games_all_teams = All 32 teams
 nfl.rankings_title = NFL Standings
 nfl.rankings_lede = The NFL standings, through games of {date}.
@@ -116,3 +116,8 @@ nfl.players_lede = Every regular in the NFL, ranked against the rest by Impact p
 nfl.players_note = Impact compares each player with every regular at his position in the NFL, from the box scores. It cannot see blocking, coverage or who was on the field, it does not adjust for the opponent, and offensive linemen have no numbers to rate.
 nfl.players_career_note = Each season's line is ESPN's, regular season only, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
 nfl.players_career_wait = His earlier seasons have not been read yet. They appear here within a day.
+
+# ---- explanations, and the line always shown under this site's own chances of winning ----
+# explain.open is the line that opens an explanation under a list or a table.
+explain.open = How to read this
+games.odds_short = These percentages are this site's own estimate of each team's chance of winning, not betting lines.

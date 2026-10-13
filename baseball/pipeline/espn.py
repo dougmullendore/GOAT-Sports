@@ -112,7 +112,7 @@ def parse_event(e: dict, day: str) -> dict | None:
         g["tv"] = (national or tv)[:3]
     odds = next((o for o in comp.get("odds") or [] if o and o.get("details")), None)
     if odds and state != "final":
-        g["line"] = [odds.get("details"), odds.get("overUnder")]       # the betting line: "NYY -150", and the total
+        g["line"] = [odds.get("details"), odds.get("overUnder"), (odds.get("provider") or {}).get("name")]   # the betting line: "NYY -150", the total, and the sportsbook
     series = comp.get("series") or {}
     if kind == 3 and series.get("summary"):
         g["series"] = series["summary"]                                 # "NYY leads series 2-1"

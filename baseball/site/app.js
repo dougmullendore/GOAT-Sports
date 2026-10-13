@@ -2,34 +2,6 @@
    sports of GOAT Sports, where a college league has a poll; here every team is numbered by the standings.) */
 (function () {
   "use strict";
-  // ---- rank tags: the better the rank, the stronger the colour. Home and away look the same. ----
-  // Every tag with a number in it is shaded as it is put on the page: full colour for first place,
-  // fading to a pale tint for last (or for 25th in a poll; teams numbered past the poll are all pale).
-  function topN() { try { return (data.poll && data.poll.teams && data.poll.teams.length) || (data.teams && data.teams.length) || 25; } catch (e) { return 25; } }
-  function hexOf(s) { var m = /^#?([0-9a-f]{6})$/i.exec((s || "").trim()); return m ? [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); }) : null; }
-  function shadeRank(tag) {
-    if (!tag.classList || !tag.classList.contains("rk") || tag.classList.contains("nr")) return;
-    var words = (tag.textContent || "").trim(), n = parseInt(words, 10);
-    if (!(n > 0) || String(n) !== words) return;
-    var cs = getComputedStyle(tag), main = hexOf(cs.getPropertyValue("--c")) || hexOf(cs.getPropertyValue("--ball")), sheet = hexOf(cs.getPropertyValue("--sheet"));
-    if (!main || !sheet) return;
-    var holder = tag.closest ? tag.closest("[data-top]") : null, top = Math.max(2, holder ? +holder.getAttribute("data-top") : topN());
-    var share = n <= top ? 1 - 0.6 * (n - 1) / (top - 1) : 0.35;
-    var bg = main.map(function (v, i) { return Math.round(v * share + sheet[i] * (1 - share)); });
-    tag.style.background = "rgb(" + bg.join(",") + ")";       // the number itself is always dark with a white outline (styles)
-  }
-  function shadeAll(root) { if (!root || root.nodeType !== 1) return; shadeRank(root); Array.prototype.forEach.call(root.querySelectorAll(".rk"), shadeRank); }
-  // ---- a game's whole row opens its page: the preview before it starts, the box score once it has ----
-  // (the team names in the row still go to the teams' own pages)
-  function openRow(ev) {
-    if (ev.type === "keydown" && ev.key !== "Enter") return;
-    var t = ev.target, row = t && t.closest ? t.closest("li.game[data-go]") : null;
-    if (!row || (t.closest("a, button, select, input") && ev.type === "click") || (ev.type === "keydown" && t !== row)) return;
-    location.hash = row.getAttribute("data-go");
-  }
-  document.addEventListener("click", openRow);
-  document.addEventListener("keydown", openRow);
-
   // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
   function liveFirst(ol) {
     var kids = Array.prototype.slice.call(ol.children), ref = null, i;
@@ -46,12 +18,145 @@
   }
   if (window.MutationObserver) new MutationObserver(function (list) {
     var lists = [];
-    list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { shadeAll(n); listsIn(n, lists); }); });
+    list.forEach(function (m) {
+      var was = {};
+      Array.prototype.forEach.call(m.removedNodes, function (n) { if (isGame(n)) was[n.getAttribute("data-id")] = scoreOf(n); });
+      Array.prototype.forEach.call(m.addedNodes, function (n) {
+        listsIn(n, lists); explainAll(n); retry(n);
+        var id = isGame(n) ? n.getAttribute("data-id") : null, now = id ? scoreOf(n) : "";
+        if (id && was[id] != null && now && now !== was[id]) { var go = n.querySelector("a.go"); say(go ? go.getAttribute("aria-label") : n.textContent); }
+      });
+    });
     lists.filter(function (ol, i) { return lists.indexOf(ol) === i; }).forEach(liveFirst);
   }).observe(document.documentElement, { childList: true, subtree: true });
-  try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { shadeAll(document.body); }); } catch (e) {}
+
+  // ---- a game's row opens its page through one link laid over the whole row. The team names in the row
+  // stay links of their own, above it, so no link sits inside another. The link reads the whole line aloud. ----
+  function rowLink(li) {
+    var go = li.getAttribute("data-go");
+    if (!go) return li;
+    function said(n) { return n ? (n.getAttribute("aria-label") || n.textContent || "").replace(/\s+/g, " ").trim() : ""; }
+    function side(t) {
+      if (!t) return "";
+      var rk = t.querySelector(".rk[aria-label]");
+      return said(t.querySelector(".name")) + (rk ? " (" + rk.getAttribute("aria-label") + ")" : "");
+    }
+    var mid = li.querySelector(".mid"), sep = mid && /\bvs\b/.test(mid.textContent) ? " vs " : " at ";
+    var words = [said(li.querySelector(".when")), side(li.querySelector(".team.away")) + sep + side(li.querySelector(".team.home")),
+      mid && mid.getAttribute("aria-label") || "", said(li.querySelector(".more"))];
+    li.insertBefore(el("a", { "class": "go", href: go, "aria-label": words.filter(Boolean).join(". ") }), li.firstChild);
+    return li;
+  }
+  // ---- the explanations under lists and tables open from a "How to read this" line, so a page stays short
+  // and its explanation stays one tap away. Notes side by side share one line. A note that holds a link
+  // or a button (marked "keep") stays as it is. ----
+  function explain(p) {
+    if (!p.classList || !p.classList.contains("note") || p.classList.contains("keep") || !p.parentNode) return;
+    if (p.parentNode.classList && p.parentNode.classList.contains("explain")) return;
+    var before = p.previousElementSibling;
+    if (before && before.classList.contains("explain")) { before.appendChild(p); return; }
+    var box = document.createElement("details"), open = document.createElement("summary");
+    box.className = "explain";
+    open.textContent = (data && data.words && data.words["explain.open"]) || "How to read this";
+    p.parentNode.insertBefore(box, p);
+    box.appendChild(open);
+    box.appendChild(p);
+  }
+  function explainAll(root) {
+    if (!root || root.nodeType !== 1) return;
+    explain(root);
+    Array.prototype.forEach.call(root.querySelectorAll("p.note"), explain);
+  }
+  // the line that is always shown under this site's own chances of winning
+  function keyline(g) {
+    if (g && g.line && g.line[0]) return null;               // a game with a bookmaker's line says so beside the line
+    return el("p", { "class": "keyline", text: W("games.odds_short") || "These percentages are this site's own estimate of each team's chance of winning, not betting lines." });
+  }
+  // ---- a score that changes is read out to screen readers ----
+  var sayBox = null;
+  function say(words) {
+    if (!sayBox) {
+      sayBox = document.createElement("p");
+      sayBox.className = "sr"; sayBox.setAttribute("role", "status"); sayBox.setAttribute("aria-live", "polite");
+      document.body.appendChild(sayBox);
+    }
+    sayBox.textContent = words;
+  }
+  function isGame(n) { return n && n.nodeType === 1 && n.matches && n.matches("li.game[data-id]"); }
+  function scoreOf(li) {
+    var m = li.querySelector(".mid"), w = li.querySelector(".when");
+    if (!m || m.classList.contains("odds") || m.classList.contains("at")) return "";
+    return m.textContent + (w && /final/i.test(w.textContent) ? " final" : "");
+  }
+  // ---- something that could not be loaded offers to try again ----
+  function retry(root) {
+    if (!root || root.nodeType !== 1) return;
+    var all = root.matches && root.matches("p.empty") ? [root] : Array.prototype.slice.call(root.querySelectorAll("p.empty"));
+    all.forEach(function (p) {
+      if (!/Reload the page/.test(p.textContent) || p.querySelector("button")) return;
+      p.appendChild(document.createTextNode(" "));
+      p.appendChild(el("button", { type: "button", "class": "morebtn", text: "Try again", onclick: function () { location.reload(); } }));
+    });
+  }
 
   var $ = function (id) { return document.getElementById(id); };
+  explainAll(document.querySelector("main"));       // the notes written into the page itself
+  // ---- the calendar: a strip of days (or weeks), each with how many games it holds; the chosen one is
+  // inverted and today is marked. It scrolls sideways a whole cell at a time. ----
+  function calendar(items, chosen, pick, name) {
+    var bar = el("nav", { "class": "cal", "aria-label": name || "Days" }), month = null;
+    items.forEach(function (it) {
+      var m = it.month || "";
+      bar.appendChild(el("button", { type: "button", "class": "calday" + (it.today ? " today" : ""), "aria-pressed": String(it.key === chosen),
+        "aria-label": it.label + (it.today ? ", today" : "") + ", " + it.n + (it.n === 1 ? " game" : " games"), onclick: function () { pick(it.key); } }, [
+        el("span", { "class": "wd", text: it.top }), el("span", { "class": "mo", text: m !== month ? m : "" }),
+        el("span", { "class": "dn", text: it.big }), el("span", { "class": "gn", text: it.n + (it.n === 1 ? " game" : " games") })]));
+      month = m;
+    });
+    setTimeout(function () {
+      var on = bar.querySelector('[aria-pressed="true"]');
+      if (on && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - Math.floor(bar.clientWidth / on.offsetWidth / 2) * on.offsetWidth);
+    }, 0);
+    return bar;
+  }
+  // one cell for each day that has a game
+  function dayItems(games) {
+    var n = {};
+    games.forEach(function (g) { n[g.date] = (n[g.date] || 0) + 1; });
+    return Object.keys(n).sort().map(function (d) {
+      var t = day(d);
+      return { key: d, top: d === today ? "Today" : t.toLocaleDateString(undefined, { weekday: "short" }), big: String(t.getDate()),
+        month: t.toLocaleDateString(undefined, { month: "short" }), n: n[d], today: d === today, label: long(d) };
+    });
+  }
+  // the day to show: the one asked for if it has games, otherwise the next day with games, otherwise the last
+  function pickDay(items, want) {
+    if (want && items.some(function (it) { return it.key === want; })) return want;
+    var next = items.filter(function (it) { return it.key >= today; })[0];
+    return (next || items[items.length - 1]).key;
+  }
+
+  // ---- betting lines: the sportsbook's line where there is one, read from ESPN ----
+  function lineMid(g) {
+    var l = g.line;
+    return el("span", { "class": "mid line", "aria-label": "Betting line: " + l[0] + (l[1] != null ? ", over/under " + l[1] : "") }, [
+      el("span", { "class": "ln", text: l[0] }), l[1] != null ? el("span", { "class": "ou", text: "O/U " + l[1] }) : null]);
+  }
+  function lineCard(g) {
+    var l = g.line;
+    return el("div", { "class": "gc-odds gc-lines" }, [
+      el("span", { "class": "gc-lab", text: "Betting line" + (l[2] ? ", " + l[2] : "") }),
+      el("div", { "class": "gc-linebig" }, [el("span", { text: l[0] }), l[1] != null ? el("span", { text: "Over/under " + l[1] }) : null]),
+      linesNote([g])]);
+  }
+  function linesNote(games) {
+    var from = (games.filter(function (g) { return g.line && g.line[2]; })[0] || {}).line;
+    return el("p", { "class": "keyline", text: "Betting lines from " + (from ? from[2] : "a sportsbook") + ", read from ESPN. Lines move: check the sportsbook before you bet. " +
+      "If you or someone you know has a gambling problem, call 1-800-GAMBLER." });
+  }
+  // this sport shows the sportsbook's betting lines in place of the site's own chances of winning
+  // (volleyball has no betting lines, so it keeps the site's own chances)
+  var LINES = true;
   var data = null, state = { day: null, team: null }, fbs = {};
 
   function el(tag, attrs, kids) {
@@ -149,7 +254,7 @@
   function rankTag(rank, id) {
     var n = shownRank(id, rank);
     if (!data.numbered) return el("span", { "class": "rk none" });
-    return el("span", { "class": "rk" + (n ? "" : " nr"), text: n ? String(n) : "NR",
+    return el("span", { "class": "rk" + (n ? "" : " nr") + (!PRO() && !rank && n ? " goat" : ""), role: PRO() && !n ? null : "img", text: n ? String(n) : "NR",
       "aria-label": PRO() ? (n ? ordinal(n) + " in the standings" : null) : rank ? "ranked " + rank : n ? "unranked, " + n + " by the GOAT ranking" : "not in " + ALL(),
       title: PRO() ? (n ? ordinal(n) + " in the " + data.league_name + " standings" : null) : !rank && n ? "Not in the AP poll; " + n + " by the GOAT ranking" : !n ? "Not in " + ALL() : null });
   }
@@ -495,6 +600,7 @@
             el("span", { "class": "sa " + (g.p > 0.5 ? "l" : "w"), text: pct(g.p)[0] }), el("span", { "class": "dash", text: g.neutral ? "vs" : "at" }),
             el("span", { "class": "sh " + (g.p < 0.5 ? "l" : "w"), text: pct(g.p)[1] })])
         : el("span", { "class": "mid at", text: g.neutral ? "vs" : "at" });
+    if (LINES && g.line && g.line[0] && (mid.classList.contains("at") || mid.classList.contains("odds"))) mid = lineMid(g);
     var more = [];
     if (g.round || g.series) more.push(el("span", { "class": "bowl", text: [g.round, g.series].filter(Boolean).join(": ") }));
     if (pitchNote(g)) more.push(el("span", { "class": "pitch", text: pitchNote(g) }));
@@ -505,10 +611,10 @@
     var go = note && !fin && !live ? null : "#/game/" + g.id;       // the row itself opens the game: its preview, or its box score once it has started
     if (dated === true && !live) when = short(g.date) + (when === "Time not set" ? "" : " · " + when);
     var unplayed = !fin && !live && !note;
-    return el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null, "data-go": go, role: go ? "link" : null, tabindex: go ? "0" : null }, [
+    return rowLink(el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-dated": dated === true ? "" : null, "data-go": go }, [
       live ? el("span", { "class": "when live" }, [liveTag(), " " + (when === "In progress" ? "" : when)]) : el("span", { "class": "when", text: when }),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
-      el("span", { "class": "more" }, more)]);
+      el("span", { "class": "more" }, more)]));
   }
 
   // ---- live scores ----
@@ -610,7 +716,7 @@
       head.appendChild(logo(t.id) || document.createTextNode(""));
       head.appendChild(document.createTextNode(" " + (t.rank && !PRO() ? "No. " + t.rank + " " : "") + t.name + ", whole season"));
       var next = mine.filter(function (g) { return g.state !== "final" && g.date >= today; }), done = mine.filter(function (g) { return g.state === "final" || g.date < today; });
-      if (next.length) { holder.appendChild(el("p", { "class": "note", text: next.length + " still to play, " + done.length + " played." + oddsNote() })); listInto(holder, next); }
+      if (next.length) { holder.appendChild(el("p", { "class": "note", text: next.length + " still to play, " + done.length + " played." + oddsNote() })); listInto(holder, next); if (next.some(function (g) { return g.p != null; })) holder.appendChild(keyline()); }
       if (done.length) { holder.appendChild(el("h3", { "class": "day", text: "Already played, newest first" })); listInto(holder, done, true); }
       if (!mine.length) holder.appendChild(el("p", { "class": "empty", text: "No games are listed for " + t.name + " this season." }));
       return;
@@ -622,30 +728,25 @@
       holder.appendChild(el("p", { "class": "empty", text: NOPOLL() || isAll() ? "No games are listed yet this season." : "No ranked team has a game listed yet. Choose " + W("scope.fbs") + " to see every game." }));
       return;
     }
-    if (!state.day) state.day = today < firstDay ? firstDay : today > lastDay ? lastDay : today;
-    var mid = state.day, w = addDays(mid, -1), end = addDays(mid, 1);
-    var games = shown.filter(function (g) { return g.date >= w && g.date <= end; });
-    if (mid === today) {          // today first, then tomorrow, then yesterday
-      var order = {}; order[today] = 0; order[end] = 1; order[w] = 2;
-      games = games.map(function (g, i) { return [order[g.date], i, g]; }).sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; }).map(function (x) { return x[2]; });
-    }
-    head.textContent = mid === today ? W("games.three_days") : short(w) + " to " + short(end);
-    // step to the nearest earlier or later stretch that has a game, so an empty week in the calendar is skipped
-    var before = days.filter(function (d) { return d < w; }).pop(), after = days.filter(function (d) { return d > end; })[0];
-    nav.appendChild(el("button", { type: "button", text: W("games.earlier"), disabled: !before, onclick: function () { state.day = before < addDays(mid, -3) ? before : addDays(mid, -3); draw(); } }));
-    if (mid !== today && today >= firstDay && today <= lastDay) nav.appendChild(el("button", { type: "button", text: W("games.today"), onclick: function () { state.day = today; draw(); } }));
-    nav.appendChild(el("button", { type: "button", text: W("games.later"), disabled: !after, onclick: function () { state.day = after > addDays(mid, 3) ? after : addDays(mid, 3); draw(); } }));
+    // one day at a time, picked from the calendar: every day that has a game
+    var items = dayItems(shown);
+    state.day = pickDay(items, state.day);
+    var mid = state.day, w = mid, end = mid, after = null;
+    var games = shown.filter(function (g) { return g.date === mid; });
+    head.textContent = (mid === today ? "Today, " : "") + long(mid);
+    holder.insertBefore(calendar(items, mid, function (d) { state.day = d; draw(); }), holder.firstChild);
     if (!games.length) {
-      holder.appendChild(el("p", { "class": "empty", text: (isAll() ? "No games" : "No ranked team has a game") + " in these three days." +
+      holder.appendChild(el("p", { "class": "empty", text: (isAll() ? "No games" : "No ranked team has a game") + " on this day." +
         (after && mid <= today ? " The next " + (after === lastDay && days.length === 1 ? "game is" : "games are") + " on " + long(after) + "." : " Try earlier or later days.") }));
       return;
     }
     listInto(holder, games, false, true);
     var both = games.filter(function (g) { return g.away.rank && g.home.rank; }).length;
-    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " in these three days. The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are places in the league standings." : "") + " Choose a team to see its whole season." }));
-    else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " in these three days" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
+    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day. The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are places in the league standings." : "") + " Choose a team to see its whole season." }));
+    else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " game" : " games") + " on this day" + (both ? ", " + both + " of them between two ranked teams (marked with a coloured edge)" : "") +
       ". The visiting team is on the left, and the channel is on the right." + (data.numbered ? " Numbers are this week's AP rankings, also for earlier weeks; a team outside the poll is numbered from 26 by the GOAT ranking." : "") + " Choose a team to see its whole season." }));
-    if (games.some(function (g) { return g.p != null && g.state !== "final"; })) holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() }));
+    if (LINES && games.some(function (g) { return g.line && g.line[0] && g.state !== "final"; })) holder.appendChild(linesNote(games));
+    if (games.some(function (g) { return g.p != null && g.state !== "final"; })) { var said = holder.lastElementChild; holder.insertBefore(keyline(), said && said.classList.contains("note") ? said : null); holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() })); }
   }
 
   // ---- players ----
@@ -996,13 +1097,14 @@
     return [["R", [s.as == null ? 0 : s.as, s.hs == null ? 0 : s.hs], 1], ["H", [a[0], h[0]], 0], ["E", [a[1], h[1]], 0]];
   }
   function oddsLine(g) {
+    if (LINES) return g.line && g.line[0] && g.state !== "final" ? lineCard(g) : null;
     var p = g.p != null ? g.p : g.p0;
     if (p == null) return null;
     var two = pct(p);
     var out = el("div", { "class": "gc-odds" }, [
       el("span", { "class": "gc-lab", text: g.p != null ? "Chance of winning" : "Chance of winning before the game" }),
       el("div", { "class": "gc-bar" }, [el("span", { "class": "a", style: "width:" + two[0], text: g.away.name + " " + two[0] }),
-        el("span", { "class": "h", style: "width:" + two[1], text: two[1] + " " + g.home.name })])]);
+        el("span", { "class": "h", style: "width:" + two[1], text: two[1] + " " + g.home.name })]), keyline(g)]);
     if (g.line && g.line[0]) out.appendChild(el("p", { "class": "gc-line" }, ["Betting line: ", el("b", { text: g.line[0] }), g.line[1] ? ", over/under " + g.line[1] : "", ". The percentages above are this site's own, not the bookmakers'."]));
     return out;
   }
@@ -1183,6 +1285,7 @@
 
   fetch("data.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }).then(function (d) {
     data = d;
+    if (LINES) d.games.forEach(function (g) { delete g.p; delete g.p0; });
     (d.fbs || []).forEach(function (x) { fbs[x[0]] = x; });
     $("brand").textContent = d.site;
     var lg = $("leagues"), base = d.league ? "../" : "";

@@ -106,7 +106,7 @@ game.espn_link = This game on ESPN
 # by its place in the league standings, and there is no Top 25 switch.
 nba.nav_rankings = Standings
 nba.games_title = NBA Games
-nba.games_lede = Every NBA game, day by day: each team's chance of winning, where to watch, and the score as it happens.
+nba.games_lede = Every NBA game, day by day: the betting line, where to watch, and the score as it happens.
 nba.games_all_teams = All 30 teams
 nba.rankings_title = NBA Standings
 nba.rankings_lede = The NBA standings, through games of {date}.
@@ -124,3 +124,8 @@ nba.players_lede = Every regular in the NBA, ranked against the rest by Impact p
 nba.players_note = Impact compares each player with every regular at his position in the NBA, from the box scores of the regular season; playoff games are listed but not counted. It cannot see defense that leaves no number or who else was on the floor, and it does not adjust for the opponent.
 nba.players_career_note = Each season's line is ESPN's, regular season only, with a line for every team he has played for. It is read again after each of his team's games, so this season's line can be a game behind.
 nba.players_career_wait = His earlier seasons have not been read yet. They appear here within a day.
+
+# ---- explanations, and the line always shown under this site's own chances of winning ----
+# explain.open is the line that opens an explanation under a list or a table.
+explain.open = How to read this
+games.odds_short = These percentages are this site's own estimate of each team's chance of winning, not betting lines.

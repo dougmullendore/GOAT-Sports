@@ -447,8 +447,10 @@ a.opp:hover .n { color: var(--teal); }
 /* on a phone the two teams are stacked, so the letter follows the team's name on both lines */
 @media (max-width: 640px) { .team.away::after { order: -1; } .team.home::before { order: 1; } }
 
-/* ---- the number in a rank tag: always dark, with a white outline so it reads on every shade ---- */
-.rk:not(.nr) { color: #0f1d33; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }
+/* ---- the number in a rank tag: navy or white, whichever stands out more from the tag's shade (set as it is
+   shaded). A number from the GOAT ranking, for a team outside the poll, is outlined instead of filled. ---- */
+.rk:not(.nr) { color: var(--ball-ink); }
+.rk.goat { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ball); }
 
 /* ---- a game's own page: the day, time and channel are the first line of the card ---- */
 .gcard .mstatus { margin: 0 0 12px; justify-content: center; text-align: center; font-size: .875rem; }
@@ -456,14 +458,31 @@ a.opp:hover .n { color: var(--teal); }
 /* ---- a game's row opens its page ---- */
 .game[data-go] { cursor: pointer; }
 .game[data-go]:hover { background: color-mix(in srgb, var(--teal) 7%, transparent); }
-.game[data-go]:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; }
+/* one link is laid over the whole row; the team names sit above it and stay links of their own */
+.game { position: relative; }
+.game a.go { position: absolute; inset: 0; z-index: 0; }
+.game a.go:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; }
+.game .team a, .game .more a, .game button { position: relative; z-index: 1; }
 
-/* ---- no small print: the explanatory notes under lists and tables are not shown. A note that
-   holds a link or a button (marked "keep") still is. ---- */
-.note:not(.keep), .livenote { display: none !important; }
+/* ---- explanations: each note under a list or table opens from a "How to read this" line, so a page stays
+   short and its explanation stays one tap away. A note that holds a link or a button (marked "keep") is shown as it is. ---- */
+.explain { margin: 14px 0 0; max-width: 66ch; font-size: .875rem; }
+.explain > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; cursor: pointer; color: var(--teal); font-weight: 600; list-style: none; border-radius: 4px; }
+.explain > summary::-webkit-details-marker { display: none; }
+.explain > summary::before { content: ""; width: 6px; height: 6px; margin: 0 2px 2px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .18s cubic-bezier(.2, .7, .3, 1); }
+.explain[open] > summary::before { transform: rotate(45deg); margin-bottom: 4px; }
+.explain > summary:hover { text-decoration: underline; text-underline-offset: 3px; }
+.explain > .note { margin: 4px 0 10px; }
+.explain:not(:has(> .note:not(:empty))) { display: none; }
+@media (prefers-reduced-motion: reduce) { .explain > summary::before { transition: none; } }
+/* the one line that is always shown under this site's own chances of winning */
+.keyline { margin: 14px 0 0; max-width: 66ch; font-size: .875rem; font-weight: 500; color: var(--ink); }
+.gcard .keyline { margin: 8px 0 0; font-size: .8125rem; color: var(--ink-2); }
 
-/* ---- the Games page of every sport reads the same: the title, then the days and the controls ---- */
-#lede, #page-games > .lede, #page-matches > .lede { display: none; }
+/* ---- phones: every page tab is a full-size target ---- */
+@media (max-width: 640px) {
+  .pages a { min-height: 44px; display: inline-flex; align-items: center; }
+}
 
 /* ---- a game's row is laid out the same in every sport. On a phone: the time, the two teams with
    their scores at the right, then the channel and the event's name on a line of their own. ---- */
@@ -487,3 +506,184 @@ a.opp:hover .n { color: var(--teal); }
 
 /* ---- a game's card: the second team reads from the right, its rank at the far right ---- */
 .gc-team:last-child .gc-name { flex-direction: row-reverse; justify-content: flex-start; }
+
+/* ==== The world: the day of sport as a data field. Pure black and pure white, nothing between them;
+   one monospace face; 1px rules; inversion (a white block with black type) is the only emphasis.
+   The light theme is the same page inverted. These rules come last and win over the ones above. ==== */
+:root:not(#x), :root[data-theme="dark"]:not(#x) {
+  --void: #000; --lumin: #fff;
+  --floor: var(--void); --sheet: var(--void); --ink: var(--lumin); --ink-2: var(--lumin); --line: var(--lumin);
+  --teal: var(--lumin); --teal-soft: var(--void); --ball: var(--lumin); --ball-ink: var(--void); --ball-home: var(--lumin);
+  --win: var(--lumin); --win-ink: var(--void); --loss: var(--lumin); --loss-ink: var(--void); --lost: var(--lumin);
+  color-scheme: dark;
+}
+:root[data-theme="light"]:not(#x) { --void: #fff; --lumin: #000; color-scheme: light; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]):not(#x) { --void: #fff; --lumin: #000; color-scheme: light; } }
+
+body { font-family: "Martian Mono", ui-monospace, "Cascadia Mono", Menlo, monospace; font-stretch: 75%; font-size: .875rem; font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased; }
+body *:not(svg):not(svg *) { font-family: inherit !important; border-radius: 0 !important; }
+::selection { background: var(--lumin); color: var(--void); }
+:focus-visible { outline: 2px solid var(--lumin); outline-offset: 3px; }
+a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+/* type: one face, set by size, weight, case and spacing */
+h1 { font-weight: 300; text-transform: uppercase; letter-spacing: -.02em; line-height: .95; font-size: clamp(2.25rem, 5.6vw, 4.25rem); }
+h2 { font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-size: 1rem; }
+.lede { font-size: .8125rem; letter-spacing: .01em; }
+.day { font-weight: 500; text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; }
+.day.today { text-decoration: underline; text-underline-offset: 5px; }
+.hahead, .gc-lab, .gc-h, .lhead, .tile .lab, .totals dt, th, .ptable th button, .ranks-head, .vsbox b { letter-spacing: .1em; text-transform: uppercase; font-size: .6875rem; font-weight: 400; }
+.pc-rank b, .tile b, .totals dd, .gc-sets, .ppct, .gscore, .llabel b { font-weight: 400; letter-spacing: -.02em; }
+.gc-sets { font-size: 3.25rem; }
+.gc-name, .pc-id h1, .thead h1, .mtitle { text-transform: uppercase; }
+.team, .gc-name, .stable tbody th, .nm a, .tcell { text-transform: uppercase; letter-spacing: .03em; }
+
+/* the masthead and the page tabs: the current page is inverted */
+.mast { border-bottom: 1px solid var(--lumin); }
+.brand { text-transform: uppercase; letter-spacing: .12em; font-size: .9375rem; font-weight: 500; }
+.brand svg { stroke: var(--lumin); }
+.pages a { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; }
+.pages a:hover { background: var(--lumin); color: var(--void); }
+.pages a[aria-current="page"] { background: var(--lumin); color: var(--void); }
+.leagues a { text-transform: uppercase; letter-spacing: .1em; font-size: .6875rem; font-weight: 400; border: 1px solid var(--lumin); margin-right: -1px; }
+.leagues a[aria-current="page"] { background: var(--lumin); color: var(--void); }
+
+/* controls: outlined; pressed and hovered are inverted; disabled is dashed */
+.nav button, .nav select, .morebtn, .filters input[type="search"] { border: 1px solid var(--lumin); background: var(--void); color: var(--lumin);
+  font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 400; }
+.nav button + button { margin-left: -7px; }
+.nav button:hover:not(:disabled), .morebtn:hover { background: var(--lumin); color: var(--void); border-color: var(--lumin); }
+.nav button[aria-pressed="true"] { background: var(--lumin); color: var(--void); border-color: var(--lumin); }
+.nav button:disabled { opacity: 1; border-style: dashed; text-decoration: line-through; }
+.filters input[type="search"] { text-transform: none; letter-spacing: .02em; }
+.bar, .ptable thead th, .pc-sec h2, .confhead, .btable tfoot td, .cartable tfoot th, .stable thead th { border-bottom-width: 1px !important; }
+
+/* lists and tables: ruled, no fills; a row being pointed at, or a game under way, is inverted */
+.games, .tablewrap, .ranks, .goals, .stars, .empty, .tile, .teamgrid a, .ltile, .vsbox { background: transparent; }
+.game[data-go]:hover, .game.on { background: var(--lumin); color: var(--void); }
+/* inside an inverted row the two inks swap, so everything in it (numbers, W and L, logos) inverts with it */
+.game[data-go]:hover *, .game.on * { --lumin: #000; --void: #fff; }
+:root[data-theme="light"] .game[data-go]:hover *, :root[data-theme="light"] .game.on * { --lumin: #fff; --void: #000; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game[data-go]:hover *, :root:not([data-theme="dark"]) .game.on * { --lumin: #fff; --void: #000; } }
+.game.both { box-shadow: inset 4px 0 0 var(--lumin); }
+.ptable .sorted, .cartable tbody tr.now td, .cartable tbody tr.now th { background: transparent; }
+.ptable th[aria-sort] button { text-decoration: underline; text-underline-offset: 4px; }
+.cartable tbody tr.now td, .cartable tbody tr.now th { font-weight: 600; }
+.team.lost, .gc-team.lost .gc-sets, .gc-team.lost .gc-name, .mid .l, .mid .dash, .tptable tr.part td, .pltable tr.part td { font-weight: 200; }
+.livenote { color: var(--lumin); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; }
+
+/* who won: a filled W, an outlined L */
+.team.won::before, .team.won::after, .team.lost::before, .team.lost::after, .gc-team.won .gc-name::after, .gc-team.lost .gc-name::after {
+  font-size: .6875rem; font-weight: 600; width: 1.7em; height: 1.7em; display: inline-grid; place-items: center; }
+.team.away.won::after, .team.home.won::before, .gc-team.won .gc-name::after { background: var(--lumin); color: var(--void); }
+.team.away.lost::after, .team.home.lost::before, .gc-team.lost .gc-name::after { color: var(--lumin); box-shadow: inset 0 0 0 1px var(--lumin); }
+.form i.w { background: var(--lumin); color: var(--void); } .form i.l { background: transparent; color: var(--lumin); box-shadow: inset 0 0 0 1px var(--lumin); }
+.logtable .res.w { text-decoration: underline; } .otable td.up::before { content: ""; } .ltable td.good { font-weight: 700; } .ltable td.poor { font-weight: 200; }
+
+/* the live tag: inverted, its square blinking (still when motion is reduced) */
+.livetag { background: var(--lumin); color: var(--void); text-transform: uppercase; letter-spacing: .12em; font-size: .6875rem; font-weight: 600; }
+.livetag .dot { border-radius: 0 !important; animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { .livetag .dot { animation: none; } }
+
+/* a team's number: filled for a place in the poll or the standings, open for a GOAT number */
+.rk:not(.nr) { background: var(--lumin) !important; color: var(--void) !important; text-shadow: none; font-weight: 500; font-size: .75rem; }
+.rk.goat { background: transparent !important; color: var(--lumin) !important; box-shadow: inset 0 0 0 1px var(--lumin); }
+.rk.nr { background: transparent; color: var(--lumin); box-shadow: inset 0 0 0 1px var(--lumin); border: 0; }
+
+/* team logos as plain silhouettes in the page's ink; player photos in grey, framed square */
+.logo { background: transparent !important; box-shadow: none !important; overflow: visible; }
+.logo::after { content: none !important; }
+.logo img { filter: brightness(0) invert(1); width: 100%; height: 100%; }
+:root[data-theme="light"] .logo img { filter: brightness(0); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: brightness(0); } }
+.game[data-go]:hover .logo img, .game.on .logo img { filter: brightness(0); }
+:root[data-theme="light"] .game[data-go]:hover .logo img, :root[data-theme="light"] .game.on .logo img { filter: brightness(0) invert(1); }
+.logo.badge { background: transparent !important; color: var(--lumin); box-shadow: inset 0 0 0 1px var(--lumin) !important; }
+.face { border: 1px solid var(--lumin); background: var(--void); color: var(--lumin); }
+.face.has { background: var(--void); }
+.face img { filter: grayscale(1) contrast(1.08); }
+
+/* cards: ruled sheets; the score card's chance of winning is one outlined and one filled half */
+.pcard, .gcard { border: 1px solid var(--lumin); border-top-width: 1px; background: transparent; }
+.gc-bar { box-shadow: inset 0 0 0 1px var(--lumin); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; font-size: .6875rem; }
+.gc-bar .a { background: transparent; color: var(--lumin); }
+.gc-bar .h { background: var(--lumin); color: var(--void); }
+.gc-track span { background: transparent; box-shadow: inset 0 0 0 1px var(--lumin); }
+.gc-track span.best { background: var(--lumin); }
+.ptrack { background: transparent; box-shadow: inset 0 0 0 1px var(--lumin); height: 12px; }
+.ptrack::after { background: var(--lumin); opacity: 1; }
+.ptrack .hi, .ptrack .mid, .ptrack .lo { background: var(--lumin); }
+.ptrack .lo { background: repeating-linear-gradient(90deg, var(--lumin) 0 2px, transparent 2px 4px); }
+.tile { border-color: var(--lumin); }
+.tile.top { background: var(--lumin); color: var(--void); box-shadow: none; }
+.tile.top .lab, .tile.top .plc { color: var(--void); }
+.otable td.heat { background: linear-gradient(90deg, var(--lumin) calc(var(--heat, 0) * 100%), transparent 0) left bottom / 100% 3px no-repeat; }
+.gtag, .seasonnote { background: transparent; box-shadow: inset 0 0 0 1px var(--lumin); color: var(--lumin); text-transform: uppercase; letter-spacing: .08em; }
+.pc-social a { background: var(--lumin); color: var(--void); }
+.teamgrid a:hover, .ltile:hover { background: var(--lumin); color: var(--void); }
+.ltile:hover .lname, .teamgrid a:hover { color: var(--void); }
+.explain > summary { color: var(--lumin); font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; }
+.keyline { font-size: .75rem; font-weight: 500; }
+.foot { border-top: 1px solid var(--lumin); font-size: .6875rem; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game[data-go]:hover .logo img, :root:not([data-theme="dark"]) .game.on .logo img { filter: brightness(0) invert(1); } }
+/* phones: the sport's name on its own line, its page tabs spread across the line under it */
+@media (max-width: 640px) {
+  .mast-row { flex-wrap: wrap; row-gap: 2px; padding-bottom: 4px; }
+  #brand { max-width: none; white-space: nowrap; line-height: 1.1; }
+  .brand svg { display: inline; }
+  .pages { flex: 1 1 100%; justify-content: space-between; margin: 0 -4px; gap: 0; }
+  .pages a { font-size: .6875rem; letter-spacing: 0; font-stretch: 75%; padding-left: 3px; padding-right: 3px; }
+}
+/* ==== fixes after the finish review ==== */
+/* the sport's own run of bars beside its name, in place of an icon */
+.brand .bars { width: 46px; height: 22px; flex: none; }
+/* team logos in two inks: dark parts to the page's ink, light parts to its ground */
+.logo img { filter: url(#ink-on-dark) !important; }
+:root[data-theme="light"] .logo img { filter: url(#ink-on-light) !important; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: url(#ink-on-light) !important; } }
+.game[data-go]:hover .logo img, .game.on .logo img { filter: url(#ink-on-light) !important; }
+:root[data-theme="light"] .game[data-go]:hover .logo img, :root[data-theme="light"] .game.on .logo img { filter: url(#ink-on-dark) !important; }
+/* channels in capitals, on one line, so every row is one height */
+.game .more, .game .more .watch { text-transform: uppercase; letter-spacing: .04em; font-size: .6875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) {
+  .pages a { padding-left: 6px; padding-right: 6px; }
+  .pages { overflow-x: auto; }
+}
+/* ==== round three: a calendar, betting lines, logos on tiles, channels in full ==== */
+/* the calendar: a strip of days (or weeks), each with its number of games; the chosen one inverted */
+.cal { display: flex; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; margin: 0 0 18px; }
+.cal::-webkit-scrollbar { display: none; }
+.calday { flex: 0 0 84px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "wd mo" "dn dn" "gn gn"; align-items: baseline; gap: 2px 6px;
+  min-height: 72px; padding: 8px 10px; color: var(--lumin); background: var(--void); border: 1px solid var(--lumin); margin-left: -1px; cursor: pointer; text-align: left;
+  scroll-snap-align: start; font-size: .875rem; }
+.calday:first-child { margin-left: 0; }
+.calday .wd, .calday .mo, .calday .gn { font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.calday .wd { grid-area: wd; } .calday .mo { grid-area: mo; text-align: right; } .calday .gn { grid-area: gn; }
+.calday .dn { grid-area: dn; font-size: 1.375rem; line-height: 1; font-weight: 300; letter-spacing: -.02em; white-space: nowrap; }
+.calday.today { box-shadow: inset 0 -4px 0 var(--lumin); }
+.calday:hover, .calday[aria-pressed="true"] { background: var(--lumin); color: var(--void); }
+.calday[aria-pressed="true"].today { box-shadow: inset 0 -4px 0 var(--void); }
+/* the sportsbook's line in the middle of a row, and on a game's card */
+.mid.line { display: flex; flex-direction: column; align-items: center; gap: 2px; font-weight: 600; font-size: .875rem; letter-spacing: .02em; }
+.mid.line .ou { font-size: .6875rem; font-weight: 400; letter-spacing: .06em; }
+.gc-linebig { display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; margin: 4px 0 0; font-size: 1.75rem; font-weight: 300; letter-spacing: -.01em; }
+.gc-linebig span + span { font-size: 1rem; font-weight: 400; }
+/* team logos as themselves, in grey, on a small white tile, so every mark keeps its shape */
+.logo { background: #fff !important; padding: 3px; }
+.logo img, :root[data-theme="light"] .logo img, .game[data-go]:hover .logo img, .game.on .logo img,
+:root[data-theme="light"] .game[data-go]:hover .logo img, :root[data-theme="light"] .game.on .logo img { filter: grayscale(1) contrast(1.1) !important; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: grayscale(1) contrast(1.1) !important; } }
+:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000 !important; }
+.logo.badge { background: transparent !important; }
+/* every channel shown in full: a long list wraps to a second line rather than being cut */
+.game .more, .game .more .watch { white-space: normal; overflow: visible; text-overflow: clip; }
+@media (max-width: 640px) {
+  .calday { flex: 0 0 74px; min-height: 60px; padding: 6px 8px; }
+  .mid.line { align-items: flex-end; }
+}
+/* calendar counts clear of the cell rules; logo tiles keep an edge on an inverted row */
+.calday { flex-basis: 96px; padding: 8px 12px; }
+.game[data-go]:hover .logo, .game.on .logo { box-shadow: inset 0 0 0 1px currentColor !important; }
+@media (max-width: 640px) { .calday { flex-basis: 88px; padding: 6px 10px; } }

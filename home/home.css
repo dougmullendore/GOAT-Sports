@@ -1,136 +1,408 @@
-/* GOAT Sports, the front page. Same look as the sports' own pages: one column, left aligned,
-   each sport in its own colour (purple for volleyball, green for hockey, brown for football,
-   orange for basketball, blue for baseball). */
+/* GOAT Sports, the front page. The day of sport as one data field: pure black and pure white,
+   nothing between them. One monospace face, 1px rules, bar fields and a sine line. The only
+   emphasis is inversion: a white block with black type, for what is live, pressed or won.
+   The light theme is the same page inverted (the Invert button, or the device's light setting). */
 :root {
-  --floor: #eef2f8; --sheet: #ffffff; --ink: #0f1d33; --ink-2: #4f5d73; --line: #cfd8e6;
-  --teal: #1d4ed8; --teal-soft: #e2e9fb; --ball: #0f1d33; --ball-ink: #ffffff;
-  --win: #15803d; --loss: #b3261e; --loss-ink: #ffffff; --lost: #7a8699;
-  --hockey: #047857; --volleyball: #6d28d9; --football: #8a4b1c; --basketball: #c2410c; --baseball: #1e40af;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-    --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #ffffff; --ball-ink: #0f1d33;
-    --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
-    --hockey: #34d399; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #8fb4f0;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --floor: #0b1220; --sheet: #121b2e; --ink: #e6ecf7; --ink-2: #9aa8bf; --line: #24324d;
-  --teal: #7aa7ff; --teal-soft: #1a2a4a; --ball: #ffffff; --ball-ink: #0f1d33;
-  --win: #4ade80; --loss: #ff8a80; --loss-ink: #3b0d0a; --lost: #7f8ba0;
-  --hockey: #34d399; --volleyball: #b794f6; --football: #e3a872; --basketball: #fb9a5f; --baseball: #8fb4f0;
+  --void: #000; --lumin: #fff;
   color-scheme: dark;
 }
-.s-hockey { --c: var(--hockey); } .s-volleyball { --c: var(--volleyball); } .s-football { --c: var(--football); }
-.s-basketball { --c: var(--basketball); } .s-baseball { --c: var(--baseball); }
+:root[data-theme="light"] { --void: #fff; --lumin: #000; color-scheme: light; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { --void: #fff; --lumin: #000; color-scheme: light; }
+}
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--floor); color: var(--ink); font: 400 1rem/1.5 Barlow, "Segoe UI", system-ui, sans-serif; }
-.wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
-@media (min-width: 1000px) { .wrap { max-width: 1200px; } }
+body { margin: 0; background: var(--void); color: var(--lumin);
+  font: 400 .875rem/1.5 "Martian Mono", ui-monospace, "Cascadia Mono", Menlo, monospace; font-stretch: 87.5%;
+  font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--lumin); color: var(--void); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
 .skip { position: absolute; left: -999px; }
-.skip:focus { left: 8px; top: 8px; background: var(--sheet); padding: 8px 12px; z-index: 5; }
-:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
-a { color: var(--teal); }
+.skip:focus { left: 8px; top: 8px; background: var(--lumin); color: var(--void); padding: 8px 12px; z-index: 5; }
+:focus-visible { outline: 2px solid var(--lumin); outline-offset: 3px; }
+a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 [hidden] { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* the small uppercase label the whole page speaks in */
+.lab, .kind, .readouts dt, .lg-key, .hahead { font-size: .6875rem; line-height: 1.3; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; }
 
-.mast { background: var(--sheet); border-bottom: 4px solid var(--ball); }
-.mast-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; padding-bottom: 14px; }
-.brand { white-space: nowrap; display: inline-flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font: 700 1.375rem/1.1 "Barlow Condensed", sans-serif; letter-spacing: .01em; }
-.brand svg { width: 26px; height: 26px; flex: none; fill: var(--ball); stroke: var(--ball); stroke-width: 1.2; stroke-linejoin: round; }
-.tag { color: var(--ink-2); font-size: .875rem; font-weight: 500; text-align: right; }
-@media (max-width: 520px) { .tag { display: none; } }
+/* ---- the masthead: the mark, and what the day holds as three readouts ---- */
+.mast { border-bottom: 1px solid var(--lumin); }
+.mast-row { display: flex; align-items: center; gap: 24px 40px; padding-top: 18px; padding-bottom: 18px; flex-wrap: wrap; }
+.brand { display: inline-flex; align-items: center; gap: 14px; color: var(--lumin); text-decoration: none; text-transform: uppercase;
+  font-weight: 500; font-size: .9375rem; letter-spacing: .14em; line-height: 1.15; }
+.readouts { display: flex; gap: 0; margin: 0 0 0 auto; }
+.readouts > div { padding: 0 22px; border-left: 1px solid var(--lumin); }
+.readouts dt { margin: 0 0 4px; }
+.readouts dd { margin: 0; font-size: 1.125rem; font-weight: 500; letter-spacing: .02em; }
+.invert { font: inherit; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin); background: var(--void);
+  border: 1px solid var(--lumin); padding: 0 12px; min-height: 36px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
+.invert::before { content: ""; width: 18px; height: 12px; border: 1px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.invert:hover { background: var(--lumin); color: var(--void); }
+.tag { display: none; }
 
-h1 { font: 700 clamp(2rem, 6.5vw, 3rem)/1.05 "Barlow Condensed", sans-serif; margin: 36px 0 12px; }
-.lede { margin: 0 0 20px; max-width: 60ch; color: var(--ink-2); font-size: 1.0625rem; line-height: 1.5; }
-h2 { font: 700 1.375rem/1.2 "Barlow Condensed", sans-serif; margin: 0; }
-h2.sec { margin: 44px 0 12px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
-.nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.nav button { font: 600 .875rem/1 Barlow, sans-serif; color: var(--ink); background: var(--sheet); border: 1px solid var(--line); border-radius: 4px; padding: 0 12px; min-height: 36px; cursor: pointer; }
-.nav button:hover:not(:disabled) { border-color: var(--teal); }
-.nav button:disabled { opacity: .45; cursor: default; }
-.nav button[aria-pressed="true"] { background: var(--teal-soft); border-color: var(--teal); }
+/* ---- the Day Field: every game as a column of bars, a sine line through the favourites' chances ---- */
+.field { border-bottom: 1px solid var(--lumin); }
+.field .wrap { position: relative; padding-top: 18px; padding-bottom: 0; }
+.field canvas { display: block; width: 100%; height: 190px; }
+.field-head { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+/* each league named under its own run of bars; a link that jumps to its list */
+.jump { position: relative; height: 46px; margin-top: 0; border-top: 1px solid var(--lumin); }
+.jump a { position: absolute; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 8px;
+  border-left: 1px solid var(--lumin); color: var(--lumin); text-decoration: none; font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase;
+  overflow: hidden; white-space: nowrap; }
+.jump a:first-child { border-left: 0; padding-left: 0; }
+.jump a:hover, .jump a:focus-visible { background: var(--lumin); color: var(--void); outline: none; }
+.jump a:first-child:hover, .jump a:first-child:focus-visible { padding-left: 8px; }
+.jump .n::before { content: "× "; }
+.jump .on { display: inline-block; width: 7px; height: 7px; background: currentColor; margin-left: 6px; vertical-align: 1px; animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
 
-/* one league's games on the chosen day */
-.lg { margin-top: 28px; }
-.lg-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; border-bottom: 2px solid var(--c); padding-bottom: 8px; margin-bottom: 8px; }
-.lg-head h2 { display: flex; align-items: baseline; gap: 10px; }
-.lg-head h2 a { color: var(--ink); text-decoration: none; }
-.lg-head h2 a:hover { color: var(--c); text-decoration: underline; }
-.lg-head .kind { font: 600 .75rem/1 Barlow, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--c); }
-.lg-head .all { font-size: .875rem; font-weight: 600; color: var(--c); white-space: nowrap; }
-.games { list-style: none; margin: 0; padding: 0; background: var(--sheet); border: 1px solid var(--line); border-radius: 4px; }
-.game { border-top: 1px solid var(--line); }
-.game:first-child { border-top: 0; }
-.game a.row { display: grid; grid-template-columns: 4.75rem 1fr 6.25rem 1fr 8.5rem; align-items: center; gap: 10px; padding: 7px 12px; color: inherit; text-decoration: none; }
-.game a.row:hover { background: color-mix(in srgb, var(--c) 7%, var(--sheet)); }
-.game.on a.row { background: color-mix(in srgb, var(--c) 10%, var(--sheet)); }
-.when { color: var(--ink-2); font-size: .8125rem; font-variant-numeric: tabular-nums; }
-.livetag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px 2px 5px; border-radius: 3px; background: var(--loss); color: var(--loss-ink);
-  font: 700 .6875rem/1 "Barlow Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; }
-.livetag .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 1.4s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+/* ---- the day: its date at display size, its controls, and what is live now ---- */
+.day { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: 24px 48px; align-items: start; padding: 40px 0 8px; }
+h1 { font-weight: 300; font-size: clamp(2.5rem, 6.2vw, 5.25rem); line-height: .92; letter-spacing: -.02em; text-transform: uppercase; margin: 0 0 14px; font-stretch: 75%; }
+.lede { margin: 0 0 22px; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
+h2 { font-weight: 500; font-size: 1rem; line-height: 1.2; margin: 0; letter-spacing: .08em; text-transform: uppercase; }
+h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lumin); display: flex; justify-content: space-between; }
+.tools { display: flex; align-items: flex-start; gap: 8px 12px; flex-wrap: wrap; }
+.nav { display: flex; gap: 0; flex-wrap: wrap; }
+.nav button, .morebtn, .pick > summary { font: inherit; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin); background: var(--void);
+  border: 1px solid var(--lumin); padding: 0 16px; min-height: 40px; cursor: pointer; }
+.nav button + button { margin-left: -1px; }
+.nav button:hover:not(:disabled), .morebtn:hover, .pick > summary:hover { background: var(--lumin); color: var(--void); }
+.nav button[aria-pressed="true"] { background: var(--lumin); color: var(--void); }
+.nav button:disabled { border-style: dashed; cursor: default; text-decoration: line-through; }
+.lede .morebtn { margin-left: 8px; }
+
+/* the leagues to show, ticked in this browser */
+.pick { font-size: .75rem; }
+.pick > summary { display: inline-flex; align-items: center; gap: 10px; list-style: none; }
+.pick > summary::-webkit-details-marker { display: none; }
+.pick > summary::after { content: "+"; font-size: .875rem; }
+.pick[open] > summary { background: var(--lumin); color: var(--void); }
+.pick[open] > summary::after { content: "−"; }
+.pick .count::before { content: "· "; }
+.pick[open] { flex-basis: 100%; }
+.pick fieldset { margin: -1px 0 0; padding: 0; border: 1px solid var(--lumin); display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
+.pick label { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 14px; cursor: pointer; text-transform: uppercase; letter-spacing: .08em; font-size: .6875rem;
+  border-right: 1px solid var(--lumin); border-bottom: 1px solid var(--lumin); margin: 0 -1px -1px 0; }
+.pick label:hover { background: var(--lumin); color: var(--void); }
+.pick input { appearance: none; width: 16px; height: 16px; margin: 0; border: 1px solid currentColor; display: grid; place-items: center; flex: none; }
+.pick input:checked { background: currentColor; }
+.pick input:checked::after { content: ""; width: 6px; height: 6px; background: var(--void); }
+.pick label:hover input:checked::after { background: var(--lumin); }
+
+/* what is live, as one inverted block; when nothing is, the next game up */
+
+/* ---- one league's games ---- */
+.lg { margin-top: 48px; scroll-margin-top: 16px; }
+.lg-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 6px 18px; padding-bottom: 10px; border-bottom: 1px solid var(--lumin); }
+.lg-head h2 { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; font-size: 1.375rem; letter-spacing: .04em; }
+.lg-head h2 a { color: var(--lumin); text-decoration: none; }
+.lg-head h2 a:hover { text-decoration: underline; }
+.lg-head .kind { letter-spacing: .14em; }
+.lg-head .all { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.lg-key { margin: 10px 0 4px; max-width: 90ch; text-transform: none; letter-spacing: .02em; font-size: .75rem; }
+.games { list-style: none; margin: 0; padding: 0; }
+.game { border-bottom: 1px solid var(--lumin); }
+.game a.row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) var(--mid-w, 8rem) minmax(0, 1fr) 11rem; align-items: center; gap: 12px; padding: 11px 10px;
+  color: inherit; text-decoration: none; min-height: 52px; }
+.game a.row:hover { background: var(--lumin); color: var(--void); }
+.game a.row:focus-visible { outline: none; background: var(--lumin); color: var(--void); }
+/* a game under way is inverted; a score that has just changed flips back for a beat */
+.game.on a.row { background: var(--lumin); color: var(--void); }
+.game.flip a.row { animation: flip .9s steps(1) 1; }
+@keyframes flip { 0%, 66% { background: var(--void); color: var(--lumin); } 33%, 100% { background: var(--lumin); color: var(--void); } }
+@media (prefers-reduced-motion: reduce) { .game.flip a.row, .jump .on { animation: none; } }
+.when { font-size: .75rem; letter-spacing: .04em; }
+.livetag { display: inline-flex; align-items: center; gap: 6px; font-size: .6875rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.livetag .dot { width: 7px; height: 7px; background: currentColor; animation: blink 1s steps(2, start) infinite; }
 @media (prefers-reduced-motion: reduce) { .livetag .dot { animation: none; } }
-.team { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 600; font-size: .9375rem; line-height: 1.25; }
+.team { display: flex; align-items: center; gap: 10px; min-width: 0; font-weight: 500; font-size: .875rem; text-transform: uppercase; letter-spacing: .03em; }
 .team.away { justify-content: flex-end; text-align: right; }
 .team .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.team.lost { color: var(--lost); font-weight: 400; }
-.rk { display: inline-grid; place-items: center; flex: none; min-width: 1.75em; height: 1.5em; padding: 0 .2em; border-radius: 3px;
-  background: var(--c); color: var(--sheet); font: 700 .9375rem/1 "Barlow Condensed", sans-serif; font-variant-numeric: tabular-nums; }
-.logo { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; line-height: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px var(--c); overflow: hidden; }
-.logo img { width: 64%; height: 64%; object-fit: contain; }
-.s-hockey .logo img { width: 100%; height: 100%; transform: scale(1.15); }
-.logo.badge { background: var(--team, var(--c)); color: #fff; font: 700 .5625rem/1 "Barlow Condensed", sans-serif; }
-.mid { display: flex; align-items: baseline; justify-content: center; gap: 6px; font: 700 1.25rem/1 "Barlow Condensed", sans-serif; font-variant-numeric: tabular-nums; }
-.mid .l { color: var(--lost); font-weight: 500; }
-.mid .dash { color: var(--ink-2); font: 500 .8125rem/1 Barlow, sans-serif; }
-.mid.odds { font-size: 1rem; }
-.mid.at { color: var(--ink-2); font: 500 .8125rem/1 Barlow, sans-serif; }
-.more { color: var(--ink-2); font-size: .8125rem; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.empty { margin: 0; padding: 14px 12px; background: var(--sheet); border: 1px solid var(--line); border-radius: 4px; color: var(--ink-2); font-size: .9375rem; }
-.quiet { margin: 22px 0 0; color: var(--ink-2); font-size: .9375rem; }
-.quiet a { font-weight: 600; }
-.note { color: var(--ink-2); font-size: .8125rem; margin: 10px 0 0; max-width: 75ch; }
+.team.lost { font-weight: 300; }
+/* a team's number: filled for a place in the poll or the standings, open for a GOAT number */
+.rk { display: inline-grid; place-items: center; flex: none; min-width: 2.1em; height: 1.6em; padding: 0 .3em; font-size: .75rem; font-weight: 500;
+  background: var(--lumin); color: var(--void); }
+.rk.goat { background: transparent; color: inherit; box-shadow: inset 0 0 0 1px currentColor; }
+.game.on .rk:not(.goat), .game a.row:hover .rk:not(.goat), .game a.row:focus-visible .rk:not(.goat) { background: var(--void); color: var(--lumin); }
+/* team logos as plain silhouettes in the page's own ink */
+.logo { display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; line-height: 0; }
+.logo img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1); }
+:root[data-theme="light"] .logo img { filter: brightness(0); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: brightness(0); } }
+.game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: brightness(0); }
+:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img { filter: brightness(0) invert(1); }
+.logo.badge { width: auto; min-width: 26px; height: 18px; padding: 0 4px; border: 1px solid currentColor; font-size: .5625rem; line-height: 1; letter-spacing: .04em; }
+.mid { display: flex; align-items: baseline; justify-content: center; gap: 8px; font-size: 1.25rem; font-weight: 400; letter-spacing: -.01em; }
+.mid .l { font-weight: 200; }
+.mid .dash { font-size: .75rem; }
+.mid.odds { font-size: .9375rem; font-weight: 600; }
+.mid.odds .l { font-weight: 300; }
+.mid.at { font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+.more { font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.more.none { font-style: italic; }
+.team.won::before, .team.won::after, .team.lost::before, .team.lost::after { font-size: .6875rem; font-weight: 600; flex: none; width: 1.7em; height: 1.7em; display: inline-grid; place-items: center; text-decoration: none; }
+.team.away.won::after, .team.home.won::before { content: "W"; background: currentColor; color: var(--void); }
+.game.on .team.away.won::after, .game.on .team.home.won::before, a.row:hover .team.away.won::after, a.row:hover .team.home.won::before { color: var(--lumin); }
+.team.away.lost::after, .team.home.lost::before { content: "L"; box-shadow: inset 0 0 0 1px currentColor; }
+.showall { margin: 14px 0 0; }
+.empty { margin: 24px 0 0; padding: 18px 20px; border: 1px dashed var(--lumin); }
+.quiet { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--lumin); font-size: .75rem; display: flex; justify-content: space-between; gap: 16px; }
+.quiet:first-of-type { margin-top: 40px; border-top: 1px solid var(--lumin); }
+.quiet a { text-transform: uppercase; letter-spacing: .1em; font-size: .6875rem; white-space: nowrap; }
+.note { font-size: .75rem; margin: 10px 0 0; max-width: 80ch; }
 
-@media (max-width: 640px) {
-  .game a.row { grid-template-columns: 1fr auto; grid-template-areas: "away mid" "home mid" "when more"; gap: 4px 12px; padding: 10px 12px; }
-  .team.away { grid-area: away; justify-content: flex-start; flex-direction: row-reverse; justify-content: flex-end; text-align: left; }
+/* ---- the sports, one ruled line each ---- */
+.doors { list-style: none; margin: 0; padding: 0; }
+.door { display: grid; grid-template-columns: 96px minmax(0, 1fr) minmax(0, 30rem); gap: 8px 32px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--lumin); }
+.door h3 { margin: 0 0 4px; font-weight: 500; font-size: 1.125rem; letter-spacing: .08em; text-transform: uppercase; }
+.door h3 a { color: var(--lumin); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+.door h3 a:hover { text-decoration: underline; }
+.door h3 svg { display: none; }
+.door p { margin: 0; font-size: .75rem; max-width: 64ch; }
+.door-pages { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; }
+.door-pages a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid var(--lumin); margin: 0 -1px -1px 0;
+  font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; color: var(--lumin); }
+.door-pages a:hover { background: var(--lumin); color: var(--void); }
+.door.soon { border-bottom-style: dashed; }
+
+.foot { margin-top: 64px; padding-top: 18px; padding-bottom: 48px; border-top: 1px solid var(--lumin); font-size: .6875rem; letter-spacing: .04em; }
+.foot p { margin: 0 0 8px; max-width: 90ch; }
+
+/* ---- phones ---- */
+@media (max-width: 760px) {
+  .wrap { padding: 0 16px; }
+  .readouts { margin-left: 0; width: 100%; }
+  .readouts > div:first-child { border-left: 0; padding-left: 0; }
+  .readouts > div { padding: 0 14px; }
+  .readouts dd { font-size: 1rem; }
+  .mast-row { gap: 16px; }
+  .invert { position: absolute; right: 16px; top: 14px; }
+  .mast { position: relative; }
+  .field canvas { height: 120px; }
+  .jump { height: auto; display: flex; flex-wrap: wrap; border-top: 1px solid var(--lumin); }
+  .jump a { position: static; width: auto !important; padding: 10px 12px; border-left: 0; border-right: 1px solid var(--lumin); }
+  .jump a:first-child { padding-left: 12px; }
+  .day { grid-template-columns: 1fr; padding-top: 28px; }
+  .tools { flex-direction: column; align-items: stretch; }
+  .nav button { flex: 1 1 0; min-height: 44px; }
+  .pick > summary { width: 100%; justify-content: space-between; min-height: 44px; }
+  .game a.row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "away mid" "home mid" "when more"; gap: 6px 12px; padding: 12px 10px; }
+  .team.away { grid-area: away; flex-direction: row-reverse; justify-content: flex-end; text-align: left; }
   .team.home { grid-area: home; }
-  .mid { grid-area: mid; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .mid { grid-area: mid; flex-direction: column; align-items: flex-end; gap: 6px; }
   .mid .dash { display: none; }
   .when { grid-area: when; }
   .more { grid-area: more; }
+  .team.away::after { order: -1; } .team.home::before { order: 1; }
+  .lg-head { grid-template-columns: auto minmax(0, 1fr); }
+  .lg-head .all { grid-column: 1 / -1; }
+  .door { grid-template-columns: 64px minmax(0, 1fr); }
+  .door-pages { grid-column: 1 / -1; }
 }
 
-/* the sports, as three doors */
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-@media (max-width: 760px) { .cards { grid-template-columns: 1fr; } }
-.card { background: var(--sheet); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 4px; padding: 16px 16px 14px; }
-.card h3 { margin: 0 0 4px; font: 700 1.375rem/1.2 "Barlow Condensed", sans-serif; }
-.card h3 a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
-.card h3 a:hover { color: var(--c); }
-.card h3 svg { width: 24px; height: 24px; flex: none; fill: none; stroke: var(--c); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.card p { margin: 0 0 10px; color: var(--ink-2); font-size: .9375rem; }
-.card ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .9375rem; font-weight: 600; }
-.card ul a { color: var(--c); }
-.card.soon { opacity: .7; }
+/* ==== fixes after the finish review ==== */
+/* the label sits over the date, which is the display line */
+.day .lede { margin: 0 0 10px; }
+.day h1 { margin: 0; }
+/* the calendar and the leagues button share one full-width row under the date */
+.day .tools { grid-column: 1 / -1; display: flex; align-items: stretch; gap: 0 12px; flex-wrap: nowrap; }
+.pick { flex: none; }
+.pick[open] { flex-basis: auto; }
+.pick fieldset { position: absolute; left: 24px; right: 24px; z-index: 4; background: var(--void); }
+.day { position: relative; }
+.pick > summary { min-height: 64px; }
+.pick > summary::after { content: ""; width: 9px; height: 9px; background: linear-gradient(currentColor, currentColor) center / 9px 1px no-repeat, linear-gradient(currentColor, currentColor) center / 1px 9px no-repeat; }
+.pick[open] > summary::after { content: ""; background: linear-gradient(currentColor, currentColor) center / 9px 1px no-repeat; }
+.cal { display: flex; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.cal::-webkit-scrollbar { display: none; }
+.calday { flex: 1 0 64px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "wd mo" "dn gn"; align-items: end; gap: 2px 6px; min-height: 64px; padding: 8px 10px;
+  font: inherit; color: var(--lumin); background: var(--void); border: 1px solid var(--lumin); margin-left: -1px; cursor: pointer; text-align: left; }
+.calday:first-child { margin-left: 0; }
+.calday .wd { grid-area: wd; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; }
+.calday .mo { grid-area: mo; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; text-align: right; }
+.calday .dn { grid-area: dn; font-size: 1.375rem; line-height: 1; font-weight: 300; letter-spacing: -.02em; }
+.calday .gn { grid-area: gn; font-size: .6875rem; text-align: right; }
+.calday.today { box-shadow: inset 0 -4px 0 var(--lumin); }
+.calday:hover { background: var(--lumin); color: var(--void); }
+.calday[aria-pressed="true"] { background: var(--lumin); color: var(--void); }
+.calday[aria-pressed="true"].today { box-shadow: inset 0 -4px 0 var(--void); }
+/* the columns of a league's list, named once over it */
+.colhead { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) var(--mid-w, 8rem) minmax(0, 1fr) 11rem; gap: 12px; padding: 12px 10px 6px;
+  font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; border-bottom: 1px solid var(--lumin); }
+.colhead .r { text-align: right; } .colhead .c { text-align: center; }
+.lg-head + .lg-key + .colhead, .lg-head + .colhead { border-top: 0; }
+/* drawn arrows; counts without a typed sign */
+.arrow { width: 14px; height: 10px; margin-left: 8px; vertical-align: 0; }
+.jump .n::before { content: none; }
+.jump .n { font-size: .875rem; }
+/* team logos in two inks: dark parts to the page's ink, light parts to its ground */
+.logo img { filter: url(#ink-on-dark); }
+:root[data-theme="light"] .logo img { filter: url(#ink-on-light); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: url(#ink-on-light); } }
+.game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: url(#ink-on-light); }
+:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: url(#ink-on-dark); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: url(#ink-on-dark); } }
 
-.foot { margin-top: 48px; padding-top: 16px; padding-bottom: 40px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: .8125rem; }
-.foot p { margin: 0 0 8px; max-width: 80ch; }
+/* phones: the first league's games come up on the first screen */
+@media (max-width: 760px) {
+  .mast-row { padding-top: 10px; padding-bottom: 10px; gap: 10px; }
+  .field .wrap { padding-top: 10px; }
+  .field canvas { height: 72px; }
+  .jump a { padding: 6px 10px; }
+  .day { padding: 18px 0 0; gap: 12px; }
+  .day h1 { font-size: 2.5rem; }
+  .day .tools { flex-direction: row; }
+  .calday { flex: 0 0 56px; min-height: 52px; padding: 6px 8px; }
+  .calday .dn { font-size: 1.125rem; }
+  .pick > summary { min-height: 52px; width: auto; padding: 0 12px; }
+  .pick fieldset { left: 16px; right: 16px; }
+  .lg { margin-top: 28px; }
+  .colhead { display: none; }
+}
 
-/* ---- who won: a W or an L beside the team. Its rank keeps the usual colour. ---- */
-.team.won::before, .team.won::after, .team.lost::before, .team.lost::after { font: 700 .8125rem/1 Barlow, sans-serif; flex: none; }
-.team.away.won::after, .team.home.won::before { content: "W"; color: var(--win); }
-.team.away.lost::after, .team.home.lost::before { content: "L"; color: var(--loss); }
-/* on a phone the two teams are stacked, so the letter follows the team's name on both lines */
-@media (max-width: 640px) { .team.away::after { order: -1; } .team.home::before { order: 1; } }
+/* the day grid's columns never grow past the screen to fit the calendar; the calendar scrolls instead */
+.day > * { min-width: 0; }
 
-/* ---- the number in a rank tag: always dark, with a white outline so it reads on every shade ---- */
-.rk:not(.nr) { color: #0f1d33; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff, -1px 0 0 #fff, 1px 0 0 #fff; }
+/* ==== round three: no field band, betting lines, logos on tiles, a labelled calendar ==== */
+/* the leagues of the day, one ruled row of links under the masthead */
+.field .wrap { padding-top: 0; }
+.jump { position: static; display: flex; flex-wrap: wrap; height: auto; border-top: 0; }
+.jump a, .jump a:first-child { position: static; width: auto !important; flex-direction: row; align-items: baseline; gap: 10px; padding: 12px 16px; min-height: 44px;
+  border-left: 0; border-right: 1px solid var(--lumin); }
+.jump a:first-child { padding-left: 0; }
+.jump a:first-child:hover, .jump a:first-child:focus-visible { padding-left: 16px; }
+.jump a > span:first-child { font-weight: 500; letter-spacing: .1em; }
+.jump .n { font-size: .6875rem; }
+/* the date, then what the day holds */
+.day h1 { margin: 0 0 10px; }
+.day .lede { margin: 0; }
+/* the calendar: weekday and month over the date, the number of games under it; a swipe moves a whole day */
+.cal { scroll-snap-type: x mandatory; }
+.calday { grid-template-columns: 1fr auto; grid-template-areas: "wd mo" "dn dn" "gn gn"; align-items: baseline; flex: 1 0 76px; scroll-snap-align: start; min-height: 72px; }
+.calday .gn { text-align: left; white-space: nowrap; }
+.pick > summary { min-height: 72px; }
+/* the sportsbook's line, in the middle of a row */
+.mid.line { flex-direction: column; align-items: center; gap: 2px; font-size: .875rem; font-weight: 600; letter-spacing: .02em; }
+.mid.line .ou { font-size: .6875rem; font-weight: 400; letter-spacing: .06em; }
+.keyline { margin: 24px 0 0; font-size: .75rem; }
+/* team logos as themselves, in grey, on a small white tile, so every mark keeps its shape */
+.logo { width: 30px; height: 30px; padding: 3px; background: #fff; }
+.logo img, :root[data-theme="light"] .logo img, .game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img,
+:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: grayscale(1) contrast(1.1); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img, :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: grayscale(1) contrast(1.1); } }
+:root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000; }
+.logo.badge { background: transparent; }
+@media (max-width: 760px) {
+  .jump a { padding: 10px 12px; }
+  .calday { flex: 0 0 72px; min-height: 60px; }
+  .pick > summary { min-height: 60px; }
+  .mid.line { align-items: flex-end; }
+}
+/* calendar counts clear of the cell rules; the helpline as its own ruled row; logo tiles keep an edge on an inverted row */
+.calday { flex-basis: 92px; padding: 8px 12px; }
+.keyline { margin: 28px 0 0; padding: 12px 0; border-top: 1px solid var(--lumin); border-bottom: 1px solid var(--lumin); }
+.game.on .logo, .game a.row:hover .logo, .game a.row:focus-visible .logo { box-shadow: inset 0 0 0 1px currentColor; }
+@media (max-width: 760px) { .calday { flex-basis: 86px; padding: 6px 10px; } }
 
-/* the front page's own mark and lines are white on the dark bar and in dark mode, dark navy on a white header */
-.sports a[aria-current="page"].sports-home, .sports .sports-home[aria-current="page"] { border-bottom-color: #fff; }
+/* ==== round four: a feed of today's scores in place of Next up; logos in place of the bars ==== */
+.brand .goat { width: 32px; height: 30px; flex: none; }
+.brand .goat .eye { fill: var(--void); }
+/* a mark: a league's own logo, or a sport's drawn icon, on the same white tile as the team logos */
+.mark { display: inline-grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 5px; background: #fff; line-height: 0; }
+.mark img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(1.1); }
+.mark svg { width: 100%; height: 100%; fill: none; stroke: #000; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; --c: #000; }
+:root[data-theme="light"] .mark { box-shadow: inset 0 0 0 1px #000; }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .mark, :root:not([data-theme="dark"]) .logo { box-shadow: inset 0 0 0 1px #000; } }
+.lg-head { align-items: center; }
+.door { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 30rem); }
+.door .mark { width: 64px; height: 64px; padding: 12px; }
+
+/* the feed: one ruled strip under the masthead; a game under way is inverted, a finished one is not */
+.feed { border-bottom: 1px solid var(--lumin); }
+.feed-row { display: flex; align-items: stretch; }
+.feed-h { flex: none; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 132px; padding: 12px 20px 12px 0;
+  border-right: 1px solid var(--lumin); font-size: .6875rem; letter-spacing: .12em; }
+.feed-h .n { font-weight: 400; letter-spacing: .1em; }
+.ticks { list-style: none; margin: 0; padding: 0; display: flex; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.ticks::-webkit-scrollbar { display: none; }
+.tick { flex: 0 0 216px; border-right: 1px solid var(--lumin); scroll-snap-align: start; }
+.tick a { display: grid; align-content: start; gap: 6px; height: 100%; padding: 10px 14px 12px; color: var(--lumin); text-decoration: none; }
+.tick a:hover, .tick a:focus-visible, .tick.on a { background: var(--lumin); color: var(--void); outline: none; }
+.tick.on a:hover .nm, .tick.on a:focus-visible .nm { text-decoration: underline; }
+.tick.flip a { animation: flip .9s steps(1) 1; }
+@media (prefers-reduced-motion: reduce) { .tick.flip a { animation: none; } }
+.tk-top { display: flex; justify-content: space-between; gap: 8px; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.tk-top > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.tick .side { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+.tick .logo { width: 22px; height: 22px; padding: 2px; }
+.tick.on .logo, .tick a:hover .logo, .tick a:focus-visible .logo { box-shadow: inset 0 0 0 1px currentColor; }
+.tick .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+.tick .sc { font-size: 1rem; font-weight: 300; }
+.tick .won .nm, .tick .won .sc { font-weight: 600; }
+@media (max-width: 760px) {
+  .brand .goat { width: 26px; height: 24px; }
+  .door { grid-template-columns: 48px minmax(0, 1fr); }
+  .door .mark { width: 48px; height: 48px; padding: 9px; }
+  .lg-head .mark { width: 36px; height: 36px; padding: 4px; }
+  .feed-row { padding-right: 0; }
+  .feed-h { min-width: 0; padding-right: 12px; }
+  .feed-h .n { display: none; }
+  .tick { flex-basis: 176px; }
+}
+
+/* ==== round five: the day's date in the masthead; a calendar that goes as far as you like ==== */
+/* the day's date, then its games and leagues as readouts, in a row with Live now and Updated */
+.mast-day { flex: 1 1 auto; display: flex; justify-content: flex-end; align-items: stretch; min-width: 0; }
+.mast-day h1 { margin: 0; padding: 0 22px; display: flex; align-items: center; font-size: 1.25rem; line-height: 1; font-weight: 400; letter-spacing: .02em; font-stretch: 87.5%; }
+.mast-day .cell { padding: 0 22px; border-left: 1px solid var(--lumin); }
+.mast-day .k { display: block; margin: 0 0 4px; font-size: .6875rem; line-height: 1.3; letter-spacing: .1em; text-transform: uppercase; }
+.mast-day .v { display: block; font-size: 1.125rem; line-height: 1.3; font-weight: 500; letter-spacing: .02em; }
+.day .lede { margin: 0 0 10px; }
+.day { display: block; padding: 24px 0 8px; }
+.day .tools { gap: 0; }
+.step { flex: none; width: 44px; display: grid; place-items: center; font: inherit; color: var(--lumin); background: var(--void); border: 1px solid var(--lumin); cursor: pointer; }
+.step + .cal, .cal + .step { margin-left: -1px; }
+.step svg { width: 10px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.step:hover { background: var(--lumin); color: var(--void); }
+.goto { flex: none; margin-left: 12px; display: grid; align-content: center; gap: 4px; padding: 0 12px; border: 1px solid var(--lumin); cursor: pointer; }
+.goto span { font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; }
+.goto input { font: inherit; font-size: .8125rem; color: var(--lumin); background: transparent; border: 0; padding: 0; min-height: 24px; }
+.goto:focus-within { outline: 2px solid var(--lumin); outline-offset: 3px; }
+.goto input:focus { outline: none; }
+.day .pick { margin-left: 12px; }
+@media (max-width: 760px) {
+  .mast-day { order: 3; width: 100%; justify-content: flex-start; padding: 10px 0 0; border-top: 1px solid var(--lumin); }
+  .mast-day h1 { padding-left: 0; font-size: 1.125rem; }
+  .mast-day .cell { padding: 0 14px; }
+  .mast-day .v { font-size: 1rem; }
+  .readouts { order: 4; }
+  .day { padding-top: 14px; }
+  .day .tools { flex-wrap: wrap; row-gap: 8px; }
+  .day .tools .cal { flex: 1 1 calc(100% - 88px); }
+  .goto { margin-left: 0; flex: 1 1 auto; min-height: 52px; }
+}
+/* games, leagues and live now sit as one run of equal cells: the masthead's gap does not come between them */
+.mast-day + .readouts { margin-left: -40px; }
+@media (max-width: 760px) { .mast-day + .readouts { margin-left: 0; } }
+/* and every one of them is the same width, so the rules between them fall at an even step */
+.mast-day .cell, .readouts > div:first-child { width: 132px; }
+@media (max-width: 1100px) and (min-width: 761px) {
+  .mast-row { gap: 24px; }
+  .mast-day + .readouts { margin-left: -24px; }
+  .brand > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .mast-day h1 { padding: 0 16px; }
+  .mast-day .cell, .readouts > div { padding: 0 16px; }
+  .mast-day .cell, .readouts > div:first-child { width: 112px; }
+}
+@media (max-width: 760px) { .mast-day .cell, .readouts > div:first-child { width: auto; min-width: 96px; } }
+/* on a phone: the date on its own line, then the four readouts in two even columns */
+@media (max-width: 760px) {
+  .mast-day { flex-wrap: wrap; }
+  .mast-day h1 { width: 100%; padding: 0 0 10px; }
+  .mast-day .cell, .readouts > div, .readouts > div:first-child { width: 50%; min-width: 0; padding: 0 14px; }
+  .mast-day .cell:nth-of-type(1), .readouts > div:first-child { border-left: 0; padding-left: 0; }
+}
