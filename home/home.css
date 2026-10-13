@@ -148,7 +148,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .team.away.won::after, .team.home.won::before { content: "W"; background: currentColor; color: var(--void); }
 .game.on .team.away.won::after, .game.on .team.home.won::before, a.row:hover .team.away.won::after, a.row:hover .team.home.won::before { color: var(--lumin); }
 .team.away.lost::after, .team.home.lost::before { content: "L"; box-shadow: inset 0 0 0 1px currentColor; }
-.showall { margin: 14px 0 0; }
 .empty { margin: 24px 0 0; padding: 18px 20px; border: 1px dashed var(--lumin); }
 .quiet { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--lumin); font-size: .75rem; display: flex; justify-content: space-between; gap: 16px; }
 .quiet:first-of-type { margin-top: 40px; border-top: 1px solid var(--lumin); }

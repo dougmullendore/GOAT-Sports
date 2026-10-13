@@ -78,8 +78,6 @@
   var HIDE_KEY = "goat-home-hidden", hidden = {};
   try { (JSON.parse(localStorage.getItem(HIDE_KEY) || "[]") || []).forEach(function (k) { hidden[k] = 1; }); } catch (e) {}
   function keepHidden() { try { localStorage.setItem(HIDE_KEY, JSON.stringify(Object.keys(hidden))); } catch (e) {} }
-  // a long league shows its first games and a button for the rest; a league opened in full stays open
-  var SHORT = 8, opened = {};
   // a score that changes is read out to screen readers
   var sayBox = null;
   function say(words) {
@@ -322,25 +320,14 @@
       var lg = x[0], games = x[1];
       // how many places a rank is shaded over: the poll's 25, or every team of a league numbered by its standings
       var top = lg.ranked_only ? 25 : Math.max.apply(null, [25].concat(lg.games.map(function (g) { return Math.max(g.away[2] || 0, g.home[2] || 0); })));
-      var long_ = games.length > SHORT && !opened[lg.key], first = long_ ? games.slice(0, SHORT) : games;
-      var list = el("ol", { "class": "games" }, first.map(function (g) { return row(lg, g); }));
+      // every game of the day is listed, however many there are
+      var list = el("ol", { "class": "games" }, games.map(function (g) { return row(lg, g); }));
       var key = keyOf(lg, games);
       var sec = el("section", { "class": "lg s-" + lg.sport, id: "lg-" + lg.key, "data-top": top, "aria-labelledby": "h-" + lg.key }, [
         el("div", { "class": "lg-head" }, [leagueMark(lg),
           el("h2", { id: "h-" + lg.key }, [el("a", { href: lg.href, text: lg.name }), el("span", { "class": "kind", text: lg.label })]),
           el("a", { "class": "all", href: lg.href }, ["All " + lg.name + " " + lg.unit, arrow()])]),
         key ? el("p", { "class": "lg-key", text: key }) : null, list]);
-      if (long_) {
-        var more = el("button", { type: "button", "class": "morebtn", text: "Show all " + games.length + " " + lg.name + " " + lg.unit, onclick: function () {
-          opened[lg.key] = 1;
-          var rest = games.slice(SHORT).map(function (g) { return row(lg, g); });
-          rest.forEach(function (li) { list.appendChild(li); });
-          more.remove();
-          var go = rest[0] && rest[0].querySelector("a");
-          if (go) go.focus();
-        } });
-        sec.appendChild(el("p", { "class": "showall" }, [more]));
-      }
       holder.appendChild(sec);
     });
     var ready_ = known(shown);
