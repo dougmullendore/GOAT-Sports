@@ -893,8 +893,7 @@
       art.appendChild(logBox);
       gameLog(logBox, p);
       art.appendChild(el("p", { "class": "note" }, ["The number beside each bar is his percentile among " + many + " who play regularly: 90 means better than 90% of them. The tick marks the middle." +
-        (roster.through ? " Regular season, through games of " + short(roster.through) + ". " : " "),
-        data.player_page ? el("a", { href: data.player_page + p.id, rel: "noopener", text: W("players.nhl_link") }) : null]));
+        (roster.through ? " Regular season, through games of " + short(roster.through) + ". " : "")]));
       var defs = [];
       CARD.forEach(function (sec) { sec[1].forEach(function (m) { if (m[2] && pctOf(p, m[0]) != null) defs.push(el("div", {}, [el("dt", { text: m[1] }), el("dd", { text: m[2] + "." })])); }); });
       if (defs.length) art.appendChild(el("details", { "class": "defs" }, [el("summary", { text: "What each line measures" }), el("dl", {}, defs)]));
@@ -1122,7 +1121,6 @@
       else if (doc) periodTable(sets, g, doc.line);
     }
     box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
-    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("game.nhl_link") })]));
     top();
     liveHooks.push(function (x) { if (x === g) top(); });
     function readBox() {

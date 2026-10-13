@@ -82,7 +82,6 @@ players.career_wait = Only this season so far: her earlier seasons at this schoo
 
 # ---- a match's own page ----
 match.back = All Games
-match.ncaa_link = Official box score on NCAA.com
 
 # ---- bottom of every page ----
 

@@ -69,7 +69,6 @@ players.lede = Every regular in the NHL, ranked by Impact per game: the points h
 players.note = Impact is a box-score rating: a goal is worth 0.75, a first assist 0.70, a second assist 0.55, a shot on goal 0.075, a blocked shot 0.05, a takeaway 0.03 (a giveaway costs the same), a minor penalty drawn 0.15 (one taken costs the same) and each goal of plus-minus 0.15. A player's total is compared with what an average forward or defenseman would have in the same ice time. It cannot see shot quality or who else was on the ice, and it does not adjust for the opponent. Early in the season a few games can move a player a long way.
 players.note_goalies = A goalie's Impact is the goals he saved beyond what an average goalie would have on the same number of shots (at even strength, against the power play and shorthanded), at 0.75 a goal. Impact does not see shot quality; goals saved above expected, on his card, does. Early in the season a game or two can move a goalie a long way.
 players.back = All players
-players.nhl_link = His page on NHL.com
 
 # ---- Lines page ----
 lines.title = NHL Line Combinations
@@ -92,7 +91,6 @@ lines.stats_note = Every line and pair with at least 10 minutes together at five
 
 # ---- a game's own page ----
 game.back = All Games
-game.nhl_link = This game on NHL.com
 
 # ---- bottom of every page ----
 

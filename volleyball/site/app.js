@@ -1103,7 +1103,6 @@
     var cmp = el("div", { "class": "gc-cmp" });
     var card = el("section", { "class": "gcard", "aria-label": "Match summary" }, [status, scoreLine(g), sets, oddsLine(g), cmp]);
     box.appendChild(title); box.appendChild(card); box.appendChild(boxes);
-    if (data.game_page) box.appendChild(el("p", { "class": "note keep" }, [el("a", { href: data.game_page + g.id, rel: "noopener", text: W("match.ncaa_link") })]));
 
     function setTable(a, h, label) {        // [points per set] for each side
       var n = Math.max(a.length, h.length), head = el("tr", {}, [el("th", { scope: "col", "class": "l", text: label })]);
