@@ -22,6 +22,17 @@
   }).observe(document.documentElement, { childList: true, subtree: true });
 
   var $ = function (id) { return document.getElementById(id); };
+  // ---- the button at the foot of the page goes back to the top ----
+  (function () {
+    var b = document.getElementById("totop");
+    if (!b) return;
+    b.addEventListener("click", function () {
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+      var first = document.querySelector(".skip") || document.body;
+      try { first.focus({ preventScroll: true }); } catch (e) {}
+    });
+  })();
   var data = null, shown = null;
   // home.json carries the days around today, with their live scores; every other day of every season is in
   // schedule/<year>-<month>.json, read the first time the calendar reaches that month

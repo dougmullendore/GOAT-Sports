@@ -43,7 +43,7 @@ def main() -> int:
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and 'href="../volleyball/"' in hockey and "football" not in hockey
         assert hockey.index("Skip to the games") < hockey.index(assemble.MARK)
-        assert hockey.count('class="indep"') == 1 and hockey.index(assemble.INDEP) < hockey.index("</footer>")
+        assert 'class="indep"' not in hockey
         assert 'href="../../hockey/"' in (site / "volleyball" / "lovb" / "index.html").read_text()
         front = (site / "index.html").read_text()
         assert 'href="football/"' not in front and "home.js?v=" in front                                 # the front page has no footer
@@ -53,7 +53,6 @@ def main() -> int:
         assert assemble.main(str(Path(tmp) / "later"), str(site)) == 0
         hockey = (site / "hockey" / "index.html").read_text()
         assert hockey.count(assemble.MARK) == 1 and hockey.count("sports.css") == 1 and 'href="../football/"' in hockey
-        assert hockey.count('class="indep"') == 1                          # written again, not twice
         assert 'aria-current="page">Football' in (site / "football" / "index.html").read_text()
         later = {l["key"]: l for l in json.loads((site / "home.json").read_text())["leagues"]}
         assert [g["id"] for g in later["cfb"]["games"]] == [9] and not later["nfl"]["ready"]

@@ -47,31 +47,19 @@
     li.insertBefore(el("a", { "class": "go", href: go, "aria-label": words.filter(Boolean).join(". ") }), li.firstChild);
     return li;
   }
-  // ---- the explanations under lists and tables open from a "How to read this" line, so a page stays short
-  // and its explanation stays one tap away. Notes side by side share one line. A note that holds a link
-  // or a button (marked "keep") stays as it is. ----
+  // ---- the explanations under lists and tables are not shown; a note that holds a link or a button
+  // (marked "keep") stays ----
   function explain(p) {
     if (!p.classList || !p.classList.contains("note") || p.classList.contains("keep") || !p.parentNode) return;
-    if (p.parentNode.classList && p.parentNode.classList.contains("explain")) return;
-    var before = p.previousElementSibling;
-    if (before && before.classList.contains("explain")) { before.appendChild(p); return; }
-    var box = document.createElement("details"), open = document.createElement("summary");
-    box.className = "explain";
-    open.textContent = (data && data.words && data.words["explain.open"]) || "How to read this";
-    p.parentNode.insertBefore(box, p);
-    box.appendChild(open);
-    box.appendChild(p);
+    p.parentNode.removeChild(p);
   }
   function explainAll(root) {
     if (!root || root.nodeType !== 1) return;
     explain(root);
     Array.prototype.forEach.call(root.querySelectorAll("p.note"), explain);
   }
-  // the line that is always shown under this site's own chances of winning
-  function keyline(g) {
-    if (g && g.line && g.line[0]) return null;               // a game with a bookmaker's line says so beside the line
-    return el("p", { "class": "keyline", text: W("games.odds_short") || "These percentages are this site's own estimate of each team's chance of winning, not betting lines." });
-  }
+  // no line under this site's own chances of winning: an empty node, so the places that add one still can
+  function keyline() { return document.createTextNode(""); }
   // ---- a score that changes is read out to screen readers ----
   var sayBox = null;
   function say(words) {
@@ -100,6 +88,17 @@
   }
 
   var $ = function (id) { return document.getElementById(id); };
+  // ---- the button at the foot of the page goes back to the top ----
+  (function () {
+    var b = document.getElementById("totop");
+    if (!b) return;
+    b.addEventListener("click", function () {
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+      var first = document.querySelector(".skip") || document.body;
+      try { first.focus({ preventScroll: true }); } catch (e) {}
+    });
+  })();
   explainAll(document.querySelector("main"));       // the notes written into the page itself
   // ---- the calendar: a strip of days (or weeks), each with how many games it holds; the chosen one is
   // inverted and today is marked. It scrolls sideways a whole cell at a time. ----
@@ -1319,7 +1318,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("[data-w]"), function (n) { var s = W(n.getAttribute("data-w")); if (s) n.textContent = s; });
     $("lede").textContent = W("games.lede", { poll: d.poll.name });
     var u = new Date(d.updated);
-    $("foot-updated").textContent = "Scores and schedule updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) +
+    (document.getElementById("foot-updated") || {}).textContent = "Scores and schedule updated " + (isNaN(u) ? d.updated : u.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })) +
       (d.poll.date ? ". Rankings: " + d.poll.name + " of " + day(d.poll.date).toLocaleDateString(undefined, { dateStyle: "long" }) : "") + ".";
     if (d.pro) document.title = W("games.title") + " | " + d.site;
     window.addEventListener("hashchange", route);

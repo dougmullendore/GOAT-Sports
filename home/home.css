@@ -406,8 +406,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
   .mast-day .cell, .readouts > div, .readouts > div:first-child { width: 50%; min-width: 0; padding: 0 14px; }
   .mast-day .cell:nth-of-type(1), .readouts > div:first-child { border-left: 0; padding-left: 0; }
 }
-/* no footer on the front page: the list of sports ends it, with room below */
-main.wrap { padding-bottom: 96px; }
 /* the day's leagues sit in the masthead's own row, between the mark and the date: each a short link to its list */
 .mast-row .jump { flex: 0 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 0; border: 0; }
 .mast-row .jump a, .mast-row .jump a:first-child { min-height: 36px; padding: 6px 12px; gap: 8px; border: 1px solid var(--lumin); margin: 0 -1px -1px 0; align-items: center; }
@@ -432,3 +430,10 @@ main.wrap { padding-bottom: 96px; }
 }
 .mast-when { flex: 1 1 0; }
 @media (max-width: 760px) { .mast-when { flex: 1 1 100%; } }
+
+/* ==== no footer: the page ends with a button back to the top, and room below it ==== */
+.totop { padding-top: 48px; padding-bottom: 96px; }
+.totop-btn { font: inherit; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin); background: var(--void);
+  border: 1px solid var(--lumin); min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+.totop-btn svg { width: 10px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.totop-btn:hover { background: var(--lumin); color: var(--void); }

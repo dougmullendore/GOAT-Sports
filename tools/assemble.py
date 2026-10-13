@@ -59,9 +59,6 @@ LEAGUES = [
 ]
 DAYS_BACK, DAYS_AHEAD = 2, 10        # the front page is given this many days either side of today
 MARK = "<!-- sports bar -->"
-# The line at the foot of every sport's page (the front page has no footer).
-INDEP = ("GOAT Sports is not affiliated with or endorsed by the NFL, the NBA, MLB, the NHL, the NCAA, the AVCA, "
-         "LOVB, MLV, ESPN, the Associated Press or any team or school.")
 
 
 def log(msg: str) -> None:
@@ -84,8 +81,7 @@ def bar(current: str, up: str, ready: dict) -> str:
 
 
 def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
-    """Write the bar into one page, in place of the one already there if it has one, and the
-    independence line into its footer.
+    """Write the bar into one page, in place of the one already there if it has one.
     Returns whether the page changed."""
     before = html = page.read_text(encoding="utf-8")
     assert "</head>" in html and "<body>" in html, f"{page} is not a page this step knows how to add the bar to"
@@ -96,10 +92,8 @@ def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
     skip = re.search(r'<a class="skip"[^>]*>.*?</a>\n?', html, re.S)       # keep "Skip to the games" first
     at = skip.end() if skip else html.index("<body>") + len("<body>\n")
     html = html[:at] + bar(current, up, ready) + "\n" + html[at:]
-    # the independence line, last in the page's footer
+    # an independence line an older build wrote into the footer is taken out
     html = re.sub(r'\s*<p class="indep">.*?</p>', "", html, flags=re.S)
-    if "</footer>" in html:
-        html = html.replace("</footer>", f'  <p class="indep">{INDEP}</p>\n</footer>', 1)
     if html != before:
         page.write_text(html, encoding="utf-8")
     return html != before
