@@ -34,13 +34,18 @@
 }
 @media print { .sports { display: none; } }
 
-/* ==== colour: one accent, green, for what is chosen or happening now; logos in their own colours ==== */
+/* ==== colour: one accent, green, for what is chosen, and for the tag on a game under way; logos in their own colours ==== */
 :root { --accent: #2fd27a; --on-accent: #000000; }
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.livetag { color: var(--accent); }
-.livetag .dot, .jump .on { background: var(--accent); }
 .gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
 .gc-row .v.best { color: var(--accent); }
 .sports a:hover:not([aria-current="page"]) { background: var(--accent); color: var(--on-accent); }
+
+/* the site's mark, the goat, in green beside its name; black on the green of the page you are on */
+.sports .sports-home { gap: 8px; }
+.sports .sports-home .goat { order: -1; width: 17px; height: 16px; flex: none; color: var(--accent, #2fd27a); }   /* first, also before the phone's short "GOAT" */
+.sports .sports-home .goat .eye { fill: var(--void, #000000); }
+.sports .sports-home[aria-current="page"] .goat, .sports .sports-home:hover .goat { color: var(--on-accent, #000000); }
+.sports .sports-home[aria-current="page"] .goat .eye, .sports .sports-home:hover .goat .eye { fill: var(--accent, #2fd27a); }

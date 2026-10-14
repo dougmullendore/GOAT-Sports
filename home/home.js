@@ -1,10 +1,25 @@
 /* GOAT Sports, the front page: each league's games on one day, and a door to each sport. No libraries. */
 (function () {
   "use strict";
+
+  // ---- a team name too long for its row gives way to the team's abbreviation (CBJ for the Columbus Blue Jackets);
+  // the full name stays in the tooltip and is what a screen reader says. Checked as rows arrive and when the window resizes. ----
+  function fitName(n) {
+    var full = n.getAttribute("data-full");
+    if (!full) { full = n.textContent; n.setAttribute("data-full", full); }
+    if (n.textContent !== full) { n.textContent = full; n.removeAttribute("title"); n.removeAttribute("aria-label"); }
+    if (n.scrollWidth > n.clientWidth + 1) { n.textContent = n.getAttribute("data-abbr"); n.setAttribute("title", full); n.setAttribute("aria-label", full); }
+  }
+  function fitNames(root) { Array.prototype.forEach.call((root || document).querySelectorAll(".team .name[data-abbr]"), fitName); }
+  if (window.MutationObserver) new MutationObserver(function (list) {
+    list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && (n.matches(".team .name[data-abbr]") || n.querySelector(".team .name[data-abbr]"))) fitNames(n); }); });
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  var fitTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitNames(); }, 120); });
   // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
   function liveFirst(ol) {
     var kids = Array.prototype.slice.call(ol.children), ref = null, i;
-    function on(li) { return li.classList && li.classList.contains("game") && li.classList.contains("on"); }
+    function on(li) { return li.classList && li.classList.contains("game") && li.classList.contains("live"); }
     for (i = 0; i < kids.length; i++) if (!on(kids[i])) { ref = kids[i]; break; }
     if (!ref) return;
     for (i = kids.indexOf(ref) + 1; i < kids.length; i++) if (on(kids[i])) ol.insertBefore(kids[i], ref);
@@ -89,22 +104,8 @@
     sayBox.textContent = words;
   }
 
-  // ---- black or white: the page follows the device until the reader inverts it, and remembers that ----
-  var THEME_KEY = "goat-theme";
-  function lightNow() {
-    var t = document.documentElement.getAttribute("data-theme");
-    if (t) return t === "light";
-    return !!(window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches);
-  }
-  function setTheme(t) {
-    document.documentElement.setAttribute("data-theme", t);
-    try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
-    var b = $("invert");
-    if (b) b.setAttribute("aria-pressed", String(t === "light"));
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute("content", t === "light" ? "#ffffff" : "#000000");
-  }
-  try { var kept = localStorage.getItem(THEME_KEY); if (kept === "light" || kept === "dark") document.documentElement.setAttribute("data-theme", kept); } catch (e) {}
+  // ---- black or white: the page follows the device; a choice kept from the old Invert button is let go ----
+  try { localStorage.removeItem("goat-theme"); } catch (e) {}
 
 
   function el(tag, attrs, kids) {
@@ -179,17 +180,15 @@
   // A team's number: its place in the poll or in the standings. A college team outside the poll carries
   // its place in the GOAT ranking instead (26 and up), and its tag is outlined rather than filled.
   function rankOf(lg, n) {
-    // only a poll's numbers are shown on the front page; a pro league's places in its standings are left to its own pages
-    if (!n || !lg.poll || /standings$/i.test(lg.poll)) return null;
-    var goat = !!lg.poll && n > 25;
-    return { n: n, goat: goat, words: goat ? n + " in the GOAT ranking" : lg.poll ? "ranked " + n + " in the " + lg.poll : ordinal(n) + " in the standings" };
+    // a college poll's numbers, or a pro league's places in its standings
+    if (!n) return null;
+    var standings = !lg.poll || /standings$/i.test(lg.poll), goat = !standings && n > 25;
+    if (goat) return null;              // a place in the GOAT ranking, for a team the poll leaves out: hidden for now
+    return { n: n, goat: goat, words: goat ? n + " in the GOAT ranking" : standings ? ordinal(n) + " in the " + (lg.poll || "standings") : "ranked " + n + " in the " + lg.poll };
   }
-  // the key under a league's name: what its numbers are, and why a list has no chances of winning
+  // the key under a league's name: why a list has no chances of winning (the rankings go without a note)
   function keyOf(lg, games) {
-    var bits = [], numbered = games.some(function (g) { return g.away[2] || g.home[2]; });
-    // a poll's numbers are explained; a pro league's places in its standings need no note
-    if (numbered && lg.poll && !/standings$/i.test(lg.poll)) bits.push("Numbers are places in the " + lg.poll + (games.some(function (g) { return (g.away[2] || 0) > 25 || (g.home[2] || 0) > 25; })
-      ? "; an outlined number is a place in this site's GOAT ranking, for a team the poll leaves out." : "."));
+    var bits = [];
     var ahead = games.filter(function (g) { return g.state === "upcoming"; });
     if (lg.sport === "volleyball" && ahead.length && !ahead.some(function (g) { return g.p != null; })) bits.push("No chances of winning are worked out for these " + lg.unit + ".");
     if (lg.sport === "volleyball" && games.some(function (g) { return g.p != null && g.state !== "final"; })) bits.push("No sportsbook offers lines on these matches; the percentages are this site's own chance of winning.");
@@ -215,7 +214,7 @@
     function team(side, s, lost, won) {
       var r = rankOf(lg, s[2]);
       // the logos sit in the middle, beside the line; the names on the outside
-      var kids = [r ? el("span", { "class": "rk" + (r.goat ? " goat" : ""), text: String(r.n) }) : null, el("span", { "class": "name", text: s[1] }), logo(lg, s[0], s[1])];
+      var kids = [r ? el("span", { "class": "rk" + (r.goat ? " goat" : ""), text: String(r.n) }) : null, el("span", { "class": "name", text: s[1], "data-abbr": s[4] && s[4] !== s[1] ? s[4] : null }), logo(lg, s[0], s[1])];
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -234,7 +233,7 @@
         : g.p != null && !fin && lg.sport === "volleyball" ? "This site's chance of winning: " + g.away[1] + " " + pct(g.p)[0] + ", " + g.home[1] + " " + pct(g.p)[1] : "",
       !fin && !note && tv.length ? "Watch on " + tv.join(", ") : ""].filter(Boolean).join(". ");
     var more = fin || note ? "" : tv.join(", ");
-    return el("li", { "class": "game" + (live ? " on" : "") + (flipped[key(lg, g)] ? " flip" : ""), "data-k": key(lg, g) }, [el("a", { "class": "row", href: lg.game + g.id, "aria-label": label }, [
+    return el("li", { "class": "game" + (live ? " live" : "") + (flipped[key(lg, g)] ? " flip" : ""), "data-k": key(lg, g) }, [el("a", { "class": "row", href: lg.game + g.id, "aria-label": label }, [
       el("span", { "class": "when" }, live ? [el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), "Live"])] : [when]),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more" + (tv.length ? "" : " none"), text: more })])]);
@@ -263,7 +262,6 @@
   function draw() {
     var holder = $("today"), nav = $("nav"), jump = $("jump");
     holder.innerHTML = ""; nav.innerHTML = ""; jump.innerHTML = "";
-    feed();
     if (!shown) shown = today;
     var all = [];
     for (var i = -7; i <= 7; i++) all.push(addDays(shown, i));
@@ -346,48 +344,16 @@
     quiet.forEach(function (lg) {
       if (!lg.ready) return;
       var coming = nextFor(lg, shown);
-      var what = (lg.ranked_only ? "No ranked " + lg.name.toLowerCase() + " " : "No " + lg.name + " ") + lg.unit;
-      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [el("span", {}, [what + " on this day" + (coming ? "; the next are on " : ". "), coming ? el("span", { "class": "date", text: long(coming) }) : null, coming ? ". " : null]),
+      // the league's name goes to its page; the next day with its games opens that day here, at its list
+      var name = el("a", { "class": "lgname", href: lg.href, text: lg.name });
+      var go = coming ? el("button", { type: "button", "class": "date", text: long(coming), onclick: function () {
+        shown = coming; draw();
+        var sec = $("lg-" + lg.key);
+        if (sec) sec.scrollIntoView({ block: "start" });
+      } }) : null;
+      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [el("span", {}, [lg.ranked_only ? "No ranked " : "No ", name, " " + lg.unit + " on this day" + (coming ? "; the next are on " : ". "), go, coming ? ". " : null]),
         el("a", { href: lg.href, text: lg.name })]));
     });
-  }
-
-  // ---- the feed: today's games under way, then today's finished ones, newest first, in every league shown;
-  // it always holds today, whichever day the list below is on, and moves with every score read live ----
-  var SHORT_NAME = { cfb: "NCAAF", cbb: "NCAAM", wvb: "NCAAW" };   // the college leagues, short enough for a feed card
-  function feed() {
-    var box = $("feed");
-    if (!box) return;
-    box.innerHTML = "";
-    var on = [], done = [];
-    data.leagues.forEach(function (lg) {
-      if (hidden[lg.key]) return;
-      lg.games.forEach(function (g) {
-        if (dayOf(g) !== today || g.away[3] == null || g.home[3] == null) return;
-        if (g.state === "live") on.push([lg, g]); else if (g.state === "final") done.push([lg, g]);
-      });
-    });
-    on.sort(function (a, b) { return (a[1].start || 0) - (b[1].start || 0); });
-    done.sort(function (a, b) { return (b[1].start || 0) - (a[1].start || 0); });
-    var items = on.concat(done.slice(0, 16));
-    box.hidden = !items.length;
-    if (!items.length) return;
-    function side(lg, s, won) {
-      return el("span", { "class": "side" + (won ? " won" : "") }, [logo(lg, s[0], s[1]), el("span", { "class": "nm", text: s[1] }), el("span", { "class": "sc", text: String(s[3]) })]);
-    }
-    var list = el("ol", { "class": "ticks" }, items.map(function (x) {
-      var lg = x[0], g = x[1], live = g.state === "live", as = g.away[3], hs = g.home[3];
-      var status = live ? g.clock || "Live" : "Final";
-      return el("li", { "class": "tick" + (live ? " on" : "") + (flipped[key(lg, g)] ? " flip" : "") }, [el("a", { href: lg.game + g.id,
-        "aria-label": lg.name + ". " + (live ? "Live" + (g.clock ? ", " + g.clock : "") : "Final") + ". " + g.away[1] + " " + as + ", " + g.home[1] + " " + hs }, [
-        el("span", { "class": "tk-top" }, [el("span", { text: SHORT_NAME[lg.key] || lg.name }), live ? el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), status]) : el("span", { text: status })]),
-        side(lg, g.away, !live && as > hs), side(lg, g.home, !live && hs > as)])]);
-    }));
-    box.appendChild(el("div", { "class": "wrap feed-row" }, [
-      el("h2", { "class": "feed-h", id: "feed-h" }, on.length
-        ? [el("span", { "class": "livetag" }, [el("span", { "class": "dot", "aria-hidden": "true" }), "Live"]), el("span", { "class": "n", text: on.length + (on.length === 1 ? " game" : " games") + (done.length ? " · " + done.length + " final" : "") })]
-        : [el("span", { text: "Scores" }), el("span", { "class": "n", text: "Today · " + done.length + " final" })]),
-      list]));
   }
 
   // ---- the sports, one line each, with the pages behind them ----
@@ -563,7 +529,5 @@
       }
     });
   })();
-  $("invert").addEventListener("click", function () { setTheme(lightNow() ? "dark" : "light"); });
-  $("invert").setAttribute("aria-pressed", String(lightNow()));
   load(true);
 })();

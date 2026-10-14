@@ -296,7 +296,7 @@ def selection(state: Path) -> dict:
                 if g["id"] not in games and g["state"] != "final":
                     games[g["id"]] = dict(g, next=1)
                     next_first = min(next_first or g["date"], g["date"])
-    # warm-up games are listed but never counted
+    # warm-up games are listed; they are counted only in the NBA's preseason, before a game that counts (below)
     preseason = sorted((g for g in games.values() if g.get("kind") == 1), key=lambda g: (g["date"], g["start"] or 0, g["id"]))
     games = {i: g for i, g in games.items() if g.get("kind") != 1}
     if not config.POLL_TYPE:
@@ -317,6 +317,9 @@ def selection(state: Path) -> dict:
                 count[s["id"]] = count.get(s["id"], 0) + 1
         fbs = {t: {"name": names[t], "conf": "", "rec": {}} for t, n in count.items() if n >= 10}
     finals = [g["date"] for g in games.values() if g["state"] == "final"]
+    # The NBA's preseason, until a game that counts is over: its warm-up games stand in for the season's in the
+    # standings (the feed's are theirs then), the team stats and the players' numbers. The games list says so.
+    warmups = bool(config.PRESEASON_GAMES) and not finals and any(g["state"] == "final" for g in preseason)
     numbered = True                 # whether the numbers beside teams mean anything yet
     if config.POLL_TYPE and main:
         newest = main[max(main)]
@@ -329,10 +332,12 @@ def selection(state: Path) -> dict:
     elif config.POLL_TYPE:
         poll_date, poll_week, through, ranked, numbered = None, "", max(finals, default=""), [], False
     else:
-        if not finals:
+        if not finals and not warmups:
             # before the first game that counts, the feed's standings are the warm-up games': start everyone level
+            # (unless the warm-ups are being counted, as the NBA's are)
             fbs = {t: dict(x, w=0, l=0, t=0, pf=0, pa=0, seed=None, gb="", rec={}) for t, x in fbs.items()}
-        poll_date, poll_week, through = None, "", max(finals, default="")
+        poll_date, poll_week = None, ""
+        through = max(g["date"] for g in preseason if g["state"] == "final") if warmups else max(finals, default="")
         ranked = [{"rank": i + 1, "id": t, "name": names.get(t, fbs[t]["name"]), "record": (fbs[t].get("rec") or {}).get("all") or "",
                    "prev": None, "points": None, "votes": 0} for i, t in enumerate(league_order(fbs))]
         numbered = any(x.get("w", 0) + x.get("l", 0) for x in fbs.values())
@@ -353,7 +358,7 @@ def selection(state: Path) -> dict:
                             "teams": [dict(r, name=names.get(r["id"], r["name"])) for r in p["rows"][:config.POLL_SIZE]]}
     return {"through": through, "poll_date": poll_date, "poll_week": poll_week, "polls_seen": len(main), "numbered": numbered,
             "season": board["season"], "first": board.get("first"), "last": (coming.get("last") if last_season else None) or board.get("last"),
-            "last_season": last_season, "next_first": next_first, "preseason": preseason, "teams": ranked, "games": listed,
+            "last_season": last_season, "next_first": next_first, "preseason": preseason, "warmups": warmups, "teams": ranked, "games": listed,
             "all_games": every, "fbs_teams": all_fbs, "fbs": fbs, "names": names, "others": others}
 
 
@@ -365,7 +370,7 @@ def update_boxes(state: Path, now: dt.datetime, live_only: bool = False) -> dict
     stored = read_json(state / "box.json", {})
     recent = (now.date() - dt.timedelta(days=config.BOX_REFRESH_DAYS)).isoformat()
     t = now.timestamp()
-    boxed = sel["all_games"] + sel["preseason"]          # warm-up games get a box score too, for their pages (never counted)
+    boxed = sel["all_games"] + sel["preseason"]          # warm-up games get a box score too, for their pages
     listed = {g["id"] for g in boxed}
     fbs = set(sel["fbs"])
 
@@ -517,6 +522,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     sel = selection(state)
     through, ranked, listed = sel["through"], sel["teams"], sel["games"]
     every, fbs_teams, fbs = sel["all_games"], sel["fbs_teams"], sel["fbs"]
+    # the games the stats are made from: the season's, or in the NBA's preseason its warm-up games
+    counted, kinds = (sel["preseason"], (1,)) if sel["warmups"] else (every, None)
     has_poll_type = bool(config.POLL_TYPE)          # a college league; False for a pro league, numbered by its standings
     has_poll = has_poll_type and bool(ranked)       # and its poll is out
     # Odds: rate every team from this season's results, starting from where each
@@ -627,7 +634,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     boxes = read_json(state / "box.json", {})
     rosters = read_json(state / "rosters.json", {})
     lines = {}                                  # every player's games, for his card
-    rated_fbs = players.compute(fbs_teams, every, boxes, rosters, lines)
+    rated_fbs = players.compute(fbs_teams, counted, boxes, rosters, lines, kinds)
     # with no poll there is one set of players and of team stats, not two
     rated = players.compute(ranked, listed, boxes, rosters) if has_poll else rated_fbs
     for r, games in ((rated, listed), (rated_fbs, every)):
@@ -643,6 +650,8 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
         "updated": now.isoformat(timespec="seconds"), "season": season, "season_label": season_label(season),
         # set while a new season has not begun and last season's numbers are still on show
         "last_season": {"next": season_label(season + 1), "starts": sel["next_first"]} if sel["last_season"] else None,
+        # the NBA's preseason being counted, and the day the games that count begin
+        "warmups": {"starts": min((g["date"] for g in every), default=None)} if sel["warmups"] else None,
         "first": sel["first"], "last": sel["last"], "periods": config.PERIODS,
         "logos": {t: x["logo"] for t, x in fbs.items() if x.get("logo")} if not config.LOGO_URL else None,
         "standings": [{"id": t["id"], "name": t["name"], "rank": t["rank"], **{k: fbs[t["id"]].get(k) for k in ("conf", "group", "w", "l", "t", "pf", "pa", "seed", "gb", "rec", "place")}}
@@ -658,7 +667,7 @@ def build_site(state: Path, out: Path, now: dt.datetime) -> dict:
     for r in (rated, rated_fbs):
         social.add(state, r["players"])          # links to a player's own pages, where they are known
     write_json(out / "players_fbs.json", rated_fbs)
-    write_json(out / "teams_fbs.json", teams.compute(fbs_teams, every, boxes, rating, fbs, "conf" if has_poll_type else "div"))
+    write_json(out / "teams_fbs.json", teams.compute(fbs_teams, counted, boxes, rating, fbs, "conf" if has_poll_type else "div", kinds))
     if has_poll:
         write_json(out / "players.json", rated)
         write_json(out / "teams.json", teams.compute(ranked, listed, boxes, rating, fbs))

@@ -67,7 +67,7 @@ def parts(p: dict) -> dict:
             "def": p["stl"] + 0.7 * p["blk"] - 0.4 * p["pf"]}
 
 
-def compute(ranked: list[dict], games: list[dict], boxes: dict, rosters: dict, logs: dict | None = None) -> dict:
+def compute(ranked: list[dict], games: list[dict], boxes: dict, rosters: dict, logs: dict | None = None, kinds: tuple | None = None) -> dict:
     """Every player who has got on the court for the given teams (the ranked 25, all of
     Division I, or the NBA), with totals, rates, impact and percentiles, each measured against
     the players of those teams. `rosters` is {team: {"players": {id: [name, number, position, ...]}}}.
@@ -78,7 +78,8 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rosters: dict, l
     rank = {t["id"]: t for t in ranked if t["id"]}
     players, team_games = {}, {t: 0 for t in rank}
     at = {c: 5 + i for i, c in enumerate(COLS)}
-    counted = (2, 3) if config.POLL_TYPE else (2,)          # college: the tournaments are part of the season
+    counted = kinds or ((2, 3) if config.POLL_TYPE else (2,))          # college: the tournaments are part of the season;
+    # `kinds` (1,) counts the NBA's warm-up games instead, while they are all there is
     for g in sorted(games, key=lambda g: (g["date"], g["start"] or 0, g["id"])):
         box = boxes.get(str(g["id"]))
         if g["state"] != "final" or not box or g.get("kind", 2) not in counted:

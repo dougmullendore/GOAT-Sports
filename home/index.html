@@ -19,14 +19,9 @@
 </head>
 <body>
 <a class="skip" href="#today">Skip to the games</a>
-<nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="./" aria-current="page">GOAT Sports</a><a href="football/nfl/">Football</a><a href="basketball/nba/">Basketball</a><a href="baseball/">Baseball</a><a href="hockey/">Hockey</a><a href="volleyball/">Volleyball</a></div></nav>
+<nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="./" aria-current="page"><svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg>GOAT Sports</a><a href="football/nfl/">Football</a><a href="basketball/nba/">Basketball</a><a href="baseball/">Baseball</a><a href="hockey/">Hockey</a><a href="volleyball/">Volleyball</a></div></nav>
 <header class="mast">
   <div class="wrap mast-row">
-    <a class="brand" href="./"><svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg><span>GOAT<br>Sports</span></a>
-    <div class="mast-when">
-      <h1 id="h-day">Today's games</h1>
-      <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
-    </div>
     <div class="mast-day">
       <div class="cell"><span class="k">Games</span><span class="v" id="r-games">–</span></div>
       <div class="cell"><span class="k">Leagues</span><span class="v" id="r-leagues">–</span></div>
@@ -34,10 +29,13 @@
     <dl class="readouts">
       <div><dt>Live now</dt><dd id="r-live">–</dd></div>
     </dl>
-    <button type="button" class="invert" id="invert" aria-pressed="false">Invert</button>
+    <div class="mast-when">
+      <h1 id="h-day">Today's games</h1>
+      <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
+    </div>
+    <details class="pick" id="pick"></details>
   </div>
 </header>
-<section class="feed" id="feed" aria-labelledby="feed-h" hidden></section>
 <main class="wrap">
   <div class="day">
     <p class="lede" id="lede" role="status">Loading the games…</p>
@@ -46,7 +44,6 @@
       <nav class="cal" id="nav" aria-label="Days"></nav>
       <button type="button" class="step" id="ahead" aria-label="A week later"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M2 1l6 6-6 6"/></svg></button>
       <div class="goto" id="goto-box"><button type="button" class="goto-btn" id="goto" aria-haspopup="dialog" aria-expanded="false" aria-controls="goto-pop"><span>Date</span><b id="goto-val">–</b></button></div>
-      <details class="pick" id="pick"></details>
     </div>
   </div>
   <div id="today" tabindex="-1"></div>

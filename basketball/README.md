@@ -48,13 +48,16 @@ one run of the job does both leagues, college first). What is different:
 - **No poll.** Every team is numbered by its place in the league standings:
   share of games won, then wins, then points scored less points allowed. The
   league's own tie-breakers are not worked through. There is no Top 25 switch
-  and there are no Beat / Lost to boxes. Before opening night nobody has a
-  number, and the records ESPN shows from the warm-up games are left out.
+  and there are no Beat / Lost to boxes. In the preseason, until the first
+  regular-season game is over, the numbers are the preseason standings'.
 - **Standings** take the place of Rankings: by division, by conference (in
   ESPN's seeding, with a line under the sixth team for the playoffs and the
   tenth for the play-in), the whole league, or the GOAT ranking.
 - **Teams** go by nickname (Knicks) and are grouped by division.
-- **Warm-up games are not listed.** Playoff and play-in games are listed, with
+- **Warm-up games are listed** (as "Preseason"), and the new season begins with
+  the first of them. Until a regular-season game is over, the standings, team
+  stats and players' numbers are the preseason's, and the pages say so; after
+  that they are the regular season's. Playoff and play-in games are listed, with
   the series score, but a player's season numbers are the regular season's.
 - **Odds** have their own settings, fitted on 2022-23 to 2025-26: tested on
   5,267 games, the favorite won 65.7%. `ratings/seed_nba.json` holds where

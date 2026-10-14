@@ -36,10 +36,6 @@ a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; 
 .readouts > div { padding: 0 22px; border-left: 1px solid var(--lumin); }
 .readouts dt { margin: 0 0 4px; }
 .readouts dd { margin: 0; font-size: 1.125rem; font-weight: 500; letter-spacing: .02em; }
-.invert { font: inherit; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lumin); background: var(--void);
-  border: 1px solid var(--lumin); padding: 0 12px; min-height: 36px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
-.invert::before { content: ""; width: 18px; height: 12px; border: 1px solid currentColor; background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
-.invert:hover { background: var(--lumin); color: var(--void); }
 .tag { display: none; }
 
 /* ---- the Day Field: every game as a column of bars, a sine line through the favourites' chances ---- */
@@ -110,11 +106,8 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
   color: inherit; text-decoration: none; min-height: 52px; }
 .game a.row:hover { background: var(--lumin); color: var(--void); }
 .game a.row:focus-visible { outline: none; background: var(--lumin); color: var(--void); }
-/* a game under way is inverted; a score that has just changed flips back for a beat */
-.game.on a.row { background: var(--lumin); color: var(--void); }
-.game.flip a.row { animation: flip .9s steps(1) 1; }
-@keyframes flip { 0%, 66% { background: var(--void); color: var(--lumin); } 33%, 100% { background: var(--lumin); color: var(--void); } }
-@media (prefers-reduced-motion: reduce) { .game.flip a.row, .jump .on { animation: none; } }
+
+@media (prefers-reduced-motion: reduce) { .jump .on { animation: none; } }
 .when { font-size: .75rem; letter-spacing: .04em; }
 .livetag { display: inline-flex; align-items: center; gap: 6px; font-size: .6875rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
 .livetag .dot { width: 7px; height: 7px; background: currentColor; animation: blink 1s steps(2, start) infinite; }
@@ -127,14 +120,14 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .rk { display: inline-grid; place-items: center; flex: none; min-width: 2.1em; height: 1.6em; padding: 0 .3em; font-size: .75rem; font-weight: 500;
   background: var(--lumin); color: var(--void); }
 .rk.goat { background: transparent; color: inherit; box-shadow: inset 0 0 0 1px currentColor; }
-.game.on .rk:not(.goat), .game a.row:hover .rk:not(.goat), .game a.row:focus-visible .rk:not(.goat) { background: var(--void); color: var(--lumin); }
+.game a.row:hover .rk:not(.goat), .game a.row:focus-visible .rk:not(.goat) { background: var(--void); color: var(--lumin); }
 /* team logos as plain silhouettes in the page's own ink */
 .logo { display: inline-grid; place-items: center; flex: none; width: 26px; height: 26px; line-height: 0; }
 .logo img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1); }
 :root[data-theme="light"] .logo img { filter: brightness(0); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: brightness(0); } }
-.game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: brightness(0); }
-:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img { filter: brightness(0) invert(1); }
+.game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: brightness(0); }
+:root[data-theme="light"] .game a.row:hover .logo img { filter: brightness(0) invert(1); }
 .logo.badge { width: auto; min-width: 26px; height: 18px; padding: 0 4px; border: 1px solid currentColor; font-size: .5625rem; line-height: 1; letter-spacing: .04em; }
 .mid { display: flex; align-items: baseline; justify-content: center; gap: 8px; font-size: 1.25rem; font-weight: 400; letter-spacing: -.01em; }
 .mid .l { font-weight: 200; }
@@ -146,7 +139,7 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .more.none { font-style: italic; }
 .team.won::before, .team.won::after, .team.lost::before, .team.lost::after { font-size: .6875rem; font-weight: 600; flex: none; width: 1.7em; height: 1.7em; display: inline-grid; place-items: center; text-decoration: none; }
 .team.away.won::after, .team.home.won::before { content: "W"; background: currentColor; color: var(--void); }
-.game.on .team.away.won::after, .game.on .team.home.won::before, a.row:hover .team.away.won::after, a.row:hover .team.home.won::before { color: var(--lumin); }
+a.row:hover .team.away.won::after, a.row:hover .team.home.won::before { color: var(--lumin); }
 .team.away.lost::after, .team.home.lost::before { content: "L"; box-shadow: inset 0 0 0 1px currentColor; }
 .empty { margin: 24px 0 0; padding: 18px 20px; border: 1px dashed var(--lumin); }
 .quiet { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--lumin); font-size: .75rem; display: flex; justify-content: space-between; gap: 16px; }
@@ -179,7 +172,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
   .readouts > div { padding: 0 14px; }
   .readouts dd { font-size: 1rem; }
   .mast-row { gap: 16px; }
-  .invert { position: absolute; right: 16px; top: 14px; }
   .mast { position: relative; }
   .field canvas { height: 120px; }
   .jump { height: auto; display: flex; flex-wrap: wrap; border-top: 1px solid var(--lumin); }
@@ -242,9 +234,9 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .logo img { filter: url(#ink-on-dark); }
 :root[data-theme="light"] .logo img { filter: url(#ink-on-light); }
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img { filter: url(#ink-on-light); } }
-.game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: url(#ink-on-light); }
-:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: url(#ink-on-dark); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: url(#ink-on-dark); } }
+.game a.row:hover .logo img, .game a.row:focus-visible .logo img { filter: url(#ink-on-light); }
+:root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: url(#ink-on-dark); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: url(#ink-on-dark); } }
 
 /* phones: the first league's games come up on the first screen */
 @media (max-width: 760px) {
@@ -290,9 +282,8 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .keyline { margin: 24px 0 0; font-size: .75rem; }
 /* team logos as themselves, in grey, on a small white tile, so every mark keeps its shape */
 .logo { width: 30px; height: 30px; padding: 3px; background: #fff; }
-.logo img, :root[data-theme="light"] .logo img, .game.on .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img,
-:root[data-theme="light"] .game.on .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: grayscale(1) contrast(1.1); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img, :root:not([data-theme="dark"]) .game.on .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: grayscale(1) contrast(1.1); } }
+.logo img, :root[data-theme="light"] .logo img, .game a.row:hover .logo img, .game a.row:focus-visible .logo img, :root[data-theme="light"] .game a.row:hover .logo img, :root[data-theme="light"] .game a.row:focus-visible .logo img { filter: grayscale(1) contrast(1.1); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .logo img, :root:not([data-theme="dark"]) .game a.row:hover .logo img { filter: grayscale(1) contrast(1.1); } }
 :root[data-theme="light"] .logo { box-shadow: inset 0 0 0 1px #000000; }
 .logo.badge { background: transparent; }
 @media (max-width: 760px) {
@@ -304,10 +295,10 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 /* calendar counts clear of the cell rules; the helpline as its own ruled row; logo tiles keep an edge on an inverted row */
 .calday { flex-basis: 92px; padding: 8px 12px; }
 .keyline { margin: 28px 0 0; padding: 12px 0; border-top: 1px solid var(--lumin); border-bottom: 1px solid var(--lumin); }
-.game.on .logo, .game a.row:hover .logo, .game a.row:focus-visible .logo { box-shadow: inset 0 0 0 1px currentColor; }
+.game a.row:hover .logo, .game a.row:focus-visible .logo { box-shadow: inset 0 0 0 1px currentColor; }
 @media (max-width: 760px) { .calday { flex-basis: 86px; padding: 6px 10px; } }
 
-/* ==== round four: a feed of today's scores in place of Next up; logos in place of the bars ==== */
+/* ==== round four: logos in place of the bars ==== */
 .brand .goat { width: 32px; height: 30px; flex: none; }
 .brand .goat .eye { fill: var(--void); }
 /* a mark: a league's own logo, or a sport's drawn icon, on the same white tile as the team logos */
@@ -320,37 +311,11 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .door { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 30rem); }
 .door .mark { width: 64px; height: 64px; padding: 12px; }
 
-/* the feed: one ruled strip under the masthead; a game under way is inverted, a finished one is not */
-.feed { border-bottom: 1px solid var(--lumin); }
-.feed-row { display: flex; align-items: stretch; }
-.feed-h { flex: none; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-width: 132px; padding: 12px 20px 12px 0;
-  border-right: 1px solid var(--lumin); font-size: .6875rem; letter-spacing: .12em; }
-.feed-h .n { font-weight: 400; letter-spacing: .1em; }
-.ticks { list-style: none; margin: 0; padding: 0; display: flex; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
-.ticks::-webkit-scrollbar { display: none; }
-.tick { flex: 0 0 216px; border-right: 1px solid var(--lumin); scroll-snap-align: start; }
-.tick a { display: grid; align-content: start; gap: 6px; height: 100%; padding: 10px 14px 12px; color: var(--lumin); text-decoration: none; }
-.tick a:hover, .tick a:focus-visible, .tick.on a { background: var(--lumin); color: var(--void); outline: none; }
-.tick.on a:hover .nm, .tick.on a:focus-visible .nm { text-decoration: underline; }
-.tick.flip a { animation: flip .9s steps(1) 1; }
-@media (prefers-reduced-motion: reduce) { .tick.flip a { animation: none; } }
-.tk-top { display: flex; justify-content: space-between; gap: 8px; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.tk-top > span:first-child { overflow: hidden; text-overflow: ellipsis; }
-.tick .side { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 8px; }
-.tick .logo { width: 22px; height: 22px; padding: 2px; }
-.tick.on .logo, .tick a:hover .logo, .tick a:focus-visible .logo { box-shadow: inset 0 0 0 1px currentColor; }
-.tick .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
-.tick .sc { font-size: 1rem; font-weight: 300; }
-.tick .won .nm, .tick .won .sc { font-weight: 600; }
 @media (max-width: 760px) {
   .brand .goat { width: 26px; height: 24px; }
   .door { grid-template-columns: 48px minmax(0, 1fr); }
   .door .mark { width: 48px; height: 48px; padding: 9px; }
   .lg-head .mark { width: 36px; height: 36px; padding: 4px; }
-  .feed-row { padding-right: 0; }
-  .feed-h { min-width: 0; padding-right: 12px; }
-  .feed-h .n { display: none; }
-  .tick { flex-basis: 176px; }
 }
 
 /* ==== round five: the day's date in the masthead; a calendar that goes as far as you like ==== */
@@ -372,7 +337,6 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 .goto input { font: inherit; font-size: .8125rem; color: var(--lumin); background: transparent; border: 0; padding: 0; min-height: 24px; }
 .goto:focus-within { outline: 2px solid var(--lumin); outline-offset: 3px; }
 .goto input:focus { outline: none; }
-.day .pick { margin-left: 12px; }
 @media (max-width: 760px) {
   .mast-day { order: 3; width: 100%; justify-content: flex-start; padding: 10px 0 0; border-top: 1px solid var(--lumin); }
   .mast-day h1 { padding-left: 0; font-size: 1.125rem; }
@@ -450,17 +414,13 @@ h2.sec { margin: 64px 0 0; padding: 0 0 12px; border-bottom: 1px solid var(--lum
 /* NHL logos come in a wide 3:2 frame with empty room either side: filled to the square's height, they use the tile */
 img[src*="assets.nhle.com/logos"] { object-fit: cover; }
 
-/* ==== colour: one accent, green, for what is chosen or happening now; logos in their own colours ==== */
+/* ==== colour: one accent, green, for what is chosen, and for the tag on a game under way; logos in their own colours ==== */
 :root { --accent: #2fd27a; --on-accent: #000000; }
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.livetag { color: var(--accent); }
-.livetag .dot, .jump .on { background: var(--accent); }
 .gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
 .gc-row .v.best { color: var(--accent); }
-.game.on a.row, .tick.on a { background: var(--accent) !important; color: var(--on-accent) !important; }
-.game.on .livetag, .tick.on .livetag { color: var(--on-accent); } .game.on .livetag .dot, .tick.on .livetag .dot { background: var(--on-accent); }
 
 /* ==== more green: hover and focus, links, the betting line, wins, and the marks ==== */
 :focus-visible { outline-color: var(--accent) !important; }
@@ -468,8 +428,8 @@ a { text-decoration-color: var(--accent); }
 .kind { color: var(--accent); font-weight: 700 !important; font-size: .8125rem !important; -webkit-text-stroke: .5px currentColor; }
 .team.away.won::after, .team.home.won::before, .gc-team.won .gc-name::after { background: var(--accent) !important; color: var(--on-accent) !important; }
 .totop-btn:hover, .calday:hover:not([aria-pressed="true"]) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.jump a:hover, .jump a:focus-visible, .door-pages a:hover, .step:hover, .invert:hover, .morebtn:hover, .pick > summary:hover, .pick[open] > summary,
-.game a.row:hover, .game a.row:focus-visible, .tick a:hover, .tick a:focus-visible { background: var(--accent) !important; color: var(--on-accent) !important; }
+.jump a:hover, .jump a:focus-visible, .door-pages a:hover, .step:hover, .morebtn:hover, .pick > summary:hover, .pick[open] > summary,
+.game a.row:hover, .game a.row:focus-visible { background: var(--accent) !important; color: var(--on-accent) !important; }
 .brand .goat, .mark.icon svg { color: var(--accent); }
 .mast-when h1 { color: var(--accent); }
 .lg-head h2 a:hover, .all:hover { color: var(--accent); }
@@ -484,7 +444,7 @@ a { text-decoration-color: var(--accent); }
 /* ==== still more green: the headings over each part, table heads, key numbers, and the frames of the controls ==== */
 h2.sec, .msec, .gc-h, .pc-sec h2, .tsec h2, .hahead, thead th { color: var(--accent) !important; }
 .pc-rank b, .readouts dd, .mast-day .v, .jump .n { color: var(--accent); }
-.totop-btn, .invert { border-color: var(--accent) !important; }
+.totop-btn { border-color: var(--accent) !important; }
 .lg-head { border-bottom: 2px solid var(--accent) !important; }
 
 /* green rules over the leagues with no games and under The sports heading */
@@ -548,9 +508,6 @@ h2.sec { border-bottom-color: var(--lumin) !important; }
 @media (max-width: 760px) { .gp { left: -1px; right: auto; width: min(19rem, calc(100vw - 32px)); } .goto-btn { min-height: 52px; } }
 .goto:focus-within, .goto:has(.goto-btn[aria-expanded="true"]) { outline: none !important; box-shadow: none !important; border-color: var(--accent) !important; }
 
-/* Away and Home sit over the line under each league's heading: the line moves down to them */
-.lg > .lg-head { border-bottom: 0 !important; padding-bottom: 4px; }
-.lg > .hahead { border-bottom: 2px solid var(--lumin); padding-bottom: 6px !important; margin-bottom: 0 !important; }
 
 /* the same room under the header as every sport page */
 .day { padding-top: 40px !important; }
@@ -576,3 +533,63 @@ h2.sec { border-bottom-color: var(--lumin) !important; }
 .lg-head .kind { display: none !important; }
 /* Away and Home in a heavier weight */
 .lg .hahead { font-weight: 700; -webkit-text-stroke: .4px currentColor; }
+
+/* ==== the Leagues filter in the masthead, where the Invert button was; its list drops under the masthead ==== */
+.mast-row { position: relative; }
+.mast-row > .pick { flex: none; }
+.mast-row > .pick > summary { min-height: 36px; padding: 0 12px; }
+.mast-row > .pick fieldset { position: absolute; top: 100%; left: 24px; right: 24px; margin-top: -1px; z-index: 20; background: var(--void); }
+@media (max-width: 760px) {
+  .mast-row > .pick { order: 1; margin-left: auto; }
+  .mast-row > .pick > summary { width: auto; min-height: 44px; }
+  .mast-row > .pick fieldset { left: 16px; right: 16px; }
+}
+
+/* ==== a game under way: a plain row like any other, marked by its tag, a still green block ==== */
+.livetag { padding: 3px 7px; background: var(--accent) !important; color: var(--on-accent) !important; }
+.livetag .dot { background: currentColor !important; animation: none !important; }
+.jump .on { background: var(--accent); animation: none; }
+.jump a:hover .on, .jump a:focus-visible .on { background: var(--on-accent); }
+
+/* ==== the games under way, boxed together in green ==== */
+.game.live { border-left: 3px solid var(--accent); border-right: 3px solid var(--accent); }
+.game.live:first-child, .game:not(.live) + .game.live { border-top: 3px solid var(--accent); }
+.game.live:not(:has(+ .game.live)) { border-bottom: 3px solid var(--accent); }
+
+/* ==== the line over each league's games sits under Away and Home; green boxes round the league logos and the winner's logo ==== */
+.lg > .lg-head { border-bottom: 0 !important; padding-bottom: 4px; }
+.lg > .hahead { border-bottom: 2px solid var(--lumin); padding-bottom: 6px !important; margin-bottom: 0 !important; }
+.lg-head .mark { outline: 3px solid var(--accent); }
+.game .team.won .logo { outline: 3px solid var(--accent); }
+/* when a league's list opens with its live games, their green box is the line over the list: the white one steps aside */
+.lg:has(.game.live:first-child) > .hahead { border-bottom-color: transparent; }
+
+/* the leagues with no games on the day: each league's name, in green, goes to its page; its next day opens that day here */
+.quiet .lgname, .quiet > a { color: var(--accent); }
+.quiet .lgname { text-transform: uppercase; letter-spacing: .04em; font-size: inherit; }   /* a league named in a sentence is in capitals, as everywhere else */
+.quiet .date { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.quiet .date:hover, .quiet .lgname:hover { background: var(--accent); color: var(--on-accent); text-decoration: none; }
+.quiet .date:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* the link to all of a league's games, beside its name, in green */
+.lg-head .all { color: var(--accent); }
+/* the day is already in the calendar and the Date box: the masthead's heading names it for screen readers only */
+.mast-when h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* the rules between live games stop at the box's green sides */
+.game.live:has(+ .game.live) { border-bottom: 0; box-shadow: inset 0 -1px 0 var(--lumin); }
+
+/* ==== the header: the day's readouts at its left (the mark is in the strip above), the day's leagues, then the Leagues filter ==== */
+.mast-row > .mast-day .cell:first-child { border-left: 0; padding-left: 0; }
+.mast-row > .readouts { margin-left: 0; }
+.mast-row > .mast-when { border-left: 1px solid var(--lumin); padding-left: 24px; }
+@media (max-width: 760px) {
+  .mast-row > .mast-day { order: 0; width: auto; flex: none; padding-top: 0; }
+  .mast-row > .readouts { order: 1; width: auto; }
+  .mast-row > .readouts > div:first-child { border-left: 1px solid var(--lumin); padding-left: 14px; width: auto; }
+  .mast-day .cell { width: auto !important; min-width: 0; }
+  .mast-row > .mast-when { order: 2; flex: 1 1 calc(100% - 160px); width: auto; min-width: 0; border: 0; padding: 0; }   /* a row of its own, the filter beside it */
+  .mast-row > .pick { order: 3; align-self: flex-start; }
+}
+
+/* the Back to top button: a white outline, green words (green throughout when hovered) */
+.totop-btn:not(:hover) { border-color: var(--lumin) !important; color: var(--accent); }

@@ -205,6 +205,10 @@ def test_team_stats():
         assert (ny["w"], ny["l"], ny["ppg"], ny["opp_ppg"]) == (1, 0, 114.0, 89.0)
         assert 95 < ny["pace"] < 110 and ny["ortg"] > sa["ortg"] and abs(ny["net"] + sa["net"]) < 0.2
         assert abs(ny["efg"] - 100 * (43 + 0.5 * 17) / 97) < 0.06 and ny["power"] == 1
+        # a warm-up game counts only when the warm-ups are asked for (the NBA's preseason, before a game that counts)
+        warm = [dict(g, kind=1)]
+        assert next(t for t in teams.compute(ranked, warm, {str(NBA_GAME): box}, {})["teams"] if t["id"] == KNICKS)["w"] == 0
+        assert next(t for t in teams.compute(ranked, warm, {str(NBA_GAME): box}, {}, kinds=(1,))["teams"] if t["id"] == KNICKS)["w"] == 1
     finally:
         league("college")
 
@@ -501,20 +505,17 @@ def test_last_season_is_shown_until_the_new_one_begins(tmp_path=None):
         web.get_json, web.get_many, espn.parse_season, espn.parse_event = real
 
 # --------------------------------------------------------- NBA warm-up games --
-def test_nba_preseason_games_are_left_out():
+def test_nba_preseason_games_are_listed_but_never_counted():
     e = {"id": "77", "date": "2026-10-12T23:00Z", "season": {"type": 1}, "status": {"type": {"state": "post", "completed": True, "name": "STATUS_FINAL"}},
          "competitions": [{"timeValid": True, "competitors": [{"homeAway": "home", "score": "101", "team": {"id": "1", "location": "Atlanta", "abbreviation": "ATL"}},
                                                               {"homeAway": "away", "score": "99", "team": {"id": "2", "location": "Boston", "abbreviation": "BOS"}}]}]}
     try:
         league("nba")
-        assert espn.parse_event(e, "20261012") is None             # the NBA's warm-ups are not listed: last season shows until its first real game
-        config.PRESEASON_GAMES = True                               # (the switch is still there, should they be wanted again)
         g = espn.parse_event(e, "20261012")
-        assert g and g["kind"] == 1 and run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))
-        config.PRESEASON_GAMES = False
-        assert not run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))
+        assert g and g["kind"] == 1 and g["state"] == "final"
+        assert run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))       # the NBA's season begins with its warm-ups
     finally:
-        config.PRESEASON_GAMES = False
         league("college")
-    assert espn.parse_event(e, "20261012") is None                 # college lists none
+    assert espn.parse_event(e, "20261012") is None                                                    # college lists none
+    assert not run.season_started({"days": {"20261012": {"games": [g]}}}, dt.date(2026, 10, 12))
 

@@ -37,7 +37,7 @@ def main() -> int:
         assert [g["id"] for g in old["nhl"]] == [2] and "2020-01" in home["months"] and home["window"][0] < today < home["window"][1]
         assert [g["id"] for g in json.loads((site / "schedule" / (today[:7] + ".json")).read_text())["leagues"]["wvb"]] == [3]
         assert [g["id"] for g in by["wvb"]["games"]] == [3]                    # college: only games with a ranked team
-        assert by["wvb"]["games"][0]["away"] == ["a", "Away", 5, 1] and by["wvb"]["poll"] == "AVCA coaches poll"
+        assert by["wvb"]["games"][0]["away"] == ["a", "Away", 5, 1, None] and by["wvb"]["poll"] == "AVCA coaches poll"
         assert by["wvb"]["games"][0]["home"][2] == 31                         # outside the poll: its GOAT number
         assert not by["cfb"]["ready"] and [s["key"] for s in home["sports"] if s["ready"]] == ["hockey", "volleyball"]
         hockey = (site / "hockey" / "index.html").read_text()

@@ -1,10 +1,28 @@
 /* GOAT Volleyball: one page, no libraries. Lists the matches of the 25 ranked teams. */
 (function () {
   "use strict";
+  // the site's own GOAT ranking is hidden for now: true brings back its views on the rankings tab, the numbers
+  // from 26 for teams outside a poll, its column beside the power rankings and every line about it
+  var SHOW_GOAT = false;
+
+  // ---- a team name too long for its row gives way to the team's abbreviation (CBJ for the Columbus Blue Jackets);
+  // the full name stays in the tooltip and is what a screen reader says. Checked as rows arrive and when the window resizes. ----
+  function fitName(n) {
+    var full = n.getAttribute("data-full");
+    if (!full) { full = n.textContent; n.setAttribute("data-full", full); }
+    if (n.textContent !== full) { n.textContent = full; n.removeAttribute("title"); n.removeAttribute("aria-label"); }
+    if (n.scrollWidth > n.clientWidth + 1) { n.textContent = n.getAttribute("data-abbr"); n.setAttribute("title", full); n.setAttribute("aria-label", full); }
+  }
+  function fitNames(root) { Array.prototype.forEach.call((root || document).querySelectorAll(".team .name[data-abbr]"), fitName); }
+  if (window.MutationObserver) new MutationObserver(function (list) {
+    list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && (n.matches(".team .name[data-abbr]") || n.querySelector(".team .name[data-abbr]"))) fitNames(n); }); });
+  }).observe(document.documentElement, { childList: true, subtree: true });
+  var fitTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitNames(); }, 120); });
   // ---- games under way go to the top of whatever list they are in, and move there when one starts ----
   function liveFirst(ol) {
     var kids = Array.prototype.slice.call(ol.children), ref = null, i;
-    function on(li) { return li.classList && li.classList.contains("game") && li.classList.contains("on"); }
+    function on(li) { return li.classList && li.classList.contains("game") && li.classList.contains("live"); }
     for (i = 0; i < kids.length; i++) if (!on(kids[i])) { ref = kids[i]; break; }
     if (!ref) return;
     for (i = kids.indexOf(ref) + 1; i < kids.length; i++) if (on(kids[i])) ol.insertBefore(kids[i], ref);
@@ -105,7 +123,7 @@
         var row = document.querySelector(".mast-row"), pages = row && row.querySelector(".pages");
         if (!row) return;
         box = el("dl", { "class": "hdr-read", id: "hdr-read" });
-        row.insertBefore(box, pages);
+        row.insertBefore(box, row.firstChild);          // at the header's left, where the mark was
       }
       box.innerHTML = "";
       [["Games today", n], ["Live now", on]].forEach(function (x) { box.appendChild(el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })])); });
@@ -161,6 +179,97 @@
     });
   }
   // the day to show: the one asked for if it has games, otherwise the next day with games, otherwise the last
+  // ---- the day calendar, as on the front page: fifteen days in a row with the chosen one in the middle, every
+  // day whether it has a game or not; the arrows move it a week at a time, and the Date box opens a month to jump to ----
+  function dayCalendar(items, chosen, pick, unit) {
+    var count = {}, month = null, bar = el("nav", { "class": "cal", "aria-label": "Days" });
+    items.forEach(function (it) { count[it.key] = it.n; });
+    function many(n) { return n + " " + unit + (n === 1 ? "" : unit === "match" ? "es" : "s"); }
+    for (var i = -7; i <= 7; i++) (function (d) {
+      var n = count[d] || 0, dt = day(d), m = dt.toLocaleDateString(undefined, { month: "short" });
+      bar.appendChild(el("button", { type: "button", "class": "calday" + (d === today ? " today" : ""), "aria-pressed": String(d === chosen),
+        "aria-label": long(d) + (d === today ? ", today" : "") + ", " + many(n), onclick: function () { pick(d); } }, [
+        el("span", { "class": "wd", text: d === today ? "Today" : dt.toLocaleDateString(undefined, { weekday: "short" }) }),
+        el("span", { "class": "dn", text: String(dt.getDate()) }), el("span", { "class": "mo", text: m !== month ? m : "" }),
+        el("span", { "class": "gn", text: n ? many(n) : "No " + unit + (unit === "match" ? "es" : "s") })]));
+      month = m;
+    })(addDays(chosen, i));
+    setTimeout(function () {
+      var on = bar.querySelector('[aria-pressed="true"]');
+      if (on && bar.scrollWidth > bar.clientWidth) bar.scrollLeft = Math.max(0, on.offsetLeft - bar.offsetLeft - Math.floor(bar.clientWidth / on.offsetWidth / 2) * on.offsetWidth);
+    }, 0);
+    function step(by, words, path) {
+      var b = el("button", { type: "button", "class": "step", "aria-label": words, onclick: function () { pick(addDays(chosen, by)); } });
+      b.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="' + path + '"/></svg>';
+      return b;
+    }
+    return el("div", { "class": "calwrap" }, [step(-7, "A week earlier", "M8 1L2 7l6 6"), bar, step(7, "A week later", "M2 1l6 6-6 6"), dateBox(chosen, pick)]);
+  }
+
+  // ---- the Date box: a month of days to jump to, this site's own, the same in every browser (as on the front page) ----
+  function dateBox(chosen, pick) {
+    var pop = null, month = null, focusDay = null;
+    var val = el("b", { text: day(chosen).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) });
+    var btn = el("button", { type: "button", "class": "goto-btn", "aria-haspopup": "dialog", "aria-expanded": "false" }, [el("span", { text: "Date" }), val]);
+    var box = el("div", { "class": "goto" }, [btn]);
+    function close(back) {
+      if (!pop) return;
+      pop.remove(); pop = null;
+      btn.setAttribute("aria-expanded", "false");
+      document.removeEventListener("mousedown", outside, true);
+      if (back) btn.focus();
+    }
+    function outside(ev) { if (pop && !box.contains(ev.target)) close(false); }
+    function first(m) { return m + "-01"; }
+    function shiftMonth(m, by) { var p = m.split("-"), d = new Date(+p[0], +p[1] - 1 + by, 1, 12); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2); }
+    function choose(d) { close(true); if (d !== chosen) pick(d); }
+    function render() {
+      pop.innerHTML = "";
+      var start = day(first(month)), title = start.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      function arrow(by, words, path) {
+        var b = el("button", { type: "button", "class": "gp-step", "aria-label": words, onclick: function () { month = shiftMonth(month, by); focusDay = first(month); render(); } });
+        b.innerHTML = '<svg viewBox="0 0 10 14" aria-hidden="true"><path d="' + path + '"/></svg>';
+        return b;
+      }
+      pop.appendChild(el("div", { "class": "gp-head" }, [arrow(-1, "Previous month", "M8 1L2 7l6 6"), el("b", { "class": "gp-title", text: title, "aria-live": "polite" }), arrow(1, "Next month", "M2 1l6 6-6 6")]));
+      var grid = el("div", { "class": "gp-grid", role: "grid", "aria-label": title });
+      // the week starts on Sunday
+      for (var w = 0; w < 7; w++) grid.appendChild(el("span", { "class": "gp-wd", "aria-hidden": "true", text: new Date(2023, 0, 1 + w, 12).toLocaleDateString(undefined, { weekday: "narrow" }) }));
+      for (var pad = 0; pad < start.getDay(); pad++) grid.appendChild(el("span", { "class": "gp-pad" }));
+      for (var d = first(month); d.slice(0, 7) === month; d = addDays(d, 1)) (function (d) {
+        grid.appendChild(el("button", { type: "button", "class": "gp-day" + (d === today ? " today" : ""), "aria-pressed": String(d === chosen), tabindex: d === focusDay ? "0" : "-1",
+          "aria-label": long(d) + (d === today ? ", today" : ""), "data-d": d, onclick: function () { choose(d); } }, [String(day(d).getDate())]));
+      })(d);
+      pop.appendChild(grid);
+      pop.appendChild(el("div", { "class": "gp-foot" }, [el("button", { type: "button", "class": "gp-today", text: "Today", onclick: function () { choose(today); } })]));
+      var f = grid.querySelector('[data-d="' + focusDay + '"]');
+      if (f) f.focus({ preventScroll: true });
+    }
+    btn.addEventListener("click", function () {
+      if (pop) { close(true); return; }
+      month = chosen.slice(0, 7); focusDay = chosen;
+      pop = el("div", { "class": "gp", role: "dialog", "aria-label": "Choose a day" });
+      box.appendChild(pop);
+      btn.setAttribute("aria-expanded", "true");
+      document.addEventListener("mousedown", outside, true);
+      render();
+    });
+    box.addEventListener("keydown", function (ev) {
+      if (!pop) return;
+      if (ev.key === "Escape") { ev.preventDefault(); close(true); return; }
+      var on = document.activeElement && document.activeElement.getAttribute("data-d");
+      if (!on) return;
+      var by = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[ev.key];
+      if (by) {
+        ev.preventDefault();
+        focusDay = addDays(on, by);
+        if (focusDay.slice(0, 7) !== month) month = focusDay.slice(0, 7);
+        render();
+      }
+    });
+    return box;
+  }
+
   function pickDay(items, want) {
     if (want && items.some(function (it) { return it.key === want; })) return want;
     var next = items.filter(function (it) { return it.key >= today; })[0];
@@ -241,6 +350,12 @@
     return box;
   }
   // A team's name as a link to its page.
+  // a team's short form, for a row too narrow for its name: ESPN's abbreviation, the league's own list, or an id that is one
+  function withAbbr(n, t) {
+    var a = t.abbr || (data && data.abbr && data.abbr[t.id] && data.abbr[t.id][0]) || (/^[A-Z]{2,4}$/.test(String(t.id)) ? t.id : null);
+    if (a && a !== n.textContent) n.setAttribute("data-abbr", a);
+    return n;
+  }
   function teamA(id, name, cls) {
     return id ? el("a", { "class": "tlink " + (cls || ""), href: "#/team/" + encodeURIComponent(id), text: name })
       : el("span", { "class": cls || "", text: name });
@@ -278,9 +393,10 @@
   }
   // A team's number: its AVCA rank, or for a team outside the poll its place
   // from 26 on in the GOAT ranking (data.nr), so no two teams share a number.
-  function shownRank(id, rank) { return rank || (id && data.nr && data.nr[id]) || null; }
+  function shownRank(id, rank) { return rank || (SHOW_GOAT && id && data.nr && data.nr[id]) || null; }
   function rankTag(rank, id) {
     var n = shownRank(id, rank);
+    if (!n && !PRO()) return null;          // a college team outside the poll has no badge
     return el("span", { "class": "rk" + (n ? "" : " nr") + (!rank && n ? " goat" : ""), role: "img", text: n ? String(n) : "NR",
       "aria-label": rank ? "ranked " + rank : n ? "unranked, " + n + " by the GOAT ranking" : "unranked", title: !rank && n ? "Not in the AVCA poll; " + n + " by the GOAT ranking" : null });
   }
@@ -327,12 +443,12 @@
         var x = a[3] || {}, y = b[3] || {};
         return share(y.conf) - share(x.conf) || split(y.conf)[0] - split(x.conf)[0] || share(y.all) - share(x.all) || at(a) - at(b);
       });
-      var thead = el("thead", {}, [el("tr", {}, [el("th", { scope: "col", text: "#", title: "Place in the conference" }), el("th", { scope: "col", "class": "l", text: (i + 1) + ". " + c, title: "Conference " + (i + 1) + " of " + names.length + " by its teams' average place in the GOAT ranking" }),
+      var thead = el("thead", {}, [el("tr", {}, [el("th", { scope: "col", text: "#", title: "Place in the conference" }), el("th", { scope: "col", "class": "l", text: (i + 1) + ". " + c, title: "Conference " + (i + 1) + " of " + names.length + (SHOW_GOAT ? " by its teams' average place in the GOAT ranking" : ", strongest first") }),
         el("th", { scope: "col", "class": "rec", text: "Conf", title: "Record in conference games" }), el("th", { scope: "col", "class": "rec", text: "Overall", title: "Record in all games" })])]);
       var body = el("tbody", {}, list.map(function (r, n) {
         var rec = r[3] || {}, polled = rankOf(r[0]);
         return el("tr", {}, [el("td", { text: String(n + 1) }),
-          el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [rankTag(polled && polled.rank, r[0]), logo(r[0]), teamA(r[0], r[1])])]),
+          el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(r[0]), teamA(r[0], r[1]), rankTag(polled && polled.rank, r[0])])]),
           el("td", { "class": "strong rec", text: rec.conf || "0-0" }), el("td", { "class": "rec", text: rec.all || "0-0" })]);
       }));
       holder.appendChild(el("div", { "class": "tablewrap", tabindex: "0", role: "region", "aria-label": c + " standings" }, [el("table", { "class": "ptable stand" }, [thead, body])]));
@@ -346,15 +462,15 @@
   // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
   function goatLede() { return W("rankings.lede_goat") + ((data.goat || {}).frozen ? " " + W("rankings.frozen") : ""); }
   function drawRanks() {
-    var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, goatView = rankView === "goat" && G.top;
+    var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, goatView = SHOW_GOAT && rankView === "goat" && G.top;
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = "";
     var was = $("conf-standings"), confs = !PRO() && hasConferences(data.d1);
     if (was) was.parentNode.removeChild(was);
     if (rankView === "conf" && !confs) rankView = "avca";
-    if (!PRO() || G.top) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).filter(function (o) { return PRO() ? o[0] !== "goat" : goatTabNow ? o[0] !== "conf" : o[0] === "conf"; }).forEach(function (o) {
+    if (!PRO() || G.top) [["avca", W("rankings.button_poll")], ["goat", W("rankings.button_goat")]].concat(confs ? [["conf", W("rankings.button_conf")]] : []).filter(function (o) { return (SHOW_GOAT || o[0] !== "goat") && (PRO() ? o[0] !== "goat" : goatTabNow ? o[0] !== "conf" : o[0] === "conf"); }).forEach(function (o) {
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
-    if (rankView === "conf") return drawConferences(data.d1);
+    if (rankView === "conf") { if (!SHOW_GOAT) bar.innerHTML = ""; return drawConferences(data.d1); }     // just the conferences dropdown, as for basketball
     (goatView ? ["GOAT", "Team", "Record", PRO() ? "Std" : "AVCA"] : [PRO() ? "#" : "AVCA", "Team", "Record", "Change"]).forEach(function (h) { head.appendChild(el("span", { text: h })); });
     // the Beat and Lost to boxes belong to the GOAT ranking only; on a wide screen they sit in the row, under these two headings
     if (goatView) {
@@ -447,7 +563,7 @@
     var note = !L && g.state === "other" ? (g.note ? g.note.charAt(0).toUpperCase() + g.note.slice(1) : "Not played") : "";
     var when = fin ? "Final" : live ? (L && L.detail) || "In progress" : note ? note : t && !isNaN(t) ? t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "Time not set";
     function team(side, s, lost, won) {
-      var kids = [rankTag(s.rank, s.id), teamA(s.id, s.name, "name"), logo(s.id)];       // logos in the middle, then the names, the rankings outermost
+      var kids = [rankTag(s.rank, s.id), withAbbr(teamA(s.id, s.name, "name"), s), logo(s.id)];       // logos in the middle, then the names, the rankings outermost
       if (side === "home") kids.reverse();
       return el("span", { "class": "team " + side + (lost ? " lost" : "") + (won ? " won" : "") }, kids);
     }
@@ -476,7 +592,7 @@
     if (!matchIds) { matchIds = {}; data.games.forEach(function (x) { matchIds[x.id] = 1; }); }
     var go = fin || live || (!note && matchIds[g.id]) ? "#/match/" + g.id : null;
     var unplayed = !fin && !live && !note;
-    return rowLink(el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " on" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-go": go }, [
+    return rowLink(el("li", { "class": "game" + (!PRO() && g.away.rank && g.home.rank ? " both" : "") + (live ? " live" : "") + (unplayed ? " ahead" : ""), "data-id": g.id, "data-go": go }, [
       live ? el("span", { "class": "when live" }, [liveTag(), " " + (when === "In progress" ? "" : when)]) : el("span", { "class": "when", text: when }),
       team("away", g.away, homeWon, awayWon), mid, team("home", g.home, awayWon, homeWon),
       el("span", { "class": "more" }, more)]));
@@ -607,9 +723,6 @@
     // which side is which: over the columns on a wide screen, beside the two lines on a phone
     holder.appendChild(el("div", { "class": "hahead", "aria-hidden": "true" }, [el("span"), el("span", { "class": "ha away", text: W("matches.away") }),
       el("span"), el("span", { "class": "ha home", text: W("matches.home") }), el("span")]));
-    var weeks = {};
-    shown.forEach(function (g) { weeks[monday(g.date)] = 1; });
-    var first = Object.keys(weeks).sort()[0], last = Object.keys(weeks).sort().pop();
     var pick = el("select", { id: "f-team", "aria-label": "Show one team", onchange: function () { state.team = pick.value || null; draw(); } },
       [el("option", { value: "", text: isD1() ? W("matches.all_teams_d1") : W("matches.all_teams") })].concat(teamsHere.map(function (x) {
         return el("option", { value: x.id, text: (x.rank ? x.rank + ". " : "") + x.name, selected: x.id === state.team });
@@ -629,40 +742,23 @@
       return;
     }
 
-    var w, end, games, three = !PRO();
-    if (three) {
-      // one day at a time, picked from the calendar: every day that has a match
-      var items = dayItems(shown);
-      if (items.length) {
-        state.day = pickDay(items, state.day);
-        var mid = state.day; w = mid; end = mid;
-        games = shown.filter(function (g) { return g.date === mid; });
-        head.textContent = (mid === today ? "Today, " : "") + long(mid);
-        holder.insertBefore(calendar(items, mid, function (d) { state.day = d; draw(); }), holder.firstChild);
-      } else { w = end = today; games = []; head.textContent = "No matches yet"; }
-    } else {
-      if (!state.week) {       // open on this week, or the nearest week that has matches
-        var now = monday(today);
-        state.week = !first ? now : now < first ? first : now > last ? last : now;
-      }
-      var thisWeek = monday(today);
-      w = state.week; end = addDays(w, 6);
-      games = shown.filter(function (g) { return g.date >= w && g.date <= end; });
-      head.textContent = (w === thisWeek ? "This week, " : "Week of ") + short(w) + " to " + short(end);
-      // the weeks that have a match, as a calendar
-      var wk = {};
-      shown.forEach(function (g) { var m = monday(g.date); wk[m] = (wk[m] || 0) + 1; });
-      holder.insertBefore(calendar(Object.keys(wk).sort().map(function (m) { var t = day(m);
-        return { key: m, top: m === thisWeek ? "This wk" : "Week of", big: String(t.getDate()), month: t.toLocaleDateString(undefined, { month: "short" }), n: wk[m], today: m === thisWeek, label: "Week of " + long(m) };
-      }), w, function (k) { state.week = k; draw(); }, "Weeks"), holder.firstChild);
-    }
+    var w, end, games, three = true;
+    // one day at a time, picked from the calendar
+    var items = dayItems(shown);
+    if (items.length) {
+      state.day = state.day || pickDay(items, null);
+      var mid = state.day; w = mid; end = mid;
+      games = shown.filter(function (g) { return g.date === mid; });
+      head.textContent = (mid === today ? "Today, " : "") + long(mid);
+      holder.insertBefore(dayCalendar(items, mid, function (d) { state.day = d; draw(); }, "match"), holder.firstChild);
+    } else { w = end = today; games = []; head.textContent = "No matches yet"; }
     if (!games.length) {
-      holder.appendChild(el("p", { "class": "empty", text: PRO() ? "No matches this week. Try an earlier or later week." : (isD1() ? "No matches" : "No ranked team has a match") + " on this day. Try earlier or later days." }));
+      holder.appendChild(el("p", { "class": "empty", text: (PRO() || isD1() ? "No matches" : "No ranked team has a match") + " on this day. Try earlier or later days." }));
       return;
     }
     listInto(holder, games, false, three);
     var both = games.filter(function (g) { return g.away.rank && g.home.rank; }).length;
-    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + " matches this week. The visiting team is on the left. Numbers are places in the standings. Choose a team to see its whole season." }));
+    if (PRO()) holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " match" : " matches") + " on this day. The visiting team is on the left. Numbers are places in the standings. Choose a team to see its whole season." }));
     else holder.appendChild(el("p", { "class": "note", text: games.length + (games.length === 1 ? " match" : " matches") + " on this day" + (both ? ", " + both + " of them between two ranked teams (marked with a green edge)" : "") +
       ". The visiting team is on the left, and the channel or streaming service is on the right for matches in the next two weeks. Numbers are this week's rankings, also for earlier weeks. Choose a team to see its whole season." }));
     if (games.some(function (g) { return g.p != null && g.state !== "final"; })) { var said = holder.lastElementChild; holder.insertBefore(keyline(), said && said.classList.contains("note") ? said : null); holder.appendChild(el("p", { "class": "note", text: oddsNote().trim() })); }
@@ -984,7 +1080,7 @@
   }
   function hitFmt(v) { return (v < 0 ? "-" : "") + Math.abs(v).toFixed(3).replace(/^0/, ""); }
   var TCOLS = [   // key, heading, meaning, getter, format, sorts high to low first
-    ["rank", "Rank", "AVCA poll rank; teams outside the poll are numbered from 26 in GOAT ranking order", function (t) { return shownRank(t.id, t.rank); }, String, 0],
+    ["rank", "Rank", "AVCA poll rank" + (SHOW_GOAT ? "; teams outside the poll are numbered from 26 in GOAT ranking order" : "") + "", function (t) { return shownRank(t.id, t.rank); }, String, 0],
     ["name", "Team", "", function (t) { return t.name; }, null, 0],
     ["rec", "W-L", "Matches won and lost", function (t) { return t.w + t.l ? t.w / (t.w + t.l) : null; }, null, 1],
     ["set_pct", "Sets", "Sets won and lost", function (t) { return t.set_pct; }, null, 1],
@@ -1280,7 +1376,7 @@
     var bits = [];
     if (t && t.record) bits.push(t.record);
     bits.push(t ? "No. " + t.rank + " in the " + data.poll.name : "Not ranked in the " + data.poll.name);
-    if (goat) bits.push("No. " + goat.rank + " in the GOAT ranking");
+    if (SHOW_GOAT && goat) bits.push("No. " + goat.rank + " in the GOAT ranking");
     box.appendChild(el("div", { "class": "thead" }, [logo(id, "big"), el("div", {}, [el("h1", { text: name }), el("p", { "class": "tsub", text: bits.join(" · ") })])]));
     box.appendChild(el("div", { "class": "nav filters" }, [scopeSwitch(function () { drawTeam(id); }, !t)]));
     if (t) box.appendChild(el("div", { "class": "tvs" }, [versus(t)]));
@@ -1341,7 +1437,7 @@
     // the GOAT ranking has a tab of its own: the rankings page, shown in its GOAT view
     var goatTab = /^#\/?goat/.test(h);
     goatTabNow = goatTab;      // (college: the poll and the GOAT ranking are on this tab, the conference standings on Standings)
-    if (goatTab) { h = "#/rankings"; rankView = PRO() ? "goat" : rankView === "conf" ? "avca" : rankView; }
+    if (goatTab) { h = "#/rankings"; rankView = PRO() && SHOW_GOAT ? "goat" : rankView === "conf" ? "avca" : rankView; }
     else if (/^#\/?rankings/.test(h)) { rankView = PRO() ? (rankView === "goat" ? "avca" : rankView) : "conf"; }
     stopMatch();
     var page = tm ? "team" : match ? "match" : card ? "card" : /^#\/?players/.test(h) ? "players" : /^#\/?rankings/.test(h) ? "rankings" : /^#\/?teams/.test(h) ? "teams" : "matches";
@@ -1350,7 +1446,7 @@
       if (a.dataset.page === (page === "card" ? "players" : page === "match" ? "matches" : page === "team" ? "teams" : page)) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
     if (goatTab) Array.prototype.forEach.call(document.querySelectorAll(".pages a"), function (a) { if (a.dataset.page === "goat") a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
-    $("rank-sort").hidden = PRO() ? goatTab : !goatTab;      // pro: the standings have the view buttons; college: the poll does
+    $("rank-sort").hidden = goatTab;          // the Standings tab has its buttons (college: the conferences dropdown); Polls & Rankings has none
     document.title = ({ rankings: W("rankings.title"), teams: W("teams.title"), players: W("players.title"), match: W("matches.box_score"), team: "Team", card: "Player card" }[page] || W("matches.title")) + " | " + data.site;
     if (page === "team") drawTeam(decodeURIComponent(tm[1])); else if (page === "match") drawMatch(match[1]); else if (page === "rankings") drawRanks(); else if (page === "teams") drawTeams(); else if (page === "players") drawPlayers(); else if (page === "card") drawCard(decodeURIComponent(card[1])); else draw();
     window.scrollTo(0, 0);

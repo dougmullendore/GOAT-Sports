@@ -11,10 +11,12 @@
 # ---- shown at the top of every page until a new season's first game ----
 season.last = These are the final numbers of the {season} season. The {next} season begins {date}; its games are listed as they come up.
 season.last_undated = These are the final numbers of the {season} season. The {next} season has not begun.
+season.preseason = Preseason: until the regular season begins {date}, the standings, team stats and players' numbers come from the preseason games.
+season.preseason_undated = Preseason: until the regular season begins, the standings, team stats and players' numbers come from the preseason games.
 
 # ---- the tabs at the top ----
 nav.games = Games
-nav.rankings = Rankings
+nav.rankings = Standings
 nav.teams = Teams
 nav.players = Players
 
@@ -54,12 +56,14 @@ rankings.lede_before = The season has not started yet.
 rankings.button_poll = AP Poll
 rankings.button_goat = GOAT Ranking
 rankings.button_conf = Conference
+rankings.all_conferences = All conferences
+rankings.lede_conf = Every conference, strongest first. Inside a conference, teams are in order of their record in conference games.
 rankings.beat = Beat
 rankings.lost_to = Lost to
 rankings.none_yet = None yet
 rankings.show_all = Show all {n} teams
 rankings.show_top = Show the top 25 only
-rankings.note = Record and change are from the poll, which is looked for on every update and normally comes out on Monday. Choose a team to see its page; the GOAT Ranking lists who each team has beaten and lost to.
+rankings.note = Record and change are from the poll, which is looked for on every update and normally comes out on Monday. Choose a team to see its page.
 rankings.note_goat = Beside each team are its results this season against the GOAT top 25, with their GOAT places. The AP column is the team's place in the AP poll; a dash means it is not ranked there. Redone on every update.
 rankings.note_other = Record and change are from the ranking itself. The numbers beside teams elsewhere on this site are from the AP poll.
 # used on the NBA's Standings page only (its own wording is at the bottom of this file)

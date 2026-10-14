@@ -69,6 +69,10 @@ def stamp(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:10]
 
 
+# the site's mark, the goat, drawn in the strip beside its name
+GOAT_MARK = '<svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg>'
+
+
 def bar(current: str, up: str, ready: dict) -> str:
     """The strip across the top of every page: the site's name and one tab for each sport
     that has pages. `up` is the way from this page back to the front page ("../" or "../../");
@@ -77,7 +81,7 @@ def bar(current: str, up: str, ready: dict) -> str:
         f'<a href="{up}{ready[s["key"]]}"' + (' aria-current="page"' if s["key"] == current else "") + f'>{s["name"]}</a>'
         for s in SPORTS if s["key"] in ready)
     return (f'{MARK}<nav class="sports" aria-label="Sports"><div class="wrap sports-row">'
-            f'<a class="sports-home" href="{up}">GOAT Sports</a>{tabs}</div></nav>')
+            f'<a class="sports-home" href="{up}">{GOAT_MARK}GOAT Sports</a>{tabs}</div></nav>')
 
 
 def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:
@@ -150,8 +154,11 @@ def front_games(site: Path, today: dt.date, months: dict | None = None) -> list[
                 continue
 
             def side(s):
-                # a team outside the poll shows its number in the sport's GOAT ranking (26 and up), as on the sport's own pages
-                return [s.get("id"), s.get("name"), (s.get("rank") or beyond.get(str(s.get("id")))) if numbered else None, s.get(lg["score"])]
+                # a team outside the poll shows its number in the sport's GOAT ranking (26 and up), as on the sport's own pages;
+                # last, its abbreviation, for a row too narrow for its name: ESPN's, the league's own list, or an id that is one
+                ab = s.get("abbr") or ((data.get("abbr") or {}).get(str(s.get("id"))) or [None])[0] \
+                    or (s.get("id") if re.fullmatch(r"[A-Z]{2,4}", str(s.get("id") or "")) else None)
+                return [s.get("id"), s.get("name"), (s.get("rank") or beyond.get(str(s.get("id")))) if numbered else None, s.get(lg["score"]), ab]
 
             row = {"id": g["id"], "date": g["date"], "start": g.get("start"), "state": g.get("state"),
                    "note": g.get("note") or "", "away": side(g["away"]), "home": side(g["home"]),

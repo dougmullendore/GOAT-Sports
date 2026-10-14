@@ -20,7 +20,8 @@ def possessions(t: dict) -> float:
     return t["fga"] - t["oreb"] + t["to"] + 0.44 * t["fta"]
 
 
-def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, info: dict | None = None, conf_key: str = "conf") -> dict:
+def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, info: dict | None = None, conf_key: str = "conf",
+            kinds: tuple | None = None) -> dict:
     """{"teams": [...], "through": date}. `games` are the season's games of the
     teams given; `rating` is every team's rating from pipeline/odds.py; `info`
     is {team: {"conf", "rec"}} from the standings, and `conf_key` says which of
@@ -31,7 +32,8 @@ def compute(ranked: list[dict], games: list[dict], boxes: dict, rating: dict, in
     power = {t: i + 1 for i, t in enumerate(sorted((t for t in rating if not info or t in info), key=lambda x: -rating[x]))}
     acc = {t: {"w": 0, "l": 0, "pf": 0, "pa": 0, "n": 0, "bpf": 0, "bpa": 0, "opp_r": [], "own": [0] * len(TEAM), "opp": [0] * len(TEAM)} for t in rank}
     through = None
-    counted = (2, 3) if config.POLL_TYPE else (2,)          # the NBA's playoffs are left out of the season's numbers
+    counted = kinds or ((2, 3) if config.POLL_TYPE else (2,))          # the NBA's playoffs are left out of the season's numbers;
+    # `kinds` (1,) counts the NBA's warm-up games instead, while they are all there is
     for g in games:
         if g["state"] != "final" or g["away"].get("score") is None or g["home"].get("score") is None or g.get("kind", 2) not in counted:
             continue
