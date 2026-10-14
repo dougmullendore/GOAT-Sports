@@ -975,23 +975,6 @@
       box.innerHTML = "";
       if (!c) return;
       function opp(id, name) { return el("span", { "class": "tcell tm" }, [PRO() ? null : rankTag((rankOf(id) || {}).rank, id), logo(id), teamA(id, name)]); }
-      if (c.highs.length) {
-        var highs = el("section", { "class": "pc-sec" }, [el("h2", { text: "Season highs" }),
-          el("dl", { "class": "totals highs" }, c.highs.map(function (h) {
-            return el("div", {}, [el("dt", { text: h[0] }), el("dd", { text: num1(h[1]) }),
-              el("a", { "class": "hwhen", href: "#/match/" + h[5], text: "vs " + h[3] + ", " + short(h[4]) })]);
-          }))]);
-        if (c.dd || c.td) highs.appendChild(el("p", { "class": "pc-secnote", text: [c.dd ? c.dd + (c.dd === 1 ? " double-double" : " double-doubles") : "", c.td ? c.td + (c.td === 1 ? " triple-double" : " triple-doubles") : ""].filter(Boolean).join(", ") +
-          " (ten or more in two, or three, of kills, assists, digs, blocks and aces)." }));
-        box.appendChild(highs);
-      }
-      if (c.ranked) {
-        var r = c.ranked, sets = r.sp, splits = [["Matches", r.mp], ["Team's record", r.w + "-" + (r.mp - r.w)], ["Sets", sets], ["Kills per set", perSet(r.k, sets)],
-          ["Hitting", r.ta ? hitFmt((r.k - r.e) / r.ta) : "–"], ["Assists per set", perSet(r.ast, sets)], ["Digs per set", perSet(r.d, sets)], ["Blocks per set", perSet(r.blk, sets)], ["Aces", r.sa]];
-        box.appendChild(el("section", { "class": "pc-sec" }, [el("h2", { text: "Against ranked teams" }),
-          el("p", { "class": "pc-secnote", text: "Her matches this season against teams now in the top 25." }),
-          el("dl", { "class": "totals" }, splits.map(function (x) { return el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })]); }))]));
-      }
       var car = c.career;
       if (car && car.seasons.length) {
         var line = function (label, team, row, cls) {
@@ -1034,6 +1017,25 @@
       box.innerHTML = "";
       box.appendChild(el("p", { "class": "empty", text: "Her matches and career could not be loaded." }));
     });
+  }
+
+  // ---- a player's page opens on her stats; a button turns it to her card, the percentile bars (#/player/<id>/card).
+  // The page is drawn whole, then each part after the head is shown in one view: those marked pv-s in the stats, the rest,
+  // and the top-25 switch above the page, which only changes the percentiles, in the card. ----
+  function playerViews(holder, art) {
+    var head = art.querySelector(".pc-head"), stats = [], card = Array.prototype.filter.call(holder.children, function (n) { return n !== art; });
+    Array.prototype.forEach.call(art.children, function (n) { if (n !== head) (n.classList.contains("pv-s") ? stats : card).push(n); });
+    var bar = el("div", { "class": "nav pv-switch", role: "group", "aria-label": "Show" }, [["stats", "Stats"], ["card", "Player card"]].map(function (o) {
+      return el("button", { type: "button", "data-v": o[0], text: o[1], onclick: function () { show(o[0], true); } });
+    }));
+    function show(v, moved) {
+      stats.forEach(function (n) { n.hidden = v === "card"; });
+      card.forEach(function (n) { n.hidden = v !== "card"; });
+      Array.prototype.forEach.call(bar.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); });
+      if (moved) history.replaceState(null, "", location.hash.replace(/\/card$/, "") + (v === "card" ? "/card" : ""));
+    }
+    art.insertBefore(bar, head.nextSibling);
+    show(/\/card$/.test(location.hash) ? "card" : "stats");
   }
 
   function drawCard(id) {
@@ -1081,11 +1083,7 @@
         art.appendChild(box);
       });
       if (!p.regular) art.appendChild(el("p", { "class": "note", text: "Percentiles are given only to regulars: players with at least " + Math.round(100 * roster.weights.regular_share) + "% of their team's sets." }));
-      var t = p.tot, totals = [["Kills", t.k], ["Errors", t.e], ["Swings", t.ta], ["Assists", t.ast], ["Aces", t.sa], ["Service errors", t.se], ["Serves", t.sv],
-        ["Digs", t.d], ["Receptions", t.ra], ["Reception errors", t.re], ["Solo blocks", t.bs], ["Block assists", t.ba], ["Points", t.pts]];
-      art.appendChild(el("section", { "class": "pc-sec" }, [el("h2", { text: "Season totals" }),
-        el("dl", { "class": "totals" }, totals.reduce(function (a, x) { return a.concat([el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })])]); }, []))]));
-      var extra = el("div", { "class": "pc-extra" }, [el("p", { "class": "empty", text: "Loading her matches and career…" })]);
+      var extra = el("div", { "class": "pc-extra pv-s" }, [el("p", { "class": "empty", text: "Loading her matches and career…" })]);
       art.appendChild(extra);
       cardExtras(extra, p);
       art.appendChild(el("p", { "class": "note", text: "The number beside each bar is her percentile among " + many + " who play regularly " + (PRO() ? "in " + data.league_name : isD1() ? "in Division I" : "for a top-25 team") + " and do that job: 90 means better than 90% of them. The tick marks the middle." +
@@ -1094,6 +1092,7 @@
       CARD.forEach(function (sec) { sec[2].forEach(function (m) { if (m[2] && pctOf(p, m[0]) != null) defs.push(el("div", {}, [el("dt", { text: m[1] }), el("dd", { text: m[2] + "." })])); }); });
       art.appendChild(el("details", { "class": "defs" }, [el("summary", { text: "What each line measures" }), el("dl", {}, defs)]));
       holder.appendChild(art);
+      playerViews(holder, art);
     }).catch(function () {
       holder.appendChild(el("p", { "class": "empty", text: "The card could not be loaded. Reload the page to try again." }));
     });
@@ -1463,7 +1462,7 @@
   }
 
   function route() {
-    var h = location.hash, card = /^#\/?player\/(.+)$/.exec(h), match = /^#\/?match\/(\d+)/.exec(h), tm = /^#\/?team\/(.+)$/.exec(h);
+    var h = location.hash, card = /^#\/?player\/([^\/]+)/.exec(h), match = /^#\/?match\/(\d+)/.exec(h), tm = /^#\/?team\/(.+)$/.exec(h);
     // the GOAT ranking has a tab of its own: the rankings page, shown in its GOAT view
     var goatTab = /^#\/?goat/.test(h);
     goatTabNow = goatTab;      // (college: the poll and the GOAT ranking are on this tab, the conference standings on Standings)

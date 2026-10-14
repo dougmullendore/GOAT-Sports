@@ -1048,3 +1048,23 @@ select::picker-icon { color: var(--accent) !important; }
   .calday .dn { font-size: 1rem; }
   .calday .wd, .calday .mo, .calday .gn { line-height: 1.25; letter-spacing: .02em; }
 }
+
+/* ==== a player's page: his stats or his card, by a switch under his name ==== */
+.pcard > .pv-switch { grid-column: 1 / -1; margin: 24px 0 4px; }
+/* ==== a player's tables, career and game by game, on even columns: every heading over its numbers, one padding for all,
+   the season, team, date, opponent and result each a set width, and every number column one width. A table is as wide as its
+   columns, never stretched, so the columns fall in the same places in every table; its box fits it, and scrolls when it is wider ==== */
+.pcard .cartable, .pcard .logtable { table-layout: fixed; width: 1px; }
+.pcard .tablewrap:has(> .cartable), .pcard .tablewrap:has(> .logtable) { width: fit-content; max-width: 100%; }
+.pcard .cartable th, .pcard .cartable td, .pcard .logtable th, .pcard .logtable td { width: 4rem; padding: 6px 8px !important; overflow: hidden; text-overflow: ellipsis; }
+.pcard .cartable tr > :nth-child(1) { width: 5rem; }
+.pcard .cartable tr > :nth-child(2) { width: 7rem; }
+.pcard .logtable tr > :nth-child(1) { width: 4.75rem; }
+.pcard .logtable tr > :nth-child(2) { width: 14rem; }
+.pcard .logtable tr > :nth-child(3) { width: 6.5rem; }
+.pcard .logtable .tcell { min-width: 0; max-width: 100%; }
+.pcard .logtable .tcell a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px) {
+  .pcard .cartable tr > :nth-child(2) { width: 4.5rem; }
+  .pcard .logtable tr > :nth-child(2) { width: 10.5rem; }
+}

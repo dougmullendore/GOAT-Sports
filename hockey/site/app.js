@@ -979,6 +979,25 @@
     return out.length ? el("p", { "class": "pc-social" }, out) : null;
   }
 
+  // ---- a player's page opens on his stats; a button turns it to his card, the percentile bars (#/player/<id>/card).
+  // The page is drawn whole, then each part after the head is shown in one view: those marked pv-s in the stats, the rest,
+  // and the top-25 switch above the page, which only changes the percentiles, in the card. ----
+  function playerViews(holder, art) {
+    var head = art.querySelector(".pc-head"), stats = [], card = Array.prototype.filter.call(holder.children, function (n) { return n !== art; });
+    Array.prototype.forEach.call(art.children, function (n) { if (n !== head) (n.classList.contains("pv-s") ? stats : card).push(n); });
+    var bar = el("div", { "class": "nav pv-switch", role: "group", "aria-label": "Show" }, [["stats", "Stats"], ["card", "Player card"]].map(function (o) {
+      return el("button", { type: "button", "data-v": o[0], text: o[1], onclick: function () { show(o[0], true); } });
+    }));
+    function show(v, moved) {
+      stats.forEach(function (n) { n.hidden = v === "card"; });
+      card.forEach(function (n) { n.hidden = v !== "card"; });
+      Array.prototype.forEach.call(bar.children, function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-v") === v)); });
+      if (moved) history.replaceState(null, "", location.hash.replace(/\/card$/, "") + (v === "card" ? "/card" : ""));
+    }
+    art.insertBefore(bar, head.nextSibling);
+    show(/\/card$/.test(location.hash) ? "card" : "stats");
+  }
+
   function drawCard(id) {
     var holder = $("card");
     holder.innerHTML = "";
@@ -986,7 +1005,7 @@
       var p = roster.players.filter(function (x) { return String(x.id) === String(id); })[0];
       if (!p) { holder.appendChild(el("p", { "class": "empty", text: "There is no card for that player. He may not have played a game yet this season." })); return; }
       document.title = p.name + " | " + data.site;
-      var goalie = p.grp === "G", many = GRP_MANY[p.grp], nPos = roster.pos_regulars[p.grp] || 0, tot = p.tot;
+      var goalie = p.grp === "G", many = GRP_MANY[p.grp], nPos = roster.pos_regulars[p.grp] || 0;
       var pool = goalie ? nPos : roster.regulars;
       var art = el("article", { "class": "pcard" });
       art.appendChild(el("header", { "class": "pc-head" }, [
@@ -1024,20 +1043,10 @@
       });
       if (!p.regular) art.appendChild(el("p", { "class": "note", text: "Percentiles are given only to regulars: players with at least " + Math.round(100 * (goalie ? roster.weights.regular_goalie : roster.weights.regular_share)) + "% of their team's games." }));
       else if (pctOf(p, "impact_gp") == null) art.appendChild(el("p", { "class": "note", text: "Percentiles appear once enough " + many + " have played regularly to compare him with." }));
-      var totals = goalie ? [["Games", p.gp], ["Starts", tot.gs], ["Wins", tot.w], ["Losses", tot.l], ["Overtime losses", tot.otl], ["Shots against", tot.sa], ["Saves", tot.sv],
-          ["Goals against", tot.ga], ["Shutouts", tot.so], ["Goals saved above average", fmt.s1(tot.gsaa)],
-          ["Expected goals against", tot.xga ? tot.xga.toFixed(1) : "–"], ["Goals saved above expected", tot.gsax == null ? "–" : fmt.s1(tot.gsax)], ["Minutes", Math.round(tot.toi / 60)]]
-        : [["Games", p.gp], ["Goals", tot.g], ["Assists", tot.a], ["First assists", tot.a1], ["Points", tot.pts], ["Plus-minus", fmt.pm(tot.pm)], ["Shots on goal", tot.sog],
-          ["Shot attempts", tot.att || 0], ["Expected goals", tot.ixg == null ? "–" : tot.ixg.toFixed(1)],
-          ["Power-play goals", tot.ppg], ["Power-play points", tot.ppp || 0], ["Shorthanded points", tot.shpts || 0], ["Game-winning goals", tot.gwg || 0],
-          ["Faceoffs won", tot.fot ? tot.fow + " of " + tot.fot : "–"], ["Hits", tot.hits], ["Blocked shots", tot.blk], ["Takeaways", tot.tk], ["Giveaways", tot.gv], ["Penalty minutes", tot.pim],
-          ["Penalties drawn", tot.pd], ["Minutes", Math.round(tot.toi / 60)]];
-      art.appendChild(el("section", { "class": "pc-sec" }, [el("h2", { text: "Season totals" }),
-        el("dl", { "class": "totals" }, totals.map(function (x) { return el("div", {}, [el("dt", { text: x[0] }), el("dd", { text: String(x[1]) })]); }))]));
-      var careerBox = el("section", { "class": "pc-sec pc-log" }, [el("h2", { text: "Career" })]);
+      var careerBox = el("section", { "class": "pc-sec pc-log pv-s" }, [el("h2", { text: "Career" })]);
       art.appendChild(careerBox);
       careerTable(careerBox, p);
-      var logBox = el("section", { "class": "pc-sec pc-log" }, [el("h2", { text: "Game by game" })]);
+      var logBox = el("section", { "class": "pc-sec pc-log pv-s" }, [el("h2", { text: "Game by game" })]);
       art.appendChild(logBox);
       gameLog(logBox, p);
       art.appendChild(el("p", { "class": "note" }, ["The number beside each bar is his percentile among " + many + " who play regularly: 90 means better than 90% of them. The tick marks the middle." +
@@ -1046,6 +1055,7 @@
       CARD.forEach(function (sec) { sec[1].forEach(function (m) { if (m[2] && pctOf(p, m[0]) != null) defs.push(el("div", {}, [el("dt", { text: m[1] }), el("dd", { text: m[2] + "." })])); }); });
       if (defs.length) art.appendChild(el("details", { "class": "defs" }, [el("summary", { text: "What each line measures" }), el("dl", {}, defs)]));
       holder.appendChild(art);
+      playerViews(holder, art);
     }).catch(function () {
       holder.appendChild(el("p", { "class": "empty", text: "The card could not be loaded. Reload the page to try again." }));
     });
