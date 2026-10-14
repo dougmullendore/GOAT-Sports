@@ -33,6 +33,10 @@ of winning, the betting line, a team comparison and both box scores) and each
 player has a card (`#/player/<id>`: Impact in four parts, shooting, season
 totals and highs, his games against ranked teams, career and game by game).
 
+**The new season is shown from 30 days before its first game** (early October;
+`COMING_SEASON_DAYS` in `pipeline/config.py`), with its schedule still to come
+and its preseason rankings; until then the site shows last season's final numbers.
+
 **Before the season's first AP poll** (it comes out in October or November)
 there is no top 25: every page shows all of Division I, the Rankings page shows
 the GOAT ranking, which starts in the order teams finished last season, and

@@ -50,6 +50,9 @@ GAME_MINUTES = 40
 # Until a new season's first game that counts, the site goes on showing last season. This is a day
 # in the middle of a season, by the year it ends in: ESPN's scoreboard for it says when that season ran.
 LAST_SEASON_DAY = "{year}0115"
+# How many days before its first game the coming season is shown instead (0: from the first game that counts).
+# College basketball moves on in early October, when the preseason rankings come out.
+COMING_SEASON_DAYS = 30
 # Whether warm-up games are listed (as "Preseason"), and the new season begins with the first of them.
 # Until a game that counts is over, they are the standings, the team stats and the players' numbers;
 # after that they never count.
@@ -123,7 +126,7 @@ _NBA_API = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/"
 NBA = {
     "LEAGUE": "nba", "LEAGUE_NAME": "NBA", "ALL_NAME": "the NBA", "STATE_FOLDER": "nba", "SITE_FOLDER": "nba",
     "POLL_NAME": "NBA standings", "POLL_TYPE": None, "POLL_SIZE": 30, "MIN_TEAMS": 30, "OTHER_POLLS": {},
-    "SITE_API": _NBA_API, "BACKUP": "nba", "POWER": "nba", "PRESEASON_GAMES": True, "SOCIAL_IDS": "P3685",
+    "SITE_API": _NBA_API, "BACKUP": "nba", "POWER": "nba", "PRESEASON_GAMES": True, "COMING_SEASON_DAYS": 0, "SOCIAL_IDS": "P3685",
     "SCOREBOARD": _NBA_API + "scoreboard?limit=400",
     "DAY": _NBA_API + "scoreboard?dates={day}&limit=400",
     "RANKINGS": None,

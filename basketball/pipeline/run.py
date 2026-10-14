@@ -94,6 +94,14 @@ def from_backup(games: list[dict], now: dt.datetime, nothing_read: bool, what: s
 NEXT_SEASON = "scoreboard_next.json"       # the coming season's schedule, kept aside while last season is still shown
 
 
+def season_shown(store: dict, today: dt.date) -> bool:
+    """Whether a season is put on show: from its first game that counts, or from COMING_SEASON_DAYS before
+    its first day (college basketball moves on to its new season in October, its preseason rankings with it)."""
+    first, early = store.get("first"), getattr(config, "COMING_SEASON_DAYS", 0)
+    soon = bool(early and first and today >= dt.date.fromisoformat(first) - dt.timedelta(days=early))
+    return soon or season_started(store, today)
+
+
 def season_started(store: dict, today: dt.date) -> bool:
     """Whether a game that counts (not a warm-up) has reached its day."""
     kinds = (1, 2, 3) if config.PRESEASON_GAMES else (2, 3)        # the NBA's season begins with its warm-up games
@@ -151,12 +159,12 @@ def update_schedule(state: Path, now: dt.datetime, only: list[str] | None = None
             log(f"schedule: the season's dates could not be read ({e!r}); using the stored ones"[:200])
             season, first, last = stored["season"], stored["first"], stored["last"]
         kept = read_json(state / NEXT_SEASON, {})
-        if stored.get("season") == season and not season_started(stored, today):
+        if stored.get("season") == season and not season_shown(stored, today):
             kept, stored = stored, {}            # this season has not begun: its schedule goes aside
         if stored.get("season") != season:       # last season is on show (or nothing is yet)
             kept, todo, failed = read_days(kept if kept.get("season") == season else {}, season, first, last, today)
-            if season_started(kept, today):
-                stored = kept                    # the new season begins today: it takes over
+            if season_shown(kept, today):
+                stored = kept                    # the new season begins today (or is near enough): it takes over
             else:
                 coming = kept
         fresh = stored is kept                   # a season that has just taken over was read a moment ago

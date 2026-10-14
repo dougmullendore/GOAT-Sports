@@ -483,7 +483,9 @@ def test_last_season_is_shown_until_the_new_one_begins(tmp_path=None):
     web.get_json, web.get_many = get_json, get_many
     espn.parse_season, espn.parse_event = (lambda doc: seasons[doc["season_key"]]), (lambda e, day: e)
     at = lambda m, d: dt.datetime(2026, m, d, 12, tzinfo=dt.timezone.utc)
+    early = config.COMING_SEASON_DAYS
     try:
+        config.COMING_SEASON_DAYS = 0                          # first: the new season is shown from its first game
         down.add("20260115")                                   # last season cannot be read: the coming season is shown, as before
         got = run.update_schedule(state, at(10, 11))
         assert (got["season"], got["showing_last_season"]) == (2027, False) and not (state / run.NEXT_SEASON).exists()
@@ -501,7 +503,15 @@ def test_last_season_is_shown_until_the_new_one_begins(tmp_path=None):
         got = run.update_schedule(state, at(11, 1))             # the day of the first game: the new season takes over
         assert (got["season"], got["showing_last_season"]) == (2027, False) and not (state / run.NEXT_SEASON).exists()
         assert not run.selection(state)["last_season"] and len(run.selection(state)["all_games"]) == 2
+        # then: shown from 30 days before its first game, as college basketball's is
+        config.COMING_SEASON_DAYS = 30
+        state = Path(tempfile.mkdtemp())
+        got = run.update_schedule(state, at(9, 15))             # seven weeks before: last season still
+        assert (got["season"], got["showing_last_season"]) == (2026, True)
+        got = run.update_schedule(state, at(10, 12))            # three weeks before: the new season takes over
+        assert (got["season"], got["showing_last_season"]) == (2027, False) and not (state / run.NEXT_SEASON).exists()
     finally:
+        config.COMING_SEASON_DAYS = early
         web.get_json, web.get_many, espn.parse_season, espn.parse_event = real
 
 # --------------------------------------------------------- NBA warm-up games --
