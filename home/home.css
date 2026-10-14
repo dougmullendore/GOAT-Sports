@@ -604,3 +604,9 @@ h2.sec { border-bottom-color: var(--lumin) !important; }
 
 /* ==== phones: no Away / Home line over the games, for now ==== */
 @media (max-width: 760px) { .lg .hahead { display: none !important; } }
+
+/* ==== phones: each league's "All … games" link at the right, on the line of its logo and name ==== */
+@media (max-width: 760px) {
+  .lg-head { grid-template-columns: auto minmax(0, 1fr) auto !important; }
+  .lg-head .all { grid-column: auto !important; justify-self: end; text-align: right; align-self: center; }
+}
