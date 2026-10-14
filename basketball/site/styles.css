@@ -1039,3 +1039,12 @@ select::picker-icon { color: var(--accent) !important; }
 
 /* ==== phones: no Away / Home line over the games, for now ==== */
 @media (max-width: 640px) { .hahead { display: none !important; } }
+
+/* ==== phones: a smaller date strip, so more days show at once, and no arrows beside it: a finger scrolls it ==== */
+@media (max-width: 760px) {
+  .step { display: none !important; }
+  .day .tools .cal, .calwrap > .cal { flex: 1 1 100%; margin: 0 !important; }
+  .calday { flex-basis: 76px; min-height: 48px; gap: 2px 4px; padding: 4px 5px; }
+  .calday .dn { font-size: 1rem; }
+  .calday .wd, .calday .mo, .calday .gn { line-height: 1.25; letter-spacing: .02em; }
+}
