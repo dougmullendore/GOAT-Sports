@@ -34,7 +34,9 @@ def main() -> int:
     # "Miss State" and "Mississippi St" are Mississippi State
     assert pr.order(page([(1, "Georgia"), (2, "Miss State")]), teams) == [[1, "61"], [2, "344"]]
     assert pr.LEAGUES["cfb"][0] == "football" and pr.LEAGUES["cbb"] == ("basketball", pr.LEAGUES["cfb"][1])
-    assert set(pr.COLLEGE) == {"cfb", "cbb"} and all(set(pr.COLLEGE[lg]) == set(pr.LEAGUES[lg][1]) for lg in pr.COLLEGE)
+    assert set(pr.COLLEGE) == set(pr.ESPN_COLLEGE) == {"cfb", "cbb"} and all(set(pr.COLLEGE[lg]) | {"espn"} == set(pr.LEAGUES[lg][1]) for lg in pr.COLLEGE)
+    # ESPN's rankings of something other than teams are passed over
+    assert pr.NOT_A_RANKING.search("Ranking college football's top 25 freshmen") and not pr.NOT_A_RANKING.search("College football Power Rankings: Week 6")
     # a numbered list whose numbers are the list's own: read in order, a note after a name allowed
     listed = "<ol>" + "".join(f"<li>City{n} Team{n}{' (new)' if n == 3 else ''}</li>" for n in range(1, 21)) + "</ol>"
     assert pr.order_list(listed, TEAMS) == [[n, str(n)] for n in range(1, 21)]

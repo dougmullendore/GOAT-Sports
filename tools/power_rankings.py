@@ -25,6 +25,7 @@ import urllib.request
 from pathlib import Path
 
 REFRESH_HOURS = 6
+RETRY_HOURS = 1            # a league some of whose sites could not be read last time is tried again sooner
 MAX_AGE_DAYS = 45
 USER_AGENT = "Mozilla/5.0 (compatible; goat-sports-site/2.0; +https://github.com/dougmullendore/GOAT-Sports)"
 
@@ -152,18 +153,53 @@ def when(stamp: str | None) -> dt.datetime | None:
 # college: where each site's newest ranking is linked from, and how its address looks. A site that
 # keeps several rankings stories on one page (FOX's basketball) has the newest one read.
 COLLEGE = {
-    "cfb": {"espn": ("https://www.espn.com", "/college-football/", r'href="(/college-football/story/_/id/\d+/[^"]*power-rankings[^"]*)"'),
-            "cbs": ("https://www.cbssports.com", "/college-football/", r'href="(/college-football/news/college-football-power-rankings[^"]*)"'),
+    "cfb": {"cbs": ("https://www.cbssports.com", "/college-football/", r'href="(/college-football/news/college-football-power-rankings[^"]*)"'),
             "fox": ("https://www.foxsports.com", "/stories/college-football", r'href="(/stories/college-football/(?:college-football-)?rankings-week-\d+[^"]*)"')},
-    "cbb": {"espn": ("https://www.espn.com", "/mens-college-basketball/",
-                     r'href="(/mens-college-basketball/story/_/id/\d+/[^"]*(?:power-rankings|top-25-rankings)[^"]*)"'),
-            "cbs": ("https://www.cbssports.com", "/college-basketball/", r'href="(/college-basketball/news/college-basketball-rankings-[^"]*top-25-and-1[^"]*)"'),
+    "cbb": {"cbs": ("https://www.cbssports.com", "/college-basketball/", r'href="(/college-basketball/news/college-basketball-rankings-[^"]*top-25-and-1[^"]*)"'),
             "fox": ("https://www.foxsports.com", "/stories/college-basketball", r'href="(/stories/college-basketball/(?:mens-)?college-basketball-rankings-[^"]*)"')},
 }
 
 
+# ESPN's college rankings are found with ESPN's article search and read from its article API (www.espn.com's
+# pages turn the publish servers away; its APIs do not): what to search for, where the sport's stories live,
+# and what a ranking's headline says. Rankings of something else (freshmen, recruits) are passed over.
+ESPN_SEARCH = "https://site.web.api.espn.com/apis/search/v2?limit=20&type=article&query="
+ESPN_STORY = "https://content.core.api.espn.com/v1/sports/news/{id}"
+ESPN_COLLEGE = {"cfb": ("college football power rankings", "/college-football/story/", r"power rankings"),
+                "cbb": ("men's college basketball top 25 rankings", "/mens-college-basketball/story/", r"power rankings|top 25 rankings")}
+NOT_A_RANKING = re.compile(r"freshm|recruit|player|prospect|transfer|fantasy|draft|coach", re.I)
+
+
+def espn_college(lg: str) -> tuple[str, str] | None:
+    query, where, said = ESPN_COLLEGE[lg]
+    found = {}
+
+    def walk(node):
+        if isinstance(node, dict):
+            name = str(node.get("displayName") or node.get("headline") or "")
+            link = node.get("link")
+            url = str((link.get("web") if isinstance(link, dict) else link) or "")
+            m = re.search(r"/id/(\d+)", url)
+            if m and where in url and re.search(said, name, re.I) and not NOT_A_RANKING.search(name):
+                found[m.group(1)] = (str(node.get("date") or node.get("published") or ""), m.group(1), name, url)
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(json.loads(fetch(ESPN_SEARCH + urllib.parse.quote(query))))
+    for date, sid, name, url in sorted(found.values(), reverse=True)[:3]:
+        story = ((json.loads(fetch(ESPN_STORY.format(id=sid))).get("headlines") or [{}])[0]).get("story") or ""
+        if story:      # the article's own text, with its headline and date where read_source looks for them
+            return url, f'<meta property="og:title" content="{html.escape(name)}"><time datetime="{date}"></time>' + story
+    return None
+
+
 def find_college(lg: str, source: str) -> tuple[str, str] | None:
     """A college league's ranking from one site: the newest of those linked from its front page for the sport."""
+    if source == "espn":
+        return espn_college(lg)
     if source not in COLLEGE[lg]:
         raise ValueError(source)
     site, hub, pat = COLLEGE[lg][source]
@@ -283,26 +319,31 @@ def main(site_dir: str, force: bool = False) -> int:
         path = out_dir / f"{lg}.json"
         old = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
         last = when(old.get("read"))
-        if not force and last and now - last < dt.timedelta(hours=REFRESH_HOURS):
+        short = any(not str(v).startswith("read") for v in (old.get("tried") or {}).values()) or set(old.get("tried") or {}) != set(sources)
+        wait = dt.timedelta(hours=RETRY_HOURS if short else REFRESH_HOURS)
+        if not force and last and now - last < wait:
             continue
         teams = league_teams(site / folder)
         kept = {s["key"]: s for s in old.get("sources", [])}
-        result = []
+        result, tried = [], {}
         for source in sources:
             try:
                 got = read_source(lg, source, teams, now)
                 if got:
                     kept[source] = got
+                    tried[source] = f"read: {len(got['teams'])} teams"
                     log(f"{lg} {source}: {len(got['teams'])} teams, {got['published']}")
                 else:
+                    tried[source] = "none published"
                     log(f"{lg} {source}: none published")
             except Exception as e:  # a site down or redesigned: the copy read last time stays
+                tried[source] = f"not read: {e!r}"[:200]
                 log(f"{lg} {source}: not read ({e!r})"[:200])
             s = kept.get(source)
             age = when((s or {}).get("published")) or when((s or {}).get("read"))
             if s and age and now - age <= dt.timedelta(days=MAX_AGE_DAYS):
                 result.append(s)
-        path.write_text(json.dumps({"read": now.isoformat(timespec="seconds"), "sources": result}, separators=(",", ":")), encoding="utf-8")
+        path.write_text(json.dumps({"read": now.isoformat(timespec="seconds"), "sources": result, "tried": tried}, separators=(",", ":")), encoding="utf-8")
     return 0
 
 
