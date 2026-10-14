@@ -457,13 +457,42 @@
     ol.parentNode.insertBefore(holder, ol);
     $("rank-lede").textContent = W("rankings.lede_conf");
     $("rank-note").textContent = ""; $("goat-note").textContent = ""; $("goat-out").textContent = "";
+    heading("Standings");
   }
 
   // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
   function goatLede() { return W("rankings.lede_goat") + ((data.goat || {}).frozen ? " " + W("rankings.frozen") : ""); }
+  // ---- college: the Standings tab is the conferences' standings, the Polls & Rankings tab the poll as a table like
+  // every other sport's (the place, the team, the record, the AVCA poll). The tab's heading says which. ----
+  function heading(text) { var h = $("page-rankings").querySelector("h1"); if (h) h.textContent = text; document.title = text + " | " + data.site; }
+  function drawPolls() {
+    var ol = $("ranks"), head = $("ranks-head"), bar = $("rank-sort");
+    ol.hidden = true; head.hidden = true; bar.innerHTML = ""; bar.hidden = true;
+    heading("Polls & Rankings");
+    var poll = data.poll || {}, date = poll.through ? day(poll.through).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+    var info = {};
+    (data.d1 || []).forEach(function (x) { info[String(x[0])] = x; });
+    var headRow = el("tr", {}, [el("th", { scope: "col", text: "#", title: "Place in the poll" }), el("th", { scope: "col", "class": "l", text: "Team" }),
+      el("th", { scope: "col", text: "Record" }), el("th", { scope: "col", text: "AVCA", title: (poll.name || "AVCA poll") + (date ? ", through " + date : "") })]);
+    var body = el("tbody", {}, (poll.teams || []).map(function (t, i) {
+      var x = info[String(t.id)] || [], rec = t.record || (x[3] && x[3].all) || "";
+      return el("tr", {}, [el("td", {}, [el("span", { "class": "rk", text: String(i + 1) })]), el("td", { "class": "l" }, [el("span", { "class": "tcell" }, [logo(t.id), teamA(t.id, x[1] || t.name)])]),
+        el("td", { text: rec }), el("td", { text: String(t.rank) })]);
+    }));
+    ol.parentNode.insertBefore(el("div", { id: "poll-table" }, [
+      el("p", { "class": "powercap" }, [el("span", {}, [el("b", { text: "AVCA" }), date ? " " + date : ""])]),
+      el("div", { "class": "tablewrap", tabindex: "0", role: "region", "aria-label": "The poll, scrolls sideways" }, [el("table", { "class": "ptable stand power" }, [el("thead", {}, [headRow]), body])])]), ol);
+    $("rank-lede").textContent = (poll.teams || []).length ? "The " + (poll.name || "AVCA poll") + (date ? ", through matches of " + date : "") + "." : "This season's first poll is not out yet.";
+    $("rank-note").textContent = (poll.teams || []).length ? "Choose a team to see its page." : "";
+    $("goat-note").textContent = ""; if ($("goat-out")) $("goat-out").textContent = "";
+  }
+
   function drawRanks() {
     var ol = $("ranks"), bar = $("rank-sort"), head = $("ranks-head"), G = data.goat || {}, goatView = SHOW_GOAT && rankView === "goat" && G.top;
     ol.innerHTML = ""; bar.innerHTML = ""; head.innerHTML = "";
+    var polls = $("poll-table");
+    if (polls) polls.parentNode.removeChild(polls);
+    ol.hidden = false; head.hidden = false;
     var was = $("conf-standings"), confs = !PRO() && hasConferences(data.d1);
     if (was) was.parentNode.removeChild(was);
     if (rankView === "conf" && !confs) rankView = "avca";
@@ -471,6 +500,7 @@
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(rankView === o[0]), text: o[1], onclick: function () { rankView = o[0]; drawRanks(); } }));
     });
     if (rankView === "conf") { if (!SHOW_GOAT) bar.innerHTML = ""; return drawConferences(data.d1); }     // just the conferences dropdown, as for basketball
+    if (!SHOW_GOAT && !PRO()) return drawPolls();     // the poll in the same table as every other sport's Polls & Rankings
     (goatView ? ["GOAT", "Team", "Record", PRO() ? "Std" : "AVCA"] : [PRO() ? "#" : "AVCA", "Team", "Record", "Change"]).forEach(function (h) { head.appendChild(el("span", { text: h })); });
     // the Beat and Lost to boxes belong to the GOAT ranking only; on a wide screen they sit in the row, under these two headings
     if (goatView) {

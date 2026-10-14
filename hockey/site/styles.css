@@ -775,7 +775,7 @@ p.note:not(.keep) { display: none !important; }
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
+.gc-track span.best { background: var(--lumin, #fff) !important; box-shadow: none !important; }   /* the better side white */
 .gc-row .v.best { color: var(--accent); }
 
 /* ==== more green: hover and focus, links, the betting line, wins, and the marks ==== */
@@ -1001,3 +1001,44 @@ thead th button[aria-sort], .ptable th button:hover { text-decoration-color: var
 /* the dropdowns: what each one shows, and its arrow, in green; the list of choices keeps its own colours */
 select, .nav select { color: var(--accent) !important; }
 select::picker-icon { color: var(--accent) !important; }
+
+/* ==== the standings' tables (one per division or conference) on the same columns: every number column one
+   width, the team's column the rest ==== */
+#stand .ptable.stand { width: 100%; }
+#stand .ptable.stand th:not(:first-child):not(.l), #stand .ptable.stand td:not(:first-child):not(.l) { width: 3.75rem; }
+
+/* ==== on a phone every game row on the same columns: the scores' (or the line's) column one width ==== */
+@media (max-width: 760px) { .game { grid-template-columns: minmax(0, 1fr) 6rem !important; } }
+/* on a phone, where they scroll sideways, the tables keep the same columns too: the team's column one width, a long name cut short */
+@media (max-width: 760px) {
+  #stand .ptable.stand { table-layout: fixed; width: 1px; min-width: 100%; }
+  #stand .ptable.stand th:first-child, #stand .ptable.stand td:first-child { width: 2.5rem; }
+  #stand .ptable.stand th.l, #stand .ptable.stand td.l { width: 15rem; overflow: hidden; }
+  #stand .ptable.stand .tcell { max-width: 100%; }
+  #stand .ptable.stand .tcell a { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* ==== the Polls & Rankings tables, alike on every page: the place, the team (the rest of the width), the record,
+   one column of one width for each poll or power ranking, and the average ==== */
+.ptable.stand.power { width: 100% !important; table-layout: fixed; }
+.ptable.stand.power th, .ptable.stand.power td { width: 8.5rem !important; text-align: center !important; }
+.ptable.stand.power th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
+.ptable.stand.power th:first-child, .ptable.stand.power td:first-child { width: 3.25rem !important; }
+.ptable.stand.power th.l, .ptable.stand.power td.l { width: auto !important; text-align: left !important; overflow: hidden; }
+.ptable.stand.power th:last-child, .ptable.stand.power td:last-child { width: 5.5rem !important; }
+.ptable.stand.power .tcell { max-width: 100%; }
+.ptable.stand.power .tcell a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.powercap { margin: 0 0 12px !important; }
+@media (max-width: 760px) {
+  .ptable.stand.power { width: 1px !important; min-width: 100%; }
+  .ptable.stand.power th, .ptable.stand.power td { width: 5.5rem !important; }
+  .ptable.stand.power th:first-child, .ptable.stand.power td:first-child { width: 2.5rem !important; }
+  .ptable.stand.power th.l, .ptable.stand.power td.l { width: 11rem !important; }
+  .ptable.stand.power th:last-child, .ptable.stand.power td:last-child { width: 4rem !important; }
+}
+
+/* ==== a game's page: the line above the score and the Team comparison heading in white ==== */
+.gcard .mstatus > span:first-child, main .gc-h { color: var(--lumin) !important; }
+
+/* ==== phones: no Away / Home line over the games, for now ==== */
+@media (max-width: 640px) { .hahead { display: none !important; } }

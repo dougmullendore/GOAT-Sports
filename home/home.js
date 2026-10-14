@@ -351,8 +351,7 @@
         var sec = $("lg-" + lg.key);
         if (sec) sec.scrollIntoView({ block: "start" });
       } }) : null;
-      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [el("span", {}, [lg.ranked_only ? "No ranked " : "No ", name, " " + lg.unit + " on this day" + (coming ? "; the next are on " : ". "), go, coming ? ". " : null]),
-        el("a", { href: lg.href, text: lg.name })]));
+      holder.appendChild(el("p", { "class": "quiet s-" + lg.sport }, [el("span", {}, [lg.ranked_only ? "No ranked " : "No ", name, " " + lg.unit + " on this day" + (coming ? "; the next are on " : ". "), go, coming ? ". " : null])]));     // (the league named once, in the sentence)
     });
   }
 

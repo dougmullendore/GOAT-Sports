@@ -399,6 +399,8 @@
   // the GOAT ranking's opening line; it says so once the ranking has stopped for the season
   function goatLede() { return W("standings.lede_goat") + ((data.goat || {}).frozen ? " " + W("standings.frozen") : ""); }
   function drawStandings() {
+    var titled = document.querySelector('h1[data-w="standings.title"]');          // the Standings tab's own heading (Polls & Rankings puts up its own)
+    if (titled) titled.textContent = W("standings.title");
     var holder = $("stand"), bar = $("rank-sort");
     holder.innerHTML = ""; bar.innerHTML = "";
     [["division", W("standings.button_division")], ["wildcard", W("standings.button_wildcard")], ["conference", W("standings.button_conference")],
@@ -1620,6 +1622,9 @@
       bar.appendChild(el("button", { type: "button", "aria-pressed": String(powerView === o[0]), text: o[1], onclick: function () { powerView = o[0]; drawStandings(); powerTab(); } }));
     });
     if (!SHOW_GOAT) { $("rank-lede").textContent = "The power rankings of the big sports sites in one table, each as it last published it. Teams are in order of their average place."; $("rank-note").textContent = ""; $("goat-note").textContent = ""; }
+    var h1 = document.querySelector('h1[data-w="standings.title"]');
+    if (h1) h1.textContent = "Polls & Rankings";
+    document.title = "Polls & Rankings | " + data.site;
     var box = $("stand");
     if (powerView === "goat") {
       if (!SHOW_GOAT && box) { box.innerHTML = ""; box.appendChild(el("p", { "class": "empty", text: "No power rankings have been published in the last " + POWER_DAYS + " days." })); }

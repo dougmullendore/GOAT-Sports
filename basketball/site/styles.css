@@ -774,7 +774,7 @@ p.note:not(.keep) { display: none !important; }
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
+.gc-track span.best { background: var(--lumin, #fff) !important; box-shadow: none !important; }   /* the better side white */
 .gc-row .v.best { color: var(--accent); }
 
 /* ==== more green: hover and focus, links, the betting line, wins, and the marks ==== */
@@ -991,3 +991,51 @@ select::picker-icon { color: var(--accent) !important; }
 
 /* the NBA conference standings: the dashed lines under the sixth (playoffs) and tenth (play-in) teams in green */
 .ptable.stand tr.cut td { border-top-color: var(--accent) !important; }
+
+/* ==== conference standings (college): every conference's table on the same columns, as for football and volleyball ==== */
+#conf-standings .tablewrap { margin-top: 14px; }
+#conf-standings .ptable.stand { width: 100%; }
+#conf-standings .ptable.stand thead th.l { font: 700 .8125rem/1 Barlow, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+#conf-standings .ptable.stand .tcell a { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+#conf-standings .ptable.stand td:first-child, #conf-standings .ptable.stand th:first-child { width: 2.5rem; }
+#conf-standings .ptable.stand .rec { width: 4.75rem; }
+#rank-sort select { margin-left: auto; }
+
+/* ==== on a phone every game row on the same columns: the scores' (or the line's) column one width ==== */
+@media (max-width: 760px) { .game { grid-template-columns: minmax(0, 1fr) 6rem !important; } }
+/* ==== every conference's table on the same columns at any width: a long name is cut short, never widens its table ==== */
+#conf-standings .ptable.stand { table-layout: fixed; }
+#conf-standings .ptable.stand td.l { overflow: hidden; }
+#conf-standings .ptable.stand .tcell { max-width: 100%; }
+#conf-standings .ptable.stand .tcell a { min-width: 0; white-space: nowrap; }
+/* on a phone: narrower record columns, and a long name on two lines rather than cut short */
+@media (max-width: 760px) {
+  #conf-standings .ptable.stand .rec { width: 3.9rem; }
+  #conf-standings .ptable.stand .tcell a { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.2; }
+}
+@media (max-width: 760px) { #conf-standings .ptable.stand th.rec { letter-spacing: .02em; padding-left: 4px; padding-right: 4px; } }
+
+/* ==== the Polls & Rankings tables, alike on every page: the place, the team (the rest of the width), the record,
+   one column of one width for each poll or power ranking, and the average ==== */
+.ptable.stand.power { width: 100% !important; table-layout: fixed; }
+.ptable.stand.power th, .ptable.stand.power td { width: 8.5rem !important; text-align: center !important; }
+.ptable.stand.power th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
+.ptable.stand.power th:first-child, .ptable.stand.power td:first-child { width: 3.25rem !important; }
+.ptable.stand.power th.l, .ptable.stand.power td.l { width: auto !important; text-align: left !important; overflow: hidden; }
+.ptable.stand.power th:last-child, .ptable.stand.power td:last-child { width: 5.5rem !important; }
+.ptable.stand.power .tcell { max-width: 100%; }
+.ptable.stand.power .tcell a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.powercap { margin: 0 0 12px !important; }
+@media (max-width: 760px) {
+  .ptable.stand.power { width: 1px !important; min-width: 100%; }
+  .ptable.stand.power th, .ptable.stand.power td { width: 5.5rem !important; }
+  .ptable.stand.power th:first-child, .ptable.stand.power td:first-child { width: 2.5rem !important; }
+  .ptable.stand.power th.l, .ptable.stand.power td.l { width: 11rem !important; }
+  .ptable.stand.power th:last-child, .ptable.stand.power td:last-child { width: 4rem !important; }
+}
+
+/* ==== a game's page: the line above the score and the Team comparison heading in white ==== */
+.gcard .mstatus > span:first-child, main .gc-h { color: var(--lumin) !important; }
+
+/* ==== phones: no Away / Home line over the games, for now ==== */
+@media (max-width: 640px) { .hahead { display: none !important; } }

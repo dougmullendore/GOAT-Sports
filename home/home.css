@@ -419,7 +419,7 @@ img[src*="assets.nhle.com/logos"] { object-fit: cover; }
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
+.gc-track span.best { background: var(--lumin, #fff) !important; box-shadow: none !important; }   /* the better side white */
 .gc-row .v.best { color: var(--accent); }
 
 /* ==== more green: hover and focus, links, the betting line, wins, and the marks ==== */
@@ -593,3 +593,14 @@ h2.sec { border-bottom-color: var(--lumin) !important; }
 
 /* the Back to top button: a white outline, green words (green throughout when hovered) */
 .totop-btn:not(:hover) { border-color: var(--lumin) !important; color: var(--accent); }
+
+/* ==== on a phone every game row on the same columns: the right-hand column one width whatever it holds (a score,
+   a line, a live tag), and the channels on the row under the teams, across its whole width ==== */
+@media (max-width: 760px) {
+  .game a.row { grid-template-columns: minmax(0, 1fr) 6rem; }
+  .game a.row .more { grid-area: auto; grid-row: 3; grid-column: 1 / -1; justify-self: end; text-align: right; }
+  .game a.row .when { grid-area: auto; grid-row: 3; grid-column: 1; }
+}
+
+/* ==== phones: no Away / Home line over the games, for now ==== */
+@media (max-width: 760px) { .lg .hahead { display: none !important; } }

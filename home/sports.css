@@ -39,7 +39,7 @@
 :root:not(#x):not(#y) .logo img, :root:not(#x):not(#y) .mark img { filter: none !important; }
 .sports a[aria-current="page"], .pages a[aria-current="page"], .leagues a[aria-current="page"],
 .calday[aria-pressed="true"], .nav button[aria-pressed="true"], button[aria-pressed="true"]:not(.invert) { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
-.gc-track span.best { background: var(--accent) !important; box-shadow: none !important; }
+.gc-track span.best { background: var(--lumin, #fff) !important; box-shadow: none !important; }   /* the better side white */
 .gc-row .v.best { color: var(--accent); }
 .sports a:hover:not([aria-current="page"]) { background: var(--accent); color: var(--on-accent); }
 
