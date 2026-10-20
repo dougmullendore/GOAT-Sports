@@ -69,8 +69,8 @@ def stamp(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()[:10]
 
 
-# the site's mark, the goat, drawn in the strip beside its name
-GOAT_MARK = '<svg class="goat" viewBox="2 2.6 19.4 18.4" aria-hidden="true"><g fill="currentColor" stroke="currentColor" stroke-width=".6" stroke-linejoin="round"><path d="M12.6 7.2L20.4 12.6Q21 14.6 19.2 15.4L16.4 15.8 15.6 20.4 13.6 16.4 9.4 19.400Q7 14 8.8 9.400Z"/><path d="M13 7.6C11 2.8 5.2 2.4 2.8 7.8 2.2 10.2 3.4 12 5.2 12.4 4.6 10.6 5.2 8.2 7.4 7.6 9 7.2 10 8.2 10.2 9.600Z"/><path d="M8.6 11L5.6 14.6 9.4 13.800Z"/></g><circle class="eye" cx="15" cy="11.2" r=".9"/></svg>'
+# the site's mark: the goat's head stands for the name, so the strip shows it alone (its alt text says the name)
+LOGO = "logo.png"
 
 
 def bar(current: str, up: str, ready: dict) -> str:
@@ -81,7 +81,7 @@ def bar(current: str, up: str, ready: dict) -> str:
         f'<a href="{up}{ready[s["key"]]}"' + (' aria-current="page"' if s["key"] == current else "") + f'>{s["name"]}</a>'
         for s in SPORTS if s["key"] in ready)
     return (f'{MARK}<nav class="sports" aria-label="Sports"><div class="wrap sports-row">'
-            f'<a class="sports-home" href="{up}">{GOAT_MARK}GOAT Sports</a>{tabs}</div></nav>')
+            f'<a class="sports-home" href="{up}"><img class="goat" src="{up}{LOGO}" alt="GOAT Sports" width="128" height="128"></a>{tabs}</div></nav>')
 
 
 def add_bar(page: Path, current: str, up: str, css: str, ready: dict) -> bool:

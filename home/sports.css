@@ -19,13 +19,12 @@
   .sports + .leagues { padding-top: 8px; }
   .leagues a { display: inline-flex; align-items: center; min-height: 36px; }
 }
-/* on a phone the site's name is cut to "GOAT" so every sport's tab fits without scrolling */
+/* on a phone the tabs tighten so every sport fits without scrolling */
 @media (max-width: 480px) {
   .sports { font-size: .6875rem; letter-spacing: .04em; }
   /* each sport a full-size target; the strip scrolls sideways when the names do not fit */
   .sports a, .sports a[aria-current="page"].sports-home, .sports .sports-home:hover { padding-left: 12px; padding-right: 12px; min-height: 44px; }
-  .sports .sports-home { margin-right: 0; font-size: 0; letter-spacing: 0; }
-  .sports .sports-home::before { content: "GOAT"; font-size: .6875rem; letter-spacing: .08em; }
+  .sports .sports-home { margin-right: 0; }
 }
 /* Saved to an iPhone's home screen, the page runs up to the clock and battery line, and iOS blurs
    whatever sits just under it. Extra room at the top keeps the sports' names clear of that. */
@@ -43,9 +42,9 @@
 .gc-row .v.best { color: var(--accent); }
 .sports a:hover:not([aria-current="page"]) { background: var(--accent); color: var(--on-accent); }
 
-/* the site's mark, the goat, in green beside its name; black on the green of the page you are on */
-.sports .sports-home { gap: 8px; }
-.sports .sports-home .goat { order: -1; width: 17px; height: 16px; flex: none; color: var(--accent, #2fd27a); }   /* first, also before the phone's short "GOAT" */
-.sports .sports-home .goat .eye { fill: var(--void, #000000); }
-.sports .sports-home[aria-current="page"] .goat, .sports .sports-home:hover .goat { color: var(--on-accent, #000000); }
-.sports .sports-home[aria-current="page"] .goat .eye, .sports .sports-home:hover .goat .eye { fill: var(--accent, #2fd27a); }
+/* the site's mark: the goat's head, in its own colours, standing in for the name. It is not inverted
+   like a tab, since pink on green would clash; the page you are on and hover get a green rule under it instead. */
+.sports .sports-home { padding-top: 4px; padding-bottom: 4px; }
+.sports .sports-home .goat { display: block; width: 30px; height: 30px; flex: none; }
+.sports a.sports-home[aria-current="page"], .sports a.sports-home:hover { background: transparent !important; box-shadow: inset 0 -3px 0 var(--accent, #2fd27a); }
+@media (max-width: 480px) { .sports .sports-home .goat { width: 28px; height: 28px; } }
