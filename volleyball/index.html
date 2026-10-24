@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOAT Volleyball: top 25 games</title>
+<meta name="description" content="Every match played by the top 25 teams in women's college volleyball, week by week, with the rankings refreshed each Monday.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,200..700&display=swap" rel="stylesheet">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="GOAT Volleyball">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="styles.css?v=55bc30f34d">
+<link rel="stylesheet" href="../sports.css?v=b93ed846f2">
+</head>
+<body>
+<a class="skip" href="#matches">Skip to the games</a>
+<!-- sports bar --><nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="../"><img class="goat" src="../logo.png" alt="GOAT Sports" width="128" height="128"></a><a href="../football/nfl/">Football</a><a href="../basketball/nba/">Basketball</a><a href="../baseball/">Baseball</a><a href="../hockey/">Hockey</a><a href="../volleyball/" aria-current="page">Volleyball</a></div></nav>
+<nav class="leagues wrap" id="leagues" aria-label="Leagues"></nav>
+<header class="mast">
+  <div class="wrap mast-row">
+    <a class="brand" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M11.1 7.1a16.55 16.55 0 0 1 10.9 4"/><path d="M12 12a12.6 12.6 0 0 1-8.7 5"/><path d="M16.8 13.6a16.55 16.55 0 0 1-9 7.5"/><path d="M20.7 17a12.8 12.8 0 0 0-8.7-5 13.3 13.3 0 0 1 0-10"/><path d="M6.3 3.8a16.55 16.55 0 0 0 1.9 11.5"/></svg><span id="brand">GOAT Volleyball</span></a>
+    <nav class="pages" aria-label="Pages">
+      <a href="#/" data-page="matches" data-w="nav.matches">Games</a>
+      <a href="#/rankings" data-page="rankings" data-w="nav.rankings">Rankings</a>
+      <a href="#/goat" data-page="goat">Polls &amp; Rankings</a>
+      <a href="#/teams" data-page="teams" data-w="nav.teams">Teams</a>
+      <a href="#/players" data-page="players" data-w="nav.players">Players</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <section id="page-matches">
+    <h1 data-w="matches.title">Ranked Games</h1>
+    <p class="lede" id="lede">Every match played by a ranked team in women's college volleyball.</p>
+    <p class="livenote" id="live-note" role="status" hidden></p>
+    <div id="matches" tabindex="-1">
+      <div class="bar">
+        <h2 id="h-list">Loading the matches…</h2>
+        <div class="nav" id="nav"></div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section id="page-rankings" hidden>
+    <h1 data-w="rankings.title">Top 25 rankings</h1>
+    <p class="lede" id="rank-lede"></p>
+    <div class="nav filters" id="rank-sort"></div>
+    <div class="ranks-head" id="ranks-head" aria-hidden="true"></div>
+    <ol class="ranks" id="ranks"></ol>
+    <p class="note" id="rank-note"></p>
+    <p class="note" id="goat-note"></p>
+    <p class="note keep" id="goat-out"></p>
+  </section>
+
+  <section id="page-teams" hidden>
+    <h1 data-w="teams.title">Top 25 team stats</h1>
+    <p class="lede" data-w="teams.lede">How each ranked team attacks, serves, blocks and defends, per set, and what its opponents manage against it. From official box scores.</p>
+    <div id="t-list"></div>
+  </section>
+
+  <section id="page-players" hidden>
+    <h1 data-w="players.title">Top 25 players</h1>
+    <p class="lede" data-w="players.lede">Every regular on a ranked team, ranked against the rest by Impact per set: the points she adds per set over an average top-25 player at her position.</p>
+    <div class="nav filters" id="p-filters"></div>
+    <div id="p-list"></div>
+  </section>
+
+  <section id="page-team" hidden>
+    <div id="team"></div>
+  </section>
+
+  <section id="page-match" hidden>
+    <p class="back"><a href="#/" data-w="match.back">All Games</a></p>
+    <div id="match"></div>
+  </section>
+
+  <section id="page-card" hidden>
+    <p class="back"><a href="#/players" data-w="players.back">All players</a></p>
+    <div id="card"></div>
+  </section>
+</main>
+<div class="wrap totop"><button type="button" class="totop-btn" id="totop">Back to top<svg viewBox="0 0 10 14" aria-hidden="true"><path d="M5 13V1M1 5l4-4 4 4"/></svg></button></div>
+<script src="app.js?v=b82d85a8cf"></script>
+</body>
+</html>
