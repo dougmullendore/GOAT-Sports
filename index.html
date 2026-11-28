@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOAT Sports: today's games</title>
+<meta name="description" content="NFL and college football, NBA and college basketball, MLB baseball, NHL hockey and women's volleyball in one place: today's games, each team's chance of winning, rankings, team stats and a card for every player.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,200..700&display=swap" rel="stylesheet">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="GOAT Sports">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="sports.css?v=b93ed846f2">
+<link rel="stylesheet" href="home.css?v=3e518da385">
+</head>
+<body>
+<a class="skip" href="#today">Skip to the games</a>
+<nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="./" aria-current="page"><img class="goat" src="logo.png" alt="GOAT Sports" width="128" height="128"></a><a href="football/nfl/">Football</a><a href="basketball/nba/">Basketball</a><a href="baseball/">Baseball</a><a href="hockey/">Hockey</a><a href="volleyball/">Volleyball</a></div></nav>
+<header class="mast">
+  <div class="wrap mast-row">
+    <div class="mast-day">
+      <div class="cell"><span class="k">Games</span><span class="v" id="r-games">–</span></div>
+      <div class="cell"><span class="k">Leagues</span><span class="v" id="r-leagues">–</span></div>
+    </div>
+    <dl class="readouts">
+      <div><dt>Live now</dt><dd id="r-live">–</dd></div>
+    </dl>
+    <div class="mast-when">
+      <h1 id="h-day">Today's games</h1>
+      <nav class="jump" id="jump" aria-label="Leagues on this day" hidden></nav>
+    </div>
+    <details class="pick" id="pick"></details>
+  </div>
+</header>
+<main class="wrap">
+  <div class="day">
+    <p class="lede" id="lede" role="status">Loading the games…</p>
+    <div class="tools">
+      <button type="button" class="step" id="back" aria-label="A week earlier"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M8 1L2 7l6 6"/></svg></button>
+      <nav class="cal" id="nav" aria-label="Days"></nav>
+      <button type="button" class="step" id="ahead" aria-label="A week later"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M2 1l6 6-6 6"/></svg></button>
+      <div class="goto" id="goto-box"><button type="button" class="goto-btn" id="goto" aria-haspopup="dialog" aria-expanded="false" aria-controls="goto-pop"><span>Date</span><b id="goto-val">–</b></button></div>
+    </div>
+  </div>
+  <div id="today" tabindex="-1"></div>
+</main>
+<div class="wrap totop"><button type="button" class="totop-btn" id="totop">Back to top<svg viewBox="0 0 10 14" aria-hidden="true"><path d="M5 13V1M1 5l4-4 4 4"/></svg></button></div>
+<script src="home.js?v=c9bca32b67"></script>
+</body>
+</html>

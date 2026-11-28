@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOAT Basketball: college and NBA games</title>
+<meta name="description" content="College basketball's top 25 and every NBA game, day by day, with each team's chance of winning, where to watch, live scores, rankings and standings, team stats and a card for every player.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,200..700&display=swap" rel="stylesheet">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="GOAT Basketball">
+<meta name="theme-color" content="#000000">
+<link rel="stylesheet" href="styles.css?v=a9f41f8550">
+<link rel="stylesheet" href="../sports.css?v=b93ed846f2">
+</head>
+<body>
+<a class="skip" href="#games">Skip to the games</a>
+<!-- sports bar --><nav class="sports" aria-label="Sports"><div class="wrap sports-row"><a class="sports-home" href="../"><img class="goat" src="../logo.png" alt="GOAT Sports" width="128" height="128"></a><a href="../football/nfl/">Football</a><a href="../basketball/nba/" aria-current="page">Basketball</a><a href="../baseball/">Baseball</a><a href="../hockey/">Hockey</a><a href="../volleyball/">Volleyball</a></div></nav>
+<nav class="leagues wrap" id="leagues" aria-label="Leagues"></nav>
+<header class="mast">
+  <div class="wrap mast-row">
+    <a class="brand" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3v18"/><path d="M5.6 5.6c2.6 1.9 2.6 10.9 0 12.800"/><path d="M18.4 5.6c-2.6 1.9-2.6 10.9 0 12.800"/></svg><span id="brand">GOAT Basketball</span></a>
+    <nav class="pages" aria-label="Pages">
+      <a href="#/" data-page="games" data-w="nav.games">Games</a>
+      <a href="#/rankings" data-page="rankings" data-w="nav.rankings">Rankings</a>
+      <a href="#/goat" data-page="goat">Polls &amp; Rankings</a>
+      <a href="#/teams" data-page="teams" data-w="nav.teams">Teams</a>
+      <a href="#/players" data-page="players" data-w="nav.players">Players</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  <section id="page-games">
+    <h1 data-w="games.title">Ranked Games</h1>
+    <p class="lede" id="lede">Every game played by a ranked team in college basketball.</p>
+    <p class="livenote" id="live-note" role="status" hidden></p>
+    <div id="games" tabindex="-1">
+      <div class="bar">
+        <h2 id="h-list">Loading the games…</h2>
+        <div class="nav" id="nav"></div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section id="page-rankings" hidden>
+    <h1 data-w="rankings.title">Top 25 Rankings</h1>
+    <p class="lede" id="rank-lede"></p>
+    <div class="nav filters" id="rank-sort"></div>
+    <div class="ranks-head" id="ranks-head" aria-hidden="true"></div>
+    <ol class="ranks" id="ranks"></ol>
+    <p class="note" id="rank-note"></p>
+    <p class="note" id="goat-note"></p>
+    <p class="note keep" id="goat-out"></p>
+  </section>
+
+  <section id="page-teams" hidden>
+    <h1 data-w="teams.title">Top 25 Team Stats</h1>
+    <p class="lede" data-w="teams.lede">How each ranked team scores, shoots and defends.</p>
+    <div id="t-list"></div>
+  </section>
+
+  <section id="page-players" hidden>
+    <h1 data-w="players.title">Top Players</h1>
+    <p class="lede" data-w="players.lede">Every regular on a ranked team, ranked against the rest by Impact per game.</p>
+    <div class="nav filters" id="p-filters"></div>
+    <div id="p-list"></div>
+  </section>
+
+  <section id="page-team" hidden>
+    <div id="team"></div>
+  </section>
+
+  <section id="page-game" hidden>
+    <p class="back"><a href="#/" data-w="game.back">All games</a></p>
+    <div id="game"></div>
+  </section>
+
+  <section id="page-card" hidden>
+    <p class="back"><a href="#/players" data-w="players.back">All players</a></p>
+    <div id="card"></div>
+  </section>
+</main>
+<div class="wrap totop"><button type="button" class="totop-btn" id="totop">Back to top<svg viewBox="0 0 10 14" aria-hidden="true"><path d="M5 13V1M1 5l4-4 4 4"/></svg></button></div>
+<script src="app.js?v=0a0af0d99d"></script>
+</body>
+</html>
